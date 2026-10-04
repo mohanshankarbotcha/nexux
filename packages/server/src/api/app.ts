@@ -54,13 +54,18 @@ export function createNexusApp() {
   app.use(`${prefix}/usage`, createUsageRouter());
 
   // Serve static client bundle if built
-  const clientDist = path.resolve(process.cwd(), 'packages/client/dist');
-  const clientDistSibling = path.resolve(__dirname, '../../../client/dist');
-  const targetDist = fs.existsSync(clientDist)
-    ? clientDist
-    : fs.existsSync(clientDistSibling)
-    ? clientDistSibling
-    : null;
+  const potentialDistPaths = [
+    process.env.NEXUS_CLIENT_DIST,
+    path.resolve(process.cwd(), 'packages/client/dist'),
+    path.resolve(__dirname, '../../../client/dist'),
+    path.resolve(__dirname, '../../client/dist'),
+    path.resolve(__dirname, '../client-dist'),
+    path.resolve(__dirname, '../../client-dist'),
+    (process as any).resourcesPath ? path.resolve((process as any).resourcesPath, 'app/client-dist') : null,
+    (process as any).resourcesPath ? path.resolve((process as any).resourcesPath, 'client-dist') : null,
+  ].filter(Boolean) as string[];
+
+  const targetDist = potentialDistPaths.find((p) => fs.existsSync(path.join(p, 'index.html'))) || null;
 
   if (targetDist) {
     app.use(express.static(targetDist));

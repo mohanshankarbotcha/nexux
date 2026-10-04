@@ -5,11 +5,12 @@
   "type": "module",
   "main": "./dist/main.js",
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && node -e \"const fs=require('fs'); if(fs.existsSync('src/preload.cjs')) fs.copyFileSync('src/preload.cjs','dist/preload.cjs')\"",
     "clean": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){}\"",
     "typecheck": "tsc --noEmit",
     "test": "node --test dist/**/*.test.js",
-    "start": "electron dist/main.js"
+    "start": "electron dist/main.js",
+    "package:windows": "node scripts/package-windows.mjs"
   },
   "dependencies": {
     "@nexus/core": "*",

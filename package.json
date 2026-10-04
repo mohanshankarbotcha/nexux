@@ -19,7 +19,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "dev:server": "npm run dev --workspace=packages/server",
     "dev:client": "npm run dev --workspace=packages/client",
-    "dev:desktop": "npm run dev --workspace=packages/desktop"
+    "dev:desktop": "npm run dev --workspace=packages/desktop",
+    "package:desktop": "npm run package:windows --workspace=packages/desktop"
   },
   "devDependencies": {
     "typescript": "^5.7.3"

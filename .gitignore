@@ -11,3 +11,4 @@ Thumbs.db
 NEXUS_AI_DATA/
 *.exe
 *.tsbuildinfo
+release/

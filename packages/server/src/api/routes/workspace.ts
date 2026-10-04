@@ -14,7 +14,7 @@ export function createWorkspaceRouter(): Router {
   // Open or register workspace
   router.post('/open', (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { targetPath } = req.body;
+      const targetPath = req.body.targetPath || req.body.path;
       const workspace = globalWorkspaceService.openWorkspace(targetPath);
       res.json({
         success: true,
@@ -28,7 +28,7 @@ export function createWorkspaceRouter(): Router {
   // Get file tree
   router.get('/tree', (req: Request, res: Response, next: NextFunction) => {
     try {
-      const workspacePath = req.query.workspace as string;
+      const workspacePath = (req.query.workspace || req.query.path) as string;
       if (!workspacePath) {
         throw new WorkspaceError('Workspace query parameter is required');
       }
