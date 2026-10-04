@@ -64,7 +64,22 @@ export class EditFileTool extends BaseTool<EditFileInput, EditFileOutput> {
 
     const originalContent = fs.readFileSync(safePath, 'utf-8');
 
-    if (!originalContent.includes(input.targetContent)) {
+    const hasCRLF = originalContent.includes('\r\n');
+    let target = input.targetContent;
+    let replacement = input.replacementContent;
+
+    if (!originalContent.includes(target)) {
+      // Normalize line endings to match file's convention
+      if (hasCRLF && !target.includes('\r\n')) {
+        target = target.replace(/\r?\n/g, '\r\n');
+        replacement = replacement.replace(/\r?\n/g, '\r\n');
+      } else if (!hasCRLF && target.includes('\r\n')) {
+        target = target.replace(/\r\n/g, '\n');
+        replacement = replacement.replace(/\r\n/g, '\n');
+      }
+    }
+
+    if (!originalContent.includes(target)) {
       throw new ToolExecutionError(
         this.name,
         `targetContent was not found in '${relPath}'. Please verify the exact lines and spacing.`
@@ -75,11 +90,11 @@ export class EditFileTool extends BaseTool<EditFileInput, EditFileOutput> {
     let count = 0;
 
     if (input.replaceAll) {
-      const parts = originalContent.split(input.targetContent);
+      const parts = originalContent.split(target);
       count = parts.length - 1;
-      updatedContent = parts.join(input.replacementContent);
+      updatedContent = parts.join(replacement);
     } else {
-      updatedContent = originalContent.replace(input.targetContent, input.replacementContent);
+      updatedContent = originalContent.replace(target, replacement);
       count = 1;
     }
 

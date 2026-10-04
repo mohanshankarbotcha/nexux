@@ -13,7 +13,8 @@ import { DebuggerAgent } from './debugger.js';
 import { ReviewerAgent } from './reviewer.js';
 import { StorageEngine, globalStorage } from '../storage/storage-engine.js';
 import { ContextEngine, globalContextEngine, TaskContextPackage } from '../context/context-engine.js';
-import { globalModelRouter } from '../providers/model-router.js';
+import { ModelRouter, globalModelRouter } from '../providers/model-router.js';
+import { ToolRegistry, globalToolRegistry } from '../tools/tool-registry.js';
 
 export interface CoordinatorResult {
   taskId: string;
@@ -44,9 +45,11 @@ export class CoordinatorAgent extends BaseAgent {
     reviewer = new ReviewerAgent(),
     storage = globalStorage,
     eventBus = globalEventBus,
-    contextEngine = globalContextEngine
+    contextEngine = globalContextEngine,
+    toolRegistry = globalToolRegistry,
+    modelRouter = globalModelRouter
   ) {
-    super(undefined, undefined, eventBus, storage);
+    super(modelRouter, toolRegistry, eventBus, storage);
     this.explorer = explorer;
     this.planner = planner;
     this.coder = coder;
@@ -106,7 +109,7 @@ export class CoordinatorAgent extends BaseAgent {
     this.emitAgentStarted(`Coordinating task: "${prompt}"`, context);
 
     // Load or create task record in storage
-    const currentRouting = globalModelRouter.getRoutingTable();
+    const currentRouting = this.modelRouter.getRoutingTable();
     let task = this.storage.getTask(context.taskId);
     if (!task) {
       task = {
