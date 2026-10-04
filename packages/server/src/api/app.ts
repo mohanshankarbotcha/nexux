@@ -26,11 +26,20 @@ export function createNexusApp() {
   app.use(cors({ origin: '*' }));
   app.use(express.json({ limit: '10mb' }));
 
-  // Request logger
+  // Request logger & correlation ID middleware
   app.use((req: Request, res: Response, next: NextFunction) => {
+    const correlationId =
+      (req.headers['x-correlation-id'] as string) ||
+      (req.headers['x-request-id'] as string) ||
+      `req_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    (req as any).correlationId = correlationId;
+    res.setHeader('X-Correlation-Id', correlationId);
+
     const start = Date.now();
     res.on('finish', () => {
-      logger.debug(`${req.method} ${req.path} -> ${res.statusCode} in ${Date.now() - start}ms`);
+      logger
+        .withCorrelationId(correlationId)
+        .debug(`${req.method} ${req.path} -> ${res.statusCode} in ${Date.now() - start}ms`);
     });
     next();
   });
@@ -73,6 +82,7 @@ export function createNexusApp() {
   // Centralized Error handler
   app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     let nexusErr: NexusError;
+    const correlationId = (req as any).correlationId || `err_${Date.now()}`;
 
     if (err instanceof NexusError) {
       nexusErr = err;
@@ -82,14 +92,24 @@ export function createNexusApp() {
       nexusErr = new NexusError(String(err), 'INTERNAL_ERROR', 500);
     }
 
-    logger.error(`Request Error [${req.method} ${req.path}]: ${nexusErr.message}`, {
-      code: nexusErr.code,
-      statusCode: nexusErr.statusCode,
-    });
+    nexusErr.correlationId = nexusErr.correlationId || correlationId;
+
+    logger
+      .withCorrelationId(correlationId)
+      .error(`Request Error [${req.method} ${req.path}]: ${nexusErr.message}`, {
+        code: nexusErr.code,
+        statusCode: nexusErr.statusCode,
+        recoveryAction: nexusErr.recoveryAction,
+      });
 
     res.status(nexusErr.statusCode).json({
       success: false,
-      error: sanitizeObject(nexusErr.toJSON()),
+      error: sanitizeObject({
+        ...nexusErr.toJSON(),
+        correlationId,
+        userReadableMessage: nexusErr.userReadableMessage,
+        recoveryAction: nexusErr.recoveryAction,
+      }),
     });
   });
 
