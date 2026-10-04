@@ -1,4 +1,6 @@
 import { AgentRole, AgentState } from './agent.js';
+import { NexusEvent } from './events.js';
+import { UsageRecord } from './usage.js';
 
 export type TaskStatus =
   | 'pending'
@@ -31,6 +33,14 @@ export interface TaskPlan {
   createdAt: number;
 }
 
+export interface ProviderTaskMetadata {
+  provider: string;
+  model: string;
+  plannerModel?: string;
+  coderModel?: string;
+  reviewerModel?: string;
+}
+
 export interface Task {
   id: string;
   sessionId: string;
@@ -43,7 +53,12 @@ export interface Task {
   resultSummary?: string;
   error?: string;
   createdAt: number;
+  startedAt?: number;
+  updatedAt?: number;
   completedAt?: number;
+  providerMetadata?: ProviderTaskMetadata;
+  events?: NexusEvent[];
+  usageRecords?: UsageRecord[];
 }
 
 export interface Session {
@@ -55,4 +70,5 @@ export interface Session {
   updatedAt: number;
   activeTaskId?: string;
   taskIds: string[];
+  metadata?: Record<string, unknown>;
 }

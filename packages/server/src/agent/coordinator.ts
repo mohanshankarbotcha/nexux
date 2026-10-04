@@ -13,6 +13,7 @@ import { DebuggerAgent } from './debugger.js';
 import { ReviewerAgent } from './reviewer.js';
 import { StorageEngine, globalStorage } from '../storage/storage-engine.js';
 import { ContextEngine, globalContextEngine, TaskContextPackage } from '../context/context-engine.js';
+import { globalModelRouter } from '../providers/model-router.js';
 
 export interface CoordinatorResult {
   taskId: string;
@@ -105,6 +106,7 @@ export class CoordinatorAgent extends BaseAgent {
     this.emitAgentStarted(`Coordinating task: "${prompt}"`, context);
 
     // Load or create task record in storage
+    const currentRouting = globalModelRouter.getRoutingTable();
     let task = this.storage.getTask(context.taskId);
     if (!task) {
       task = {
@@ -115,10 +117,28 @@ export class CoordinatorAgent extends BaseAgent {
         changedFiles: [],
         activeAgents: [this.getState()],
         createdAt: startTime,
+        startedAt: startTime,
+        updatedAt: startTime,
+        providerMetadata: {
+          provider: currentRouting.coder.provider,
+          model: currentRouting.coder.model,
+          plannerModel: currentRouting.planner.model,
+          coderModel: currentRouting.coder.model,
+          reviewerModel: currentRouting.reviewer.model,
+        },
       };
       this.storage.saveTask(task);
     } else {
       task.status = 'running';
+      task.startedAt = task.startedAt || startTime;
+      task.updatedAt = startTime;
+      task.providerMetadata = {
+        provider: currentRouting.coder.provider,
+        model: currentRouting.coder.model,
+        plannerModel: currentRouting.planner.model,
+        coderModel: currentRouting.coder.model,
+        reviewerModel: currentRouting.reviewer.model,
+      };
       this.storage.saveTask(task);
     }
 

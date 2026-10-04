@@ -14,6 +14,7 @@ import { createWorkspaceRouter } from './routes/workspace.js';
 import { createProviderRouter } from './routes/provider.js';
 import { createTaskRouter } from './routes/task.js';
 import { createUsageRouter } from './routes/usage.js';
+import { createSessionRouter } from './routes/session.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,7 @@ export function createNexusApp() {
   app.use(`${prefix}/workspaces`, createWorkspaceRouter());
   app.use(`${prefix}/providers`, createProviderRouter());
   app.use(`${prefix}/tasks`, createTaskRouter());
+  app.use(`${prefix}/sessions`, createSessionRouter());
   app.use(`${prefix}/usage`, createUsageRouter());
 
   // Serve static client bundle if built

@@ -104,6 +104,36 @@ export const App: React.FC = () => {
         // Refresh recent workspaces
         const wsRes = await api.getWorkspaces();
         setRecentWorkspaces(wsRes.workspaces);
+
+        // Restore or load existing session & task state for this workspace
+        try {
+          const sessionsRes = await api.getSessions(pathStr);
+          if (sessionsRes.sessions && sessionsRes.sessions.length > 0) {
+            const recent = sessionsRes.sessions[0];
+            if (recent.activeTaskId) {
+              setActiveTaskId(recent.activeTaskId);
+              const taskRes = await api.getTask(recent.activeTaskId, { includeEvents: true });
+              if (taskRes.task) {
+                if (taskRes.task.plan) {
+                  setPlan({
+                    summary: taskRes.task.plan.summary,
+                    steps: taskRes.task.plan.steps.map((s) => ({
+                      id: s.id,
+                      description: s.description,
+                      targetFiles: s.targetFiles || [],
+                      status: s.status === 'in_progress' ? 'running' : (s.status === 'skipped' ? 'completed' : s.status),
+                    })),
+                  });
+                }
+                if (taskRes.task.events && taskRes.task.events.length > 0) {
+                  setLiveEvents(taskRes.task.events);
+                }
+              }
+            }
+          }
+        } catch (sessionErr) {
+          console.warn('Could not restore prior session state:', sessionErr);
+        }
       } catch (err: any) {
         alert(`Failed to open workspace: ${err.message}`);
       }

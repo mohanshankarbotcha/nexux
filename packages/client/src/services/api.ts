@@ -1,6 +1,7 @@
 import {
   NexusEvent,
   ProviderId,
+  Session,
   Task,
   UsageRecord,
   UsageSummary,
@@ -114,8 +115,15 @@ class ApiService {
     return this.request('/tasks');
   }
 
-  async getTask(taskId: string): Promise<{ task: Task }> {
-    return this.request(`/tasks/${encodeURIComponent(taskId)}`);
+  async getTask(
+    taskId: string,
+    options?: { includeEvents?: boolean; includeUsage?: boolean }
+  ): Promise<{ success: boolean; task: Task }> {
+    const query = new URLSearchParams();
+    if (options?.includeEvents) query.set('includeEvents', 'true');
+    if (options?.includeUsage) query.set('includeUsage', 'true');
+    const qs = query.toString() ? `?${query.toString()}` : '';
+    return this.request(`/tasks/${encodeURIComponent(taskId)}${qs}`);
   }
 
   async createTask(
@@ -129,9 +137,53 @@ class ApiService {
     });
   }
 
+  async getTaskEventsHistory(taskId: string): Promise<{ success: boolean; events: NexusEvent[] }> {
+    return this.request(`/tasks/${encodeURIComponent(taskId)}/events/history`);
+  }
+
+  async getTaskUsage(taskId: string): Promise<{ success: boolean; records: UsageRecord[] }> {
+    return this.request(`/tasks/${encodeURIComponent(taskId)}/usage`);
+  }
+
   async cancelTask(taskId: string): Promise<{ success: boolean; message: string }> {
     return this.request(`/tasks/${encodeURIComponent(taskId)}/cancel`, {
       method: 'POST',
+    });
+  }
+
+  // Sessions and History
+  async getSessions(workspacePath?: string): Promise<{ success: boolean; sessions: Session[] }> {
+    const qs = workspacePath ? `?workspace=${encodeURIComponent(workspacePath)}` : '';
+    return this.request(`/sessions${qs}`);
+  }
+
+  async getSession(
+    sessionId: string
+  ): Promise<{ success: boolean; session: Session; tasks: Task[]; usageCount: number }> {
+    return this.request(`/sessions/${encodeURIComponent(sessionId)}`);
+  }
+
+  async createSession(
+    workspacePath: string,
+    title?: string
+  ): Promise<{ success: boolean; session: Session }> {
+    return this.request('/sessions', {
+      method: 'POST',
+      body: JSON.stringify({ workspacePath, title }),
+    });
+  }
+
+  async reopenSession(
+    sessionId: string
+  ): Promise<{ success: boolean; session: Session; tasks: Task[]; message: string }> {
+    return this.request(`/sessions/${encodeURIComponent(sessionId)}/reopen`, {
+      method: 'POST',
+    });
+  }
+
+  async deleteSession(sessionId: string): Promise<{ success: boolean; message: string }> {
+    return this.request(`/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'DELETE',
     });
   }
 

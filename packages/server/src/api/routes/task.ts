@@ -58,6 +58,32 @@ export function createTaskRouter(): Router {
 
       const taskId = `task_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       const taskSessionId = sessionId || `session_${Date.now()}`;
+      // Target workspace directory
+      const targetWorkspace = workspaceRoot || globalWorkspaceService.getCurrentWorkspace()?.path || process.cwd();
+
+      // Ensure session exists or is updated
+      let session = globalStorage.getSession(taskSessionId);
+      if (!session) {
+        session = {
+          id: taskSessionId,
+          workspaceId: globalWorkspaceService.getCurrentWorkspace()?.id || `ws_${Date.now()}`,
+          workspacePath: targetWorkspace,
+          title: prompt.slice(0, 45),
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          taskIds: [taskId],
+          activeTaskId: taskId,
+        };
+        globalStorage.saveSession(session);
+      } else {
+        if (!session.taskIds.includes(taskId)) {
+          session.taskIds.push(taskId);
+        }
+        session.activeTaskId = taskId;
+        session.updatedAt = Date.now();
+        globalStorage.saveSession(session);
+      }
+
       const task: Task = {
         id: taskId,
         sessionId: taskSessionId,
@@ -78,9 +104,6 @@ export function createTaskRouter(): Router {
         timestamp: Date.now(),
         prompt: task.prompt,
       });
-
-      // Target workspace directory
-      const targetWorkspace = workspaceRoot || globalWorkspaceService.getCurrentWorkspace()?.path || process.cwd();
 
       // Launch async coordinator loop in background
       const controller = new AbortController();
@@ -130,15 +153,31 @@ export function createTaskRouter(): Router {
     }
   });
 
-  // Get task by ID
+  // Get task by ID (supports includeEvents=true and includeUsage=true)
   router.get('/:id', (req: Request, res: Response) => {
     const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-    const task = globalStorage.getTask(taskId);
+    const includeEvents = req.query.includeEvents === 'true';
+    const includeUsage = req.query.includeUsage === 'true';
+    const task = globalStorage.getTask(taskId, { includeEvents, includeUsage });
     if (!task) {
       res.status(404).json({ success: false, error: 'Task not found' });
       return;
     }
     res.json({ success: true, task });
+  });
+
+  // Get persisted historical events for a task
+  router.get('/:id/events/history', (req: Request, res: Response) => {
+    const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const events = globalStorage.getTaskEvents(taskId);
+    res.json({ success: true, events });
+  });
+
+  // Get usage records for a task
+  router.get('/:id/usage', (req: Request, res: Response) => {
+    const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const records = globalStorage.getUsageRecords().filter((u) => u.taskId === taskId);
+    res.json({ success: true, records });
   });
 
   // Server-Sent Events (SSE) stream for real-time task events
