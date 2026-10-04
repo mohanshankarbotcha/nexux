@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.cache/
+coverage/
+*.log
+.env
+.env.local
+.DS_Store
+Thumbs.db
+NEXUS_AI_DATA/
+*.exe

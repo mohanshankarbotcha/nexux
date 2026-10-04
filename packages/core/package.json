@@ -1,0 +1,17 @@
+{
+  "name": "@nexus/core",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.10.2"
+  }
+}

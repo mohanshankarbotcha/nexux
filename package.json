@@ -1,0 +1,24 @@
+{
+  "name": "nexus-ai-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NEXUS.AI — Autonomous AI Coding Agent Workspace",
+  "workspaces": [
+    "packages/core",
+    "packages/server",
+    "packages/client"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=packages/core && npm run build --workspace=packages/server && npm run build --workspace=packages/client",
+    "build:core": "npm run build --workspace=packages/core",
+    "build:server": "npm run build --workspace=packages/server",
+    "build:client": "npm run build --workspace=packages/client",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev:server": "npm run dev --workspace=packages/server",
+    "dev:client": "npm run dev --workspace=packages/client"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
