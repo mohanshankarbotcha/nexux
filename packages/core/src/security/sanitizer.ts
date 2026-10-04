@@ -63,3 +63,18 @@ export function sanitizeObject<T>(obj: T): T {
   }
   return result as T;
 }
+
+/**
+ * Safely masks a stored API key for UI display (e.g. sk-••••••••1a2b).
+ * Never exposes full key values.
+ */
+export function maskKey(key?: string): string | null {
+  if (!key || typeof key !== 'string' || key.trim().length === 0) {
+    return null;
+  }
+  const trimmed = key.trim();
+  if (trimmed.length <= 8) {
+    return '••••••••';
+  }
+  return `${trimmed.slice(0, 4)}••••••••${trimmed.slice(-4)}`;
+}

@@ -2,12 +2,14 @@ import { Router, Request, Response, NextFunction } from 'express';
 import {
   NexusError,
   NexusEventBus,
+  ProviderError,
   Task,
   ValidationError,
   globalEventBus,
   logger,
 } from '@nexus/core';
 import { globalStorage } from '../../storage/storage-engine.js';
+import { globalModelRouter } from '../../providers/model-router.js';
 
 export function createTaskRouter(): Router {
   const router = Router();
@@ -18,6 +20,15 @@ export function createTaskRouter(): Router {
       const { prompt, sessionId, workspaceRoot } = req.body;
       if (!prompt || typeof prompt !== 'string') {
         throw new ValidationError('Task prompt is required');
+      }
+
+      if (!globalModelRouter.hasAnyConfiguredProvider()) {
+        throw new ProviderError(
+          'Cannot execute task: No AI model provider is configured. Please configure an OpenAI or Google Gemini API key.',
+          'router',
+          'PROVIDER_NOT_CONFIGURED',
+          400
+        );
       }
 
       const taskId = `task_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
