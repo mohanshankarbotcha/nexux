@@ -6,17 +6,20 @@
   "workspaces": [
     "packages/core",
     "packages/server",
-    "packages/client"
+    "packages/client",
+    "packages/desktop"
   ],
   "scripts": {
-    "build": "npm run build --workspace=packages/core && npm run build --workspace=packages/server && npm run build --workspace=packages/client",
+    "build": "npm run build --workspace=packages/core && npm run build --workspace=packages/server && npm run build --workspace=packages/client && npm run build --workspace=packages/desktop",
     "build:core": "npm run build --workspace=packages/core",
     "build:server": "npm run build --workspace=packages/server",
     "build:client": "npm run build --workspace=packages/client",
+    "build:desktop": "npm run build --workspace=packages/desktop",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "dev:server": "npm run dev --workspace=packages/server",
-    "dev:client": "npm run dev --workspace=packages/client"
+    "dev:client": "npm run dev --workspace=packages/client",
+    "dev:desktop": "npm run dev --workspace=packages/desktop"
   },
   "devDependencies": {
     "typescript": "^5.7.3"

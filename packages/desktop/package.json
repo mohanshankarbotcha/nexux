@@ -1,0 +1,23 @@
+{
+  "name": "@nexus/desktop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/main.js",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test dist/**/*.test.js",
+    "start": "electron dist/main.js"
+  },
+  "dependencies": {
+    "@nexus/core": "*",
+    "@nexus/server": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "electron": "^34.2.0",
+    "typescript": "^5.7.3"
+  }
+}

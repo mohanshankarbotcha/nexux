@@ -26,6 +26,8 @@ export class StorageEngine {
   constructor(customDataDir?: string) {
     if (customDataDir) {
       this.dataDir = path.resolve(customDataDir);
+    } else if (process.env.NEXUS_DATA_DIR) {
+      this.dataDir = path.resolve(process.env.NEXUS_DATA_DIR);
     } else {
       const baseDir =
         process.env.LOCALAPPDATA ||
@@ -97,6 +99,16 @@ export class StorageEngine {
 
   getDataDir(): string {
     return this.dataDir;
+  }
+
+  setDataDir(dir: string): void {
+    this.dataDir = path.resolve(dir);
+    this.sessionsFile = path.join(this.dataDir, 'sessions.json');
+    this.workspacesFile = path.join(this.dataDir, 'workspaces.json');
+    this.credentialsFile = path.join(this.dataDir, 'credentials.json');
+    this.usageFile = path.join(this.dataDir, 'usage.json');
+    this.tasksDir = path.join(this.dataDir, 'tasks');
+    this.ensureInitialized();
   }
 
   private readJson<T>(filePath: string, fallback: T): T {

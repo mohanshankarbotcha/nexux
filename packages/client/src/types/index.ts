@@ -64,3 +64,27 @@ export interface TerminalEntry {
   isError?: boolean;
   exitCode?: number | null;
 }
+
+export interface NexusDesktopBridge {
+  isDesktop: boolean;
+  platform: string;
+  getSystemInfo: () => Promise<{
+    platform: string;
+    arch: string;
+    version: string;
+    serverPort: number;
+    dataDir: string;
+  }>;
+  openDirectoryPicker: () => Promise<string | null>;
+  openExternal: (url: string) => Promise<void>;
+  minimizeWindow: () => Promise<void>;
+  maximizeWindow: () => Promise<void>;
+  closeWindow: () => Promise<void>;
+}
+
+declare global {
+  interface Window {
+    nexusDesktop?: NexusDesktopBridge;
+  }
+}
+

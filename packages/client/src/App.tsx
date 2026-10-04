@@ -425,13 +425,30 @@ export const App: React.FC = () => {
               />
 
               <div className="flex items-center justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={() => handleOpenWorkspace('c:/Users/BMS/Desktop/nexux')}
-                  className="text-xs text-sky-400 hover:underline font-mono"
-                >
-                  Quick open current repo
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenWorkspace('c:/Users/BMS/Desktop/nexux')}
+                    className="text-xs text-sky-400 hover:underline font-mono"
+                  >
+                    Quick open current repo
+                  </button>
+                  {typeof window !== 'undefined' && window.nexusDesktop?.openDirectoryPicker && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const chosen = await window.nexusDesktop?.openDirectoryPicker();
+                        if (chosen) {
+                          setModalPathInput(chosen);
+                          handleOpenWorkspace(chosen);
+                        }
+                      }}
+                      className="text-xs text-amber-400 hover:underline font-mono"
+                    >
+                      Browse folder...
+                    </button>
+                  )}
+                </div>
 
                 <div className="flex items-center space-x-2">
                   <button

@@ -99,6 +99,21 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                   onChange={(e) => setFolderInput(e.target.value)}
                   className="flex-1 bg-nexus-950 border border-nexus-border focus:border-sky-500 text-slate-200 px-3 py-2 rounded text-xs font-mono focus:outline-none"
                 />
+                {typeof window !== 'undefined' && window.nexusDesktop?.openDirectoryPicker && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const chosen = await window.nexusDesktop?.openDirectoryPicker();
+                      if (chosen) {
+                        setFolderInput(chosen);
+                        onOpenWorkspace(chosen);
+                      }
+                    }}
+                    className="px-3 py-2 rounded bg-nexus-800 hover:bg-nexus-700 text-slate-300 font-medium text-xs border border-nexus-border transition-colors shrink-0"
+                  >
+                    Browse...
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={!folderInput.trim()}
