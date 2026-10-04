@@ -36,6 +36,6 @@ export const DEFAULT_TOOL_CONFIG = {
 };
 
 export const DEFAULT_SERVER_CONFIG = {
-  defaultPort: 4173,
+  defaultPort: 3000,
   apiPrefix: '/api',
 };

@@ -21,7 +21,8 @@ export function startNexusServer(port: number = DEFAULT_SERVER_CONFIG.defaultPor
 }
 
 // Auto-start if directly run
-const isMain = process.argv[1]?.endsWith('dist/index.js') || process.argv[1]?.endsWith('src/index.ts');
+const scriptPath = process.argv[1]?.replace(/\\/g, '/');
+const isMain = scriptPath?.endsWith('dist/index.js') || scriptPath?.endsWith('src/index.ts');
 if (isMain) {
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : DEFAULT_SERVER_CONFIG.defaultPort;
   startNexusServer(port);
