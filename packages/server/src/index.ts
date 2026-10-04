@@ -6,7 +6,7 @@ export * from './providers/openai-provider.js';
 export * from './providers/gemini-provider.js';
 export * from './providers/model-router.js';
 export * from './tools/index.js';
-export * from './agent/base-agent.js';
+export * from './agent/index.js';
 export * from './workspace/workspace-service.js';
 export * from './storage/storage-engine.js';
 export * from './api/app.js';
