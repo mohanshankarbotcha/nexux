@@ -9,12 +9,88 @@ import {
   ToolDefinition,
   ToolName,
   ToolExecutionError,
+  SecurityViolationError,
   resolveSafePath,
   sanitizeString,
   globalEventBus,
   DEFAULT_TOOL_CONFIG,
   logger,
 } from '@nexus/core';
+
+const DANGEROUS_COMMAND_RULES = [
+  // Disallow remote Git push operations to protect external repositories
+  {
+    pattern: /(?:^|[;&|`\n\r])\s*git\s+push\b/i,
+    reason: 'Remote Git push operations are restricted to prevent unauthorized remote changes.',
+  },
+  // Disallow destructive root or drive wiping
+  {
+    pattern: /\brm\s+(?:-[a-zA-Z]*r[a-zA-Z]*f*|-[a-zA-Z]*f[a-zA-Z]*r*)\s+[\/\\](?:\s|$|\*)/i,
+    reason: 'Destructive filesystem deletion of system root is strictly prohibited.',
+  },
+  {
+    pattern: /\b(?:del|rd|rmdir)\s+\/[sS]\s+\/[qQ]\s+[a-zA-Z]:\\/i,
+    reason: 'Destructive drive wiping is strictly prohibited.',
+  },
+  {
+    pattern: /\bformat\s+[a-zA-Z]:/i,
+    reason: 'Disk format command is strictly prohibited.',
+  },
+  {
+    pattern: /\b(?:shutdown|reboot|poweroff|init\s+0)\b/i,
+    reason: 'System power and restart commands are strictly prohibited.',
+  },
+  {
+    pattern: /\bdd\s+if=.*of=\/dev\//i,
+    reason: 'Direct block device writes are strictly prohibited.',
+  },
+  {
+    pattern: /\bmkfs(?:\.[a-z0-9]+)?\b/i,
+    reason: 'Filesystem formatting is strictly prohibited.',
+  },
+  {
+    pattern: /:\(\)\s*\{\s*:\s*\|\s*:\s*&\s*\}\s*;\s*:/,
+    reason: 'Fork bombs are strictly prohibited.',
+  },
+];
+
+function getSanitizedEnv(): NodeJS.ProcessEnv {
+  const cleanEnv: NodeJS.ProcessEnv = {
+    ...process.env,
+    CI: 'true',
+    PAGER: 'cat',
+    GIT_TERMINAL_PROMPT: '0',
+  };
+
+  const sensitiveExact = new Set([
+    'OPENAI_API_KEY',
+    'GEMINI_API_KEY',
+    'ANTHROPIC_API_KEY',
+    'NEXUS_API_KEY',
+    'AWS_SECRET_ACCESS_KEY',
+    'GITHUB_TOKEN',
+    'GH_TOKEN',
+  ]);
+
+  for (const key of Object.keys(cleanEnv)) {
+    const upper = key.toUpperCase();
+    if (sensitiveExact.has(upper)) {
+      delete cleanEnv[key];
+      continue;
+    }
+    if (
+      (upper.includes('API_KEY') ||
+        upper.includes('SECRET') ||
+        upper.includes('PASSWORD') ||
+        (upper.includes('TOKEN') && !['COLORTERM', 'TERM', 'TERM_PROGRAM'].includes(upper))) &&
+      !['PATH', 'SYSTEMROOT', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'HOME'].includes(upper)
+    ) {
+      delete cleanEnv[key];
+    }
+  }
+
+  return cleanEnv;
+}
 
 export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
   readonly name: ToolName = 'terminal';
@@ -50,6 +126,15 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
       throw new ToolExecutionError(this.name, 'command parameter is required');
     }
 
+    const trimmedCmd = input.command.trim();
+
+    // Verify command safety against destructive patterns and unauthorized remote pushes
+    for (const rule of DANGEROUS_COMMAND_RULES) {
+      if (rule.pattern.test(trimmedCmd)) {
+        throw new SecurityViolationError(`Security policy violation: ${rule.reason}`);
+      }
+    }
+
     const startTime = Date.now();
     const timeoutMs = Math.min(input.timeoutMs || DEFAULT_TOOL_CONFIG.terminalTimeoutMs, 120_000);
     const maxOutputBytes = input.maxOutputBytes || DEFAULT_TOOL_CONFIG.terminalMaxOutputBytes;
@@ -82,13 +167,7 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
       const child = spawn(shell, shellArgs, {
         cwd,
         windowsHide: true,
-        env: {
-          ...process.env,
-          // Prevent interactive prompts or pagers
-          CI: 'true',
-          PAGER: 'cat',
-          GIT_TERMINAL_PROMPT: '0',
-        },
+        env: getSanitizedEnv(),
       });
 
       const killProcessTree = () => {

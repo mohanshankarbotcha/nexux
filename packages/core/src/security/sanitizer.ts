@@ -13,7 +13,7 @@ export function sanitizeString(text: string): string {
   if (!text || typeof text !== 'string') return text;
   let sanitized = text;
 
-  // Mask OpenAI keys
+  // Mask OpenAI keys (including modern sk-proj-... formats)
   sanitized = sanitized.replace(/sk-[a-zA-Z0-9_-]{20,}/g, (match) => {
     return `${match.slice(0, 4)}...[REDACTED]...${match.slice(-4)}`;
   });
@@ -23,8 +23,19 @@ export function sanitizeString(text: string): string {
     return `${match.slice(0, 4)}...[REDACTED]...${match.slice(-4)}`;
   });
 
+  // Mask GitHub personal access tokens
+  sanitized = sanitized.replace(/(?:ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9_]{40,})/g, (match) => {
+    return `${match.slice(0, 4)}...[REDACTED]...${match.slice(-4)}`;
+  });
+
   // Mask Bearer tokens
   sanitized = sanitized.replace(/Bearer\s+([a-zA-Z0-9_\-\.]{8,})/gi, 'Bearer [REDACTED]');
+
+  // Mask key=value and key: value formats
+  sanitized = sanitized.replace(
+    /((?:api[_-]?key|secret|password|access[_-]?token|auth_token)\s*[:=]\s*["']?)([a-zA-Z0-9_\-\.]{8,})(["']?)/gi,
+    '$1[REDACTED]$3'
+  );
 
   return sanitized;
 }

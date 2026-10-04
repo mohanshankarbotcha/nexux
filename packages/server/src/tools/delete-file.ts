@@ -9,6 +9,7 @@ import {
   ToolDefinition,
   ToolName,
   ToolExecutionError,
+  SecurityViolationError,
   resolveSafePath,
   getSafeRelativePath,
   globalEventBus,
@@ -41,11 +42,12 @@ export class DeleteFileTool extends BaseTool<DeleteFileInput, DeleteFileOutput> 
     const relPath = getSafeRelativePath(context.workspaceRoot, safePath);
 
     if (relPath === '' || relPath === '.') {
-      throw new ToolExecutionError(this.name, 'Refusing to delete the workspace root directory');
+      throw new SecurityViolationError('Refusing to delete the workspace root directory');
     }
 
-    if (relPath.startsWith('.git') || relPath === '.git') {
-      throw new ToolExecutionError(this.name, 'Refusing to delete .git directory or files');
+    const normalizedRel = relPath.replace(/\\/g, '/');
+    if (normalizedRel === '.git' || normalizedRel.startsWith('.git/')) {
+      throw new SecurityViolationError('Refusing to delete .git directory or files');
     }
 
     if (!fs.existsSync(safePath)) {
