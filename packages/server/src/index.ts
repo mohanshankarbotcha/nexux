@@ -8,6 +8,7 @@ export * from './providers/model-router.js';
 export * from './tools/base-tool.js';
 export * from './tools/tool-registry.js';
 export * from './agent/base-agent.js';
+export * from './workspace/workspace-service.js';
 export * from './storage/storage-engine.js';
 export * from './api/app.js';
 
