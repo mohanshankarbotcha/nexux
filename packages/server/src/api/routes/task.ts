@@ -10,11 +10,36 @@ import {
 } from '@nexus/core';
 import { globalStorage } from '../../storage/storage-engine.js';
 import { globalModelRouter } from '../../providers/model-router.js';
+import { globalCoordinator } from '../../agent/coordinator.js';
+import { globalWorkspaceService } from '../../workspace/workspace-service.js';
 
 export function createTaskRouter(): Router {
   const router = Router();
+  const activeTaskControllers = new Map<string, AbortController>();
 
-  // Create new task
+  // List all tasks
+  router.get('/', (_req: Request, res: Response) => {
+    const tasks = globalStorage.getAllTasks();
+    res.json({ success: true, tasks });
+  });
+
+  // Global SSE stream for all workspace events
+  router.get('/events/all', (_req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    const unsubscribe = globalEventBus.onAll((event) => {
+      res.write(NexusEventBus.formatSSE(event));
+    });
+
+    _req.on('close', () => {
+      unsubscribe();
+    });
+  });
+
+  // Create and launch new task
   router.post('/', (req: Request, res: Response, next: NextFunction) => {
     try {
       const { prompt, sessionId, workspaceRoot } = req.body;
@@ -32,9 +57,10 @@ export function createTaskRouter(): Router {
       }
 
       const taskId = `task_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const taskSessionId = sessionId || `session_${Date.now()}`;
       const task: Task = {
         id: taskId,
-        sessionId: sessionId || `session_${Date.now()}`,
+        sessionId: taskSessionId,
         prompt,
         status: 'pending',
         changedFiles: [],
@@ -53,12 +79,54 @@ export function createTaskRouter(): Router {
         prompt: task.prompt,
       });
 
+      // Target workspace directory
+      const targetWorkspace = workspaceRoot || globalWorkspaceService.getCurrentWorkspace()?.path || process.cwd();
+
+      // Launch async coordinator loop in background
+      const controller = new AbortController();
+      activeTaskControllers.set(taskId, controller);
+
+      globalCoordinator
+        .run(prompt, {
+          sessionId: taskSessionId,
+          taskId,
+          workspaceRoot: targetWorkspace,
+          abortSignal: controller.signal,
+        })
+        .then((result) => {
+          logger.info(`Task ${taskId} completed with status: ${result.data?.status || 'completed'}`);
+        })
+        .catch((err) => {
+          logger.error(`Task ${taskId} execution failed:`, err);
+        })
+        .finally(() => {
+          activeTaskControllers.delete(taskId);
+        });
+
       res.status(201).json({
         success: true,
         task,
       });
     } catch (err) {
       next(err);
+    }
+  });
+
+  // Cancel running task
+  router.post('/:id/cancel', (req: Request, res: Response) => {
+    const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const controller = activeTaskControllers.get(taskId);
+    if (controller) {
+      controller.abort();
+      activeTaskControllers.delete(taskId);
+      const task = globalStorage.getTask(taskId);
+      if (task) {
+        task.status = 'cancelled';
+        globalStorage.saveTask(task);
+      }
+      res.json({ success: true, message: `Task ${taskId} cancelled` });
+    } else {
+      res.status(404).json({ success: false, error: 'Task not found or not currently active' });
     }
   });
 

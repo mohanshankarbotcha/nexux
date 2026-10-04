@@ -75,6 +75,11 @@ export class WorkspaceService {
     return this.storage.getWorkspaces();
   }
 
+  getCurrentWorkspace(): WorkspaceInfo | null {
+    const list = this.getRecentWorkspaces();
+    return list.length > 0 ? list[0] : null;
+  }
+
   /**
    * Generates a recursive file tree node structure.
    */

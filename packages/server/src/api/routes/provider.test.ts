@@ -30,107 +30,108 @@ async function makeRequest(app: any, method: string, pathUrl: string, body?: any
   }
 }
 
-test('Phase 3 / Masking - maskKey safely masks secrets without full disclosure', () => {
-  assert.equal(maskKey(undefined), null);
-  assert.equal(maskKey(''), null);
-  assert.equal(maskKey('short'), '••••••••');
-  assert.equal(maskKey('sk-1234567890abcdef'), 'sk-1••••••••cdef');
-  assert.equal(maskKey('AIzaSyA1B2C3D4E5F6G7H8I9'), 'AIza••••••••H8I9');
-});
-
-test('Phase 3 / Onboarding - status returns correctly when no provider is configured', async () => {
-  // Reset credentials in storage
-  globalStorage.saveCredentials({ openaiApiKey: '', geminiApiKey: '' });
-  globalModelRouter.updateCredential('openai', '');
-  globalModelRouter.updateCredential('gemini', '');
-
-  const app = createNexusApp();
-  const res = await makeRequest(app, 'GET', '/api/providers/status');
-
-  assert.equal(res.status, 200);
-  assert.equal(res.body.success, true);
-  assert.equal(res.body.hasAnyValidProvider, false);
-  assert.equal(res.body.providers.openai.configured, false);
-  assert.equal(res.body.providers.openai.maskedKey, null);
-  assert.equal(res.body.providers.gemini.configured, false);
-  assert.equal(res.body.providers.gemini.maskedKey, null);
-});
-
-test('Phase 3 / Safety - blocks AI task execution when no provider is configured', async () => {
-  globalStorage.saveCredentials({ openaiApiKey: '', geminiApiKey: '' });
-  globalModelRouter.updateCredential('openai', '');
-  globalModelRouter.updateCredential('gemini', '');
-
-  const app = createNexusApp();
-  const res = await makeRequest(app, 'POST', '/api/tasks', {
-    prompt: 'Implement a feature',
+test('Phase 3 / Provider Suite', { concurrency: 1 }, async (t) => {
+  await t.test('Masking - maskKey safely masks secrets without full disclosure', () => {
+    assert.equal(maskKey(undefined), null);
+    assert.equal(maskKey(''), null);
+    assert.equal(maskKey('short'), '••••••••');
+    assert.equal(maskKey('sk-1234567890abcdef'), 'sk-1••••••••cdef');
+    assert.equal(maskKey('AIzaSyA1B2C3D4E5F6G7H8I9'), 'AIza••••••••H8I9');
   });
 
-  assert.equal(res.status, 400);
-  assert.equal(res.body.success, false);
-  assert.equal(res.body.error.code, 'PROVIDER_NOT_CONFIGURED');
-});
+  await t.test('Onboarding - status returns correctly when no provider is configured', async () => {
+    // Reset credentials in storage
+    globalStorage.saveCredentials({ openaiApiKey: '', geminiApiKey: '' });
+    globalModelRouter.updateCredential('openai', '');
+    globalModelRouter.updateCredential('gemini', '');
 
-test('Phase 3 / Onboarding - configuring OpenAI only', async () => {
-  const app = createNexusApp();
-  const updateRes = await makeRequest(app, 'POST', '/api/providers/credentials', {
-    openaiApiKey: 'sk-testkey123456789012345678',
-    geminiApiKey: '',
+    const app = createNexusApp();
+    const res = await makeRequest(app, 'GET', '/api/providers/status');
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.success, true);
+    assert.equal(res.body.hasAnyValidProvider, false);
+    assert.equal(res.body.providers.openai.configured, false);
+    assert.equal(res.body.providers.openai.maskedKey, null);
+    assert.equal(res.body.providers.gemini.configured, false);
+    assert.equal(res.body.providers.gemini.maskedKey, null);
   });
 
-  assert.equal(updateRes.status, 200);
-  assert.equal(updateRes.body.hasAnyValidProvider, true);
+  await t.test('Safety - blocks AI task execution when no provider is configured', async () => {
+    globalStorage.saveCredentials({ openaiApiKey: '', geminiApiKey: '' });
+    globalModelRouter.updateCredential('openai', '');
+    globalModelRouter.updateCredential('gemini', '');
 
-  const statusRes = await makeRequest(app, 'GET', '/api/providers/status');
-  assert.equal(statusRes.body.hasAnyValidProvider, true);
-  assert.equal(statusRes.body.providers.openai.configured, true);
-  assert.ok(statusRes.body.providers.openai.maskedKey.startsWith('sk-t'));
-  assert.equal(statusRes.body.providers.gemini.configured, false);
-});
+    const app = createNexusApp();
+    const res = await makeRequest(app, 'POST', '/api/tasks', {
+      prompt: 'Implement a feature',
+    });
 
-test('Phase 3 / Onboarding - configuring Gemini only', async () => {
-  const app = createNexusApp();
-  const updateRes = await makeRequest(app, 'POST', '/api/providers/credentials', {
-    openaiApiKey: '',
-    geminiApiKey: 'AIzaSyA1B2C3D4E5F6G7H8I9J0K1L2M3',
+    assert.equal(res.status, 400);
+    assert.equal(res.body.success, false);
+    assert.equal(res.body.error.code, 'PROVIDER_NOT_CONFIGURED');
   });
 
-  assert.equal(updateRes.status, 200);
-  assert.equal(updateRes.body.hasAnyValidProvider, true);
+  await t.test('Onboarding - configuring OpenAI only', async () => {
+    const app = createNexusApp();
+    const updateRes = await makeRequest(app, 'POST', '/api/providers/credentials', {
+      openaiApiKey: 'sk-testkey123456789012345678',
+      geminiApiKey: '',
+    });
 
-  const statusRes = await makeRequest(app, 'GET', '/api/providers/status');
-  assert.equal(statusRes.body.hasAnyValidProvider, true);
-  assert.equal(statusRes.body.providers.gemini.configured, true);
-  assert.ok(statusRes.body.providers.gemini.maskedKey.startsWith('AIza'));
-  assert.equal(statusRes.body.providers.openai.configured, false);
-});
+    assert.equal(updateRes.status, 200);
+    assert.equal(updateRes.body.hasAnyValidProvider, true);
 
-test('Phase 3 / Onboarding - configuring both providers', async () => {
-  const app = createNexusApp();
-  const updateRes = await makeRequest(app, 'POST', '/api/providers/credentials', {
-    openaiApiKey: 'sk-testopenai1234567890abcdef',
-    geminiApiKey: 'AIzaSyGemini1234567890abcdef',
+    const statusRes = await makeRequest(app, 'GET', '/api/providers/status');
+    assert.equal(statusRes.body.hasAnyValidProvider, true);
+    assert.equal(statusRes.body.providers.openai.configured, true);
+    assert.ok(statusRes.body.providers.openai.maskedKey.startsWith('sk-t'));
+    assert.equal(statusRes.body.providers.gemini.configured, false);
   });
 
-  assert.equal(updateRes.status, 200);
-  assert.equal(updateRes.body.hasAnyValidProvider, true);
+  await t.test('Onboarding - configuring Gemini only', async () => {
+    const app = createNexusApp();
+    const updateRes = await makeRequest(app, 'POST', '/api/providers/credentials', {
+      openaiApiKey: '',
+      geminiApiKey: 'AIzaSyA1B2C3D4E5F6G7H8I9J0K1L2M3',
+    });
 
-  const statusRes = await makeRequest(app, 'GET', '/api/providers/status');
-  assert.equal(statusRes.body.hasAnyValidProvider, true);
-  assert.equal(statusRes.body.providers.openai.configured, true);
-  assert.equal(statusRes.body.providers.gemini.configured, true);
-  assert.deepEqual(statusRes.body.activeProviders.sort(), ['gemini', 'openai']);
-});
+    assert.equal(updateRes.status, 200);
+    assert.equal(updateRes.body.hasAnyValidProvider, true);
 
-test('Phase 3 / Validation - validate rejects invalid credentials', async () => {
-  const app = createNexusApp();
-  // Validating an intentionally invalid key against OpenAI
-  const res = await makeRequest(app, 'POST', '/api/providers/validate', {
-    provider: 'openai',
-    apiKey: 'sk-intentionally-invalid-key',
+    const statusRes = await makeRequest(app, 'GET', '/api/providers/status');
+    assert.equal(statusRes.body.hasAnyValidProvider, true);
+    assert.equal(statusRes.body.providers.gemini.configured, true);
+    assert.ok(statusRes.body.providers.gemini.maskedKey.startsWith('AIza'));
+    assert.equal(statusRes.body.providers.openai.configured, false);
   });
 
-  assert.equal(res.status, 200);
-  assert.equal(res.body.success, false);
-  assert.equal(res.body.result.isValid, false);
+  await t.test('Onboarding - configuring both providers', async () => {
+    const app = createNexusApp();
+    const updateRes = await makeRequest(app, 'POST', '/api/providers/credentials', {
+      openaiApiKey: 'sk-testopenai1234567890abcdef',
+      geminiApiKey: 'AIzaSyGemini1234567890abcdef',
+    });
+
+    assert.equal(updateRes.status, 200);
+    assert.equal(updateRes.body.hasAnyValidProvider, true);
+
+    const statusRes = await makeRequest(app, 'GET', '/api/providers/status');
+    assert.equal(statusRes.body.hasAnyValidProvider, true);
+    assert.equal(statusRes.body.providers.openai.configured, true);
+    assert.equal(statusRes.body.providers.gemini.configured, true);
+    assert.deepEqual(statusRes.body.activeProviders.sort(), ['gemini', 'openai']);
+  });
+
+  await t.test('Validation - validate rejects invalid credentials', async () => {
+    const app = createNexusApp();
+    const res = await makeRequest(app, 'POST', '/api/providers/validate', {
+      provider: 'openai',
+      apiKey: 'sk-intentionally-invalid-key',
+    });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.success, false);
+    assert.equal(res.body.result.isValid, false);
+  });
 });

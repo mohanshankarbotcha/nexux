@@ -114,6 +114,22 @@ export class StorageEngine {
     this.writeJson(this.getTaskFilePath(task.id), task);
   }
 
+  getAllTasks(): Task[] {
+    const tasksDir = path.join(this.dataDir, 'tasks');
+    if (!fs.existsSync(tasksDir)) return [];
+    try {
+      const files = fs.readdirSync(tasksDir).filter((f) => f.endsWith('.json'));
+      const tasks: Task[] = [];
+      for (const file of files) {
+        const t = this.readJson<Task | undefined>(path.join(tasksDir, file), undefined);
+        if (t) tasks.push(t);
+      }
+      return tasks.sort((a, b) => b.createdAt - a.createdAt);
+    } catch {
+      return [];
+    }
+  }
+
   // Credentials (secure local persistence)
   getCredentials(): ProviderCredentials {
     return this.readJson<ProviderCredentials>(this.credentialsFile, {});

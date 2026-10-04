@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import {
@@ -11,6 +14,9 @@ import { createWorkspaceRouter } from './routes/workspace.js';
 import { createProviderRouter } from './routes/provider.js';
 import { createTaskRouter } from './routes/task.js';
 import { createUsageRouter } from './routes/usage.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export function createNexusApp() {
   const app = express();
@@ -35,6 +41,25 @@ export function createNexusApp() {
   app.use(`${prefix}/providers`, createProviderRouter());
   app.use(`${prefix}/tasks`, createTaskRouter());
   app.use(`${prefix}/usage`, createUsageRouter());
+
+  // Serve static client bundle if built
+  const clientDist = path.resolve(process.cwd(), 'packages/client/dist');
+  const clientDistSibling = path.resolve(__dirname, '../../../client/dist');
+  const targetDist = fs.existsSync(clientDist)
+    ? clientDist
+    : fs.existsSync(clientDistSibling)
+    ? clientDistSibling
+    : null;
+
+  if (targetDist) {
+    app.use(express.static(targetDist));
+    app.get('*', (req: Request, res: Response, next: NextFunction) => {
+      if (req.path.startsWith(prefix)) {
+        return next();
+      }
+      res.sendFile(path.join(targetDist, 'index.html'));
+    });
+  }
 
   // 404 handler
   app.use((req: Request, res: Response) => {
