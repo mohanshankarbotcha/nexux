@@ -125,8 +125,8 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
                       <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{data.requests} calls</span>
-                      <span>{data.tokens.toLocaleString()} tokens</span>
+                      <span>{data.requests} calls ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
+                      <span>{data.totalTokens.toLocaleString()} tokens</span>
                     </div>
                   </div>
                 ))
@@ -155,8 +155,8 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
                       <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{data.requests} calls</span>
-                      <span>{data.tokens.toLocaleString()} tokens</span>
+                      <span>{data.requests} calls ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
+                      <span>{data.totalTokens.toLocaleString()} tokens</span>
                     </div>
                   </div>
                 ))
@@ -185,13 +185,76 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
                       <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{data.requests} calls</span>
-                      <span>{data.tokens.toLocaleString()} tokens</span>
+                      <span>{data.requests} calls ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
+                      <span>{data.totalTokens.toLocaleString()} tokens</span>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-xs text-slate-500 italic">No agent calls recorded yet.</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Aggregations: By Task & By Session */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* By Task */}
+          <div className="p-4 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-3">
+            <div className="flex items-center space-x-2 text-xs font-semibold text-slate-300 font-mono uppercase">
+              <Clock className="w-3.5 h-3.5 text-sky-400" />
+              <span>By Coding Task</span>
+            </div>
+
+            <div className="space-y-2 max-h-48 overflow-auto">
+              {summary && summary.byTask && Object.keys(summary.byTask).length > 0 ? (
+                Object.entries(summary.byTask).map(([task, data]) => (
+                  <div
+                    key={task}
+                    className="p-2 rounded bg-nexus-950/60 border border-nexus-border/60 text-xs font-mono space-y-1"
+                  >
+                    <div className="flex items-center justify-between font-semibold text-slate-200">
+                      <span className="truncate max-w-[200px]">{task}</span>
+                      <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span>{data.requests} requests ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
+                      <span>{data.totalTokens.toLocaleString()} tokens</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-xs text-slate-500 italic">No task telemetry recorded yet.</div>
+              )}
+            </div>
+          </div>
+
+          {/* By Session */}
+          <div className="p-4 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-3">
+            <div className="flex items-center space-x-2 text-xs font-semibold text-slate-300 font-mono uppercase">
+              <Cpu className="w-3.5 h-3.5 text-purple-400" />
+              <span>By Session</span>
+            </div>
+
+            <div className="space-y-2 max-h-48 overflow-auto">
+              {summary && summary.bySession && Object.keys(summary.bySession).length > 0 ? (
+                Object.entries(summary.bySession).map(([sess, data]) => (
+                  <div
+                    key={sess}
+                    className="p-2 rounded bg-nexus-950/60 border border-nexus-border/60 text-xs font-mono space-y-1"
+                  >
+                    <div className="flex items-center justify-between font-semibold text-slate-200">
+                      <span className="truncate max-w-[200px]">{sess}</span>
+                      <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span>{data.requests} requests ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
+                      <span>{data.totalTokens.toLocaleString()} tokens</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-xs text-slate-500 italic">No session telemetry recorded yet.</div>
               )}
             </div>
           </div>

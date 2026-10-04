@@ -25,7 +25,33 @@ export function createUsageRouter(): Router {
       byProvider: {},
       byModel: {},
       byAgent: {},
+      byTask: {},
+      bySession: {},
     };
+
+    function accumulate(
+      target: Record<string, any>,
+      key: string,
+      r: any
+    ) {
+      if (!target[key]) {
+        target[key] = {
+          requests: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          tokens: 0,
+          estimatedCostUsd: 0,
+        };
+      }
+      const item = target[key];
+      item.requests += 1;
+      item.inputTokens += r.inputTokens;
+      item.outputTokens += r.outputTokens;
+      item.totalTokens += r.totalTokens;
+      item.tokens += r.totalTokens;
+      item.estimatedCostUsd = Math.round((item.estimatedCostUsd + r.estimatedCostUsd) * 1_000_000) / 1_000_000;
+    }
 
     for (const r of records) {
       summary.totalInputTokens += r.inputTokens;
@@ -33,29 +59,11 @@ export function createUsageRouter(): Router {
       summary.totalTokens += r.totalTokens;
       summary.totalEstimatedCostUsd += r.estimatedCostUsd;
 
-      // By provider
-      if (!summary.byProvider[r.provider]) {
-        summary.byProvider[r.provider] = { requests: 0, tokens: 0, estimatedCostUsd: 0 };
-      }
-      summary.byProvider[r.provider].requests += 1;
-      summary.byProvider[r.provider].tokens += r.totalTokens;
-      summary.byProvider[r.provider].estimatedCostUsd += r.estimatedCostUsd;
-
-      // By model
-      if (!summary.byModel[r.model]) {
-        summary.byModel[r.model] = { requests: 0, tokens: 0, estimatedCostUsd: 0 };
-      }
-      summary.byModel[r.model].requests += 1;
-      summary.byModel[r.model].tokens += r.totalTokens;
-      summary.byModel[r.model].estimatedCostUsd += r.estimatedCostUsd;
-
-      // By agent
-      if (!summary.byAgent[r.agent]) {
-        summary.byAgent[r.agent] = { requests: 0, tokens: 0, estimatedCostUsd: 0 };
-      }
-      summary.byAgent[r.agent].requests += 1;
-      summary.byAgent[r.agent].tokens += r.totalTokens;
-      summary.byAgent[r.agent].estimatedCostUsd += r.estimatedCostUsd;
+      accumulate(summary.byProvider, r.provider, r);
+      accumulate(summary.byModel, r.model, r);
+      accumulate(summary.byAgent, r.agent, r);
+      if (r.taskId) accumulate(summary.byTask, r.taskId, r);
+      if (r.sessionId) accumulate(summary.bySession, r.sessionId, r);
     }
 
     // Round total cost

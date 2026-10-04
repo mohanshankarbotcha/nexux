@@ -19,15 +19,26 @@ export interface UsageRecord {
   error?: string;
 }
 
+export interface UsageAggregationItem {
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  tokens: number;
+  estimatedCostUsd: number;
+}
+
 export interface UsageSummary {
   totalRequests: number;
   totalInputTokens: number;
   totalOutputTokens: number;
   totalTokens: number;
   totalEstimatedCostUsd: number;
-  byProvider: Record<string, { requests: number; tokens: number; estimatedCostUsd: number }>;
-  byModel: Record<string, { requests: number; tokens: number; estimatedCostUsd: number }>;
-  byAgent: Record<string, { requests: number; tokens: number; estimatedCostUsd: number }>;
+  byProvider: Record<string, UsageAggregationItem>;
+  byModel: Record<string, UsageAggregationItem>;
+  byAgent: Record<string, UsageAggregationItem>;
+  byTask: Record<string, UsageAggregationItem>;
+  bySession: Record<string, UsageAggregationItem>;
 }
 
 export interface ModelPricing {
