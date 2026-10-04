@@ -85,7 +85,8 @@ export class EditFileTool extends BaseTool<EditFileInput, EditFileOutput> {
 
     fs.writeFileSync(safePath, updatedContent, 'utf-8');
 
-    globalEventBus.emit({
+    const bus = context.eventBus || globalEventBus;
+    bus.emit({
       id: `evt_${Date.now()}`,
       type: 'file_changed',
       sessionId: context.sessionId,

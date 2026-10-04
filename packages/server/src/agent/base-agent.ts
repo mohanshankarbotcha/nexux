@@ -145,6 +145,7 @@ export abstract class BaseAgent {
       taskId: context.taskId,
       agentRole: this.role,
       abortSignal: context.abortSignal,
+      eventBus: this.eventBus,
     };
 
     const result = await this.toolRegistry.execute(name, input, toolContext);

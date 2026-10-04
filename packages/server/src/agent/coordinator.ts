@@ -12,12 +12,14 @@ import { CoderAgent } from './coder.js';
 import { DebuggerAgent } from './debugger.js';
 import { ReviewerAgent } from './reviewer.js';
 import { StorageEngine, globalStorage } from '../storage/storage-engine.js';
+import { ContextEngine, globalContextEngine, TaskContextPackage } from '../context/context-engine.js';
 
 export interface CoordinatorResult {
   taskId: string;
   status: TaskStatus;
   summary: string;
   changedFiles: string[];
+  diff?: string;
   stagesRun: AgentRole[];
   totalDurationMs: number;
 }
@@ -31,6 +33,7 @@ export class CoordinatorAgent extends BaseAgent {
   private coder: CoderAgent;
   private debuggerAgent: DebuggerAgent;
   private reviewer: ReviewerAgent;
+  private contextEngine: ContextEngine;
 
   constructor(
     explorer = new ExplorerAgent(),
@@ -39,7 +42,8 @@ export class CoordinatorAgent extends BaseAgent {
     debuggerAgent = new DebuggerAgent(),
     reviewer = new ReviewerAgent(),
     storage = globalStorage,
-    eventBus = globalEventBus
+    eventBus = globalEventBus,
+    contextEngine = globalContextEngine
   ) {
     super(undefined, undefined, eventBus, storage);
     this.explorer = explorer;
@@ -48,6 +52,7 @@ export class CoordinatorAgent extends BaseAgent {
     this.debuggerAgent = debuggerAgent;
     this.reviewer = reviewer;
     this.storage = storage;
+    this.contextEngine = contextEngine;
   }
 
   /**
@@ -88,6 +93,14 @@ export class CoordinatorAgent extends BaseAgent {
     const startTime = Date.now();
     const stagesRun: AgentRole[] = [this.role];
     const changedFiles = new Set<string>();
+    this.eventBus.emit({
+      id: `evt_${Date.now()}`,
+      type: 'task_started',
+      sessionId: context.sessionId,
+      taskId: context.taskId,
+      timestamp: startTime,
+      prompt,
+    });
 
     this.emitAgentStarted(`Coordinating task: "${prompt}"`, context);
 
@@ -110,6 +123,14 @@ export class CoordinatorAgent extends BaseAgent {
     }
 
     try {
+      // Build task context package
+      const contextPackage: TaskContextPackage = await this.contextEngine.buildTaskContext(
+        context.workspaceRoot,
+        prompt,
+        context.sessionId,
+        context.taskId
+      );
+
       const complexity = this.assessComplexity(prompt);
       logger.info(`Coordinator: task complexity assessed`, { taskId: context.taskId, complexity });
 
@@ -142,7 +163,7 @@ export class CoordinatorAgent extends BaseAgent {
       stagesRun.push('coder');
       const coderRes = await this.coder.run(prompt, context, {
         plan,
-        relevantFiles: exploration?.relevantFiles,
+        relevantFiles: exploration?.relevantFiles || contextPackage.items.map((i) => i.relativePath),
       });
 
       if (coderRes.data?.changedFiles) {
@@ -151,7 +172,7 @@ export class CoordinatorAgent extends BaseAgent {
         }
       }
 
-      // Stage 4: Verification (if verification commands exist or requested)
+      // Stage 4: Verification (if verification commands exist)
       let verificationSuccess = true;
       if (complexity.needsVerification && plan?.steps) {
         for (const step of plan.steps) {
@@ -234,6 +255,7 @@ export class CoordinatorAgent extends BaseAgent {
           status: 'completed',
           summary: finalSummary,
           changedFiles: Array.from(changedFiles),
+          diff: reviewRes.data?.diffSummary,
           stagesRun,
           totalDurationMs,
         },

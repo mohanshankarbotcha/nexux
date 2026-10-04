@@ -69,7 +69,8 @@ export class WriteFileTool extends BaseTool<WriteFileInput, WriteFileOutput> {
     const bytesWritten = Buffer.byteLength(input.content, 'utf-8');
 
     // Emit file changed event
-    globalEventBus.emit({
+    const bus = context.eventBus || globalEventBus;
+    bus.emit({
       id: `evt_${Date.now()}`,
       type: 'file_changed',
       sessionId: context.sessionId,

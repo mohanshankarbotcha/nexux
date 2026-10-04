@@ -1,3 +1,5 @@
+import type { NexusEventBus } from '../events/event-bus.js';
+
 export type ToolName =
   | 'read_file'
   | 'write_file'
@@ -15,6 +17,7 @@ export interface ToolCallContext {
   taskId: string;
   agentRole: string;
   abortSignal?: AbortSignal;
+  eventBus?: NexusEventBus;
 }
 
 export interface ToolResult<T = unknown> {

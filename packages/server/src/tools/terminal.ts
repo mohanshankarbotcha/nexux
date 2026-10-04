@@ -58,7 +58,8 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
       ? resolveSafePath(context.workspaceRoot, input.workingDir)
       : resolveSafePath(context.workspaceRoot, '.');
 
-    globalEventBus.emit({
+    const bus = context.eventBus || globalEventBus;
+    bus.emit({
       id: `evt_${Date.now()}`,
       type: 'command_started',
       sessionId: context.sessionId,
@@ -143,7 +144,8 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
         const sanitizedStdout = sanitizeString(stdout);
         const sanitizedStderr = sanitizeString(stderr);
 
-        globalEventBus.emit({
+        const bus = context.eventBus || globalEventBus;
+        bus.emit({
           id: `evt_${Date.now()}`,
           type: 'command_completed',
           sessionId: context.sessionId,

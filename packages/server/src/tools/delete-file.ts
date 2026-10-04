@@ -59,7 +59,8 @@ export class DeleteFileTool extends BaseTool<DeleteFileInput, DeleteFileOutput> 
       fs.unlinkSync(safePath);
     }
 
-    globalEventBus.emit({
+    const bus = context.eventBus || globalEventBus;
+    bus.emit({
       id: `evt_${Date.now()}`,
       type: 'file_changed',
       sessionId: context.sessionId,
