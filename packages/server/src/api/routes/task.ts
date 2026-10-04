@@ -42,7 +42,7 @@ export function createTaskRouter(): Router {
   // Create and launch new task
   router.post('/', (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { prompt, sessionId, workspaceRoot } = req.body;
+      const { prompt, sessionId, workspaceRoot, workspacePath } = req.body;
       if (!prompt || typeof prompt !== 'string') {
         throw new ValidationError('Task prompt is required');
       }
@@ -59,7 +59,11 @@ export function createTaskRouter(): Router {
       const taskId = `task_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       const taskSessionId = sessionId || `session_${Date.now()}`;
       // Target workspace directory
-      const targetWorkspace = workspaceRoot || globalWorkspaceService.getCurrentWorkspace()?.path || process.cwd();
+      const targetWorkspace =
+        workspaceRoot ||
+        workspacePath ||
+        globalWorkspaceService.getCurrentWorkspace()?.path ||
+        process.cwd();
 
       // Ensure session exists or is updated
       let session = globalStorage.getSession(taskSessionId);
