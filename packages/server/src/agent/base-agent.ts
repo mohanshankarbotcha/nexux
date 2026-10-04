@@ -12,6 +12,7 @@ import {
   ToolResult,
   calculateEstimatedCost,
   globalEventBus,
+  LRUCache,
   logger,
 } from '@nexus/core';
 import { ModelRouter, globalModelRouter } from '../providers/model-router.js';
@@ -35,6 +36,19 @@ export abstract class BaseAgent {
   protected storage: StorageEngine;
   protected state: AgentState;
 
+  private static readonly READ_ONLY_TOOLS = new Set<ToolName>([
+    'read_file',
+    'list_files',
+    'search_files',
+    'git_status',
+    'git_diff',
+  ]);
+
+  protected toolResultCache = new LRUCache<string, ToolResult<any>>({
+    maxItems: 50,
+    defaultTtlMs: 15_000,
+  });
+
   constructor(
     modelRouter: ModelRouter = globalModelRouter,
     toolRegistry: ToolRegistry = globalToolRegistry,
@@ -49,6 +63,11 @@ export abstract class BaseAgent {
       role: 'coordinator',
       status: 'idle',
     };
+
+    // Invalidate cached tool results when files are modified
+    this.eventBus.on('file_changed', () => {
+      this.toolResultCache.clear();
+    });
   }
 
   getState(): AgentState {
@@ -124,6 +143,48 @@ export abstract class BaseAgent {
     input: TInput,
     context: AgentExecutionContext
   ): Promise<ToolResult<TOutput>> {
+    // Invalidate cached read-only tools on mutating operations
+    if (['write_file', 'edit_file', 'delete_file'].includes(name)) {
+      this.toolResultCache.clear();
+    }
+
+    const cacheKey = BaseAgent.READ_ONLY_TOOLS.has(name)
+      ? `${context.workspaceRoot}:${name}:${JSON.stringify(input)}`
+      : undefined;
+
+    if (cacheKey) {
+      const cached = this.toolResultCache.get(cacheKey);
+      if (cached && cached.success) {
+        logger.debug(`BaseAgent [${this.role}]: cache hit for tool '${name}'`);
+        const cachedCallId = `cached_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        this.eventBus.emit({
+          id: `evt_${Date.now()}`,
+          type: 'tool_started',
+          sessionId: context.sessionId,
+          taskId: context.taskId,
+          timestamp: Date.now(),
+          agentRole: this.role,
+          toolCallId: cachedCallId,
+          toolName: name,
+          input: (input as Record<string, unknown>) || {},
+        });
+        this.eventBus.emit({
+          id: `evt_${Date.now()}`,
+          type: 'tool_completed',
+          sessionId: context.sessionId,
+          taskId: context.taskId,
+          timestamp: Date.now(),
+          agentRole: this.role,
+          toolCallId: cachedCallId,
+          toolName: name,
+          success: true,
+          durationMs: 0,
+          outputSummary: JSON.stringify(cached.data).slice(0, 150),
+        });
+        return { ...cached, callId: cachedCallId, durationMs: 0 } as ToolResult<TOutput>;
+      }
+    }
+
     const callId = `call_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     this.updateStatus('executing_tool', context, `Tool: ${name}`);
 
@@ -149,6 +210,10 @@ export abstract class BaseAgent {
     };
 
     const result = await this.toolRegistry.execute(name, input, toolContext);
+
+    if (cacheKey && result.success) {
+      this.toolResultCache.set(cacheKey, result);
+    }
 
     this.eventBus.emit({
       id: `evt_${Date.now()}`,

@@ -14,3 +14,4 @@ export * from './security/path-guard.js';
 export * from './security/sanitizer.js';
 export * from './logging/logger.js';
 export * from './events/event-bus.js';
+export * from './cache/lru-cache.js';

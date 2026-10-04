@@ -5,9 +5,12 @@ import {
   resolveSafePath,
   getSafeRelativePath,
   DEFAULT_TOOL_CONFIG,
+  LRUCache,
+  globalEventBus,
   logger,
 } from '@nexus/core';
 import { WorkspaceService, globalWorkspaceService } from '../workspace/workspace-service.js';
+import { globalFileCache } from '../cache/file-cache.js';
 
 export interface ContextSourceItem {
   filePath: string;
@@ -62,9 +65,22 @@ const STOP_WORDS = new Set([
 
 export class ContextEngine {
   private workspaceService: WorkspaceService;
+  private contextPackageCache = new LRUCache<string, TaskContextPackage>({
+    maxItems: 50,
+    defaultTtlMs: 30_000,
+  });
 
   constructor(workspaceService: WorkspaceService = globalWorkspaceService) {
     this.workspaceService = workspaceService;
+
+    // Invalidate context cache when workspace files change
+    globalEventBus.on('file_changed', () => {
+      this.contextPackageCache.clear();
+    });
+  }
+
+  clearCache(): void {
+    this.contextPackageCache.clear();
   }
 
   /**
@@ -98,6 +114,17 @@ export class ContextEngine {
     taskId: string,
     options: ContextOptions = {}
   ): Promise<TaskContextPackage> {
+    const cacheKey = `${path.resolve(workspaceRoot).toLowerCase()}:${prompt.trim().toLowerCase()}`;
+    const cached = this.contextPackageCache.get(cacheKey);
+    if (cached) {
+      return {
+        ...cached,
+        taskId,
+        sessionId,
+        generatedAt: Date.now(),
+      };
+    }
+
     const maxBytes = options.maxBytes || 64 * 1024; // 64 KB default context budget
     const maxTokens = options.maxTokens || 16_000;
     const maxFiles = options.maxFiles || 8;
@@ -115,7 +142,8 @@ export class ContextEngine {
       try {
         const filePath = path.join(workspaceRoot, name);
         if (fs.existsSync(filePath)) {
-          const content = fs.readFileSync(filePath, 'utf-8').slice(0, 4000); // Max 4KB per instruction
+          const raw = globalFileCache.readFile(filePath).content;
+          const content = raw.slice(0, 4000); // Max 4KB per instruction
           projectInstructions += `\n--- [${name}] ---\n${content}\n`;
           visitedPaths.add(name.toLowerCase());
           break; // Take the primary instruction file
@@ -132,7 +160,8 @@ export class ContextEngine {
           const safePath = resolveSafePath(workspaceRoot, cleanWord);
           if (fs.existsSync(safePath) && !visitedPaths.has(cleanWord.toLowerCase())) {
             const relPath = getSafeRelativePath(workspaceRoot, safePath);
-            const content = fs.readFileSync(safePath, 'utf-8').slice(0, 8000);
+            const raw = globalFileCache.readFile(safePath).content;
+            const content = raw.slice(0, 8000);
             const byteSize = Buffer.byteLength(content, 'utf-8');
             const tokens = ContextEngine.estimateTokens(content);
 
@@ -199,7 +228,7 @@ export class ContextEngine {
           continue;
         }
 
-        const raw = fs.readFileSync(safePath, 'utf-8');
+        const raw = globalFileCache.readFile(safePath).content;
         // Cap single file at 8 KB to prevent a single file dominating the context
         const content = raw.slice(0, 8192);
         const byteSize = Buffer.byteLength(content, 'utf-8');
@@ -231,7 +260,7 @@ export class ContextEngine {
     const topEntries = tree.children?.map((c) => (c.isDirectory ? `${c.name}/` : c.name)).join(', ') || 'empty';
     const projectSummary = `Repository overview: [${topEntries}]. Identified ${items.length} relevant file(s).`;
 
-    return {
+    const pkg: TaskContextPackage = {
       taskId,
       sessionId,
       projectSummary,
@@ -242,6 +271,9 @@ export class ContextEngine {
       totalEstimatedTokens: currentTokens,
       generatedAt: Date.now(),
     };
+
+    this.contextPackageCache.set(cacheKey, pkg);
+    return pkg;
   }
 }
 

@@ -15,6 +15,7 @@ import {
   globalEventBus,
   AgentRole,
 } from '@nexus/core';
+import { globalFileCache } from '../cache/file-cache.js';
 
 export class DeleteFileTool extends BaseTool<DeleteFileInput, DeleteFileOutput> {
   readonly name: ToolName = 'delete_file';
@@ -60,6 +61,7 @@ export class DeleteFileTool extends BaseTool<DeleteFileInput, DeleteFileOutput> 
     } else {
       fs.unlinkSync(safePath);
     }
+    globalFileCache.invalidate(safePath);
 
     const bus = context.eventBus || globalEventBus;
     bus.emit({

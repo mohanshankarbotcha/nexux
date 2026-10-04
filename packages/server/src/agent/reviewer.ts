@@ -28,6 +28,23 @@ export class ReviewerAgent extends BaseAgent {
       const modifiedFiles = statusRes.data?.modified || [];
       const untrackedFiles = statusRes.data?.untracked || [];
       const allChanged = Array.from(new Set([...modifiedFiles, ...untrackedFiles, ...(additionalContext?.changedFiles || [])]));
+
+      // Fast-path token optimization: If no files were modified, approve immediately without LLM roundtrip
+      if (allChanged.length === 0) {
+        const summary = 'Review completed: No files were modified in this read-only task.';
+        this.emitAgentCompleted(summary, context);
+        return {
+          summary,
+          success: true,
+          data: {
+            summary,
+            diffSummary: 'No changes',
+            changedFiles: [],
+            approved: true,
+          },
+        };
+      }
+
       const diffSnippet = diffRes.data?.diff ? diffRes.data.diff.slice(0, 3000) : 'No git diff recorded.';
 
       const systemInstruction = `You are the NEXUS.AI Reviewer Agent.

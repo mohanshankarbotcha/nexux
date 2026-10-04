@@ -14,6 +14,7 @@ import {
   logger,
 } from '@nexus/core';
 import { StorageEngine, globalStorage } from '../storage/storage-engine.js';
+import { globalFileCache } from '../cache/file-cache.js';
 
 // Files and directories to ignore by default in file trees and broad searches
 const DEFAULT_IGNORED_DIRS = new Set([
@@ -195,7 +196,7 @@ export class WorkspaceService {
       );
     }
 
-    const raw = fs.readFileSync(safePath, 'utf-8');
+    const raw = globalFileCache.readFile(safePath).content;
     const lines = raw.split(/\r?\n/);
     const totalLines = lines.length;
 

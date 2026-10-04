@@ -27,6 +27,10 @@ export class NexusEventBus {
     return () => this.emitter.off(type, handler);
   }
 
+  on<T extends NexusEvent>(type: NexusEventType, listener: (event: T) => void): () => void {
+    return this.onType(type, listener);
+  }
+
   onTask(taskId: string, listener: NexusEventListener): () => void {
     const channel = `task:${taskId}`;
     this.emitter.on(channel, listener);

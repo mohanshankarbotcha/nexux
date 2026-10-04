@@ -14,6 +14,7 @@ import {
   globalEventBus,
   AgentRole,
 } from '@nexus/core';
+import { globalFileCache } from '../cache/file-cache.js';
 
 export class EditFileTool extends BaseTool<EditFileInput, EditFileOutput> {
   readonly name: ToolName = 'edit_file';
@@ -99,6 +100,7 @@ export class EditFileTool extends BaseTool<EditFileInput, EditFileOutput> {
     }
 
     fs.writeFileSync(safePath, updatedContent, 'utf-8');
+    globalFileCache.invalidate(safePath);
 
     const bus = context.eventBus || globalEventBus;
     bus.emit({

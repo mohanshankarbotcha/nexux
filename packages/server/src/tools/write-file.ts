@@ -15,6 +15,7 @@ import {
   globalEventBus,
   AgentRole,
 } from '@nexus/core';
+import { globalFileCache } from '../cache/file-cache.js';
 
 export class WriteFileTool extends BaseTool<WriteFileInput, WriteFileOutput> {
   readonly name: ToolName = 'write_file';
@@ -66,6 +67,7 @@ export class WriteFileTool extends BaseTool<WriteFileInput, WriteFileOutput> {
     }
 
     fs.writeFileSync(safePath, input.content, 'utf-8');
+    globalFileCache.invalidate(safePath);
     const bytesWritten = Buffer.byteLength(input.content, 'utf-8');
 
     // Emit file changed event
