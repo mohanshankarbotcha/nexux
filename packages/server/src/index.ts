@@ -2,6 +2,8 @@ import { createNexusApp } from './api/app.js';
 import { DEFAULT_SERVER_CONFIG, logger } from '@nexus/core';
 
 export * from './providers/base-provider.js';
+export * from './providers/openai-provider.js';
+export * from './providers/gemini-provider.js';
 export * from './providers/model-router.js';
 export * from './tools/base-tool.js';
 export * from './tools/tool-registry.js';

@@ -11,6 +11,9 @@ import {
   logger,
 } from '@nexus/core';
 import { IModelProvider } from './base-provider.js';
+import { OpenAIProvider } from './openai-provider.js';
+import { GeminiProvider } from './gemini-provider.js';
+import { StorageEngine, globalStorage } from '../storage/storage-engine.js';
 
 export class ModelRouter {
   private providers = new Map<ProviderId, IModelProvider>();
@@ -31,6 +34,32 @@ export class ModelRouter {
 
   getRoutingTable(): ModelRoutingTable {
     return { ...this.routingTable };
+  }
+
+  initializeFromStorage(storage: StorageEngine = globalStorage): void {
+    const creds = storage.getCredentials();
+
+    const openai = new OpenAIProvider({ apiKey: creds.openaiApiKey });
+    const gemini = new GeminiProvider({ apiKey: creds.geminiApiKey });
+
+    this.registerProvider(openai);
+    this.registerProvider(gemini);
+  }
+
+  updateCredential(providerId: ProviderId, apiKey: string): void {
+    const provider = this.getProvider(providerId);
+    if (provider && 'setApiKey' in provider) {
+      (provider as any).setApiKey(apiKey);
+    }
+  }
+
+  hasAnyConfiguredProvider(): boolean {
+    for (const provider of this.providers.values()) {
+      if ('getApiKey' in provider && (provider as any).getApiKey()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   getRouteForRole(role: AgentRole): { provider: IModelProvider; model: string } {
@@ -74,3 +103,4 @@ export class ModelRouter {
 }
 
 export const globalModelRouter = new ModelRouter();
+globalModelRouter.initializeFromStorage();
