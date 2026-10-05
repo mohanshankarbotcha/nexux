@@ -38,7 +38,28 @@ class ApiService {
 
   // Providers
   async getProviderStatus(): Promise<{ providers: ProviderStatusItem[]; anyConfigured: boolean }> {
-    return this.request('/providers/status');
+    const data = await this.request<any>('/providers/status');
+    const raw = data?.providers || {};
+    const providerList: ProviderStatusItem[] = Array.isArray(raw)
+      ? raw
+      : Object.values(raw).map((p: any) => ({
+          id: p.id,
+          name: p.name || (p.id === 'openai' ? 'OpenAI' : 'Google Gemini'),
+          isConfigured: Boolean(p.configured ?? p.isConfigured),
+          maskedKey: p.maskedKey,
+          models:
+            p.id === 'openai'
+              ? ['gpt-4o', 'gpt-4o-mini', 'o1-mini']
+              : ['gemini-2.5-flash', 'gemini-2.5-pro'],
+          defaultModel: p.id === 'openai' ? 'gpt-4o' : 'gemini-2.5-flash',
+        }));
+
+    return {
+      providers: providerList,
+      anyConfigured: Boolean(
+        data?.hasAnyValidProvider ?? data?.anyConfigured ?? providerList.some((p) => p.isConfigured)
+      ),
+    };
   }
 
   async saveProviderCredentials(
@@ -108,6 +129,30 @@ class ApiService {
     const query = new URLSearchParams({ workspace: workspacePath, q: queryText });
     if (pattern) query.set('pattern', pattern);
     return this.request(`/workspaces/search?${query.toString()}`);
+  }
+
+  async executeTerminalCommand(
+    command: string,
+    workspacePath?: string,
+    workingDir?: string,
+    timeoutMs?: number
+  ): Promise<{
+    success: boolean;
+    data?: {
+      command: string;
+      exitCode: number | null;
+      stdout: string;
+      stderr: string;
+      timedOut: boolean;
+      durationMs: number;
+    };
+    error?: string;
+    durationMs: number;
+  }> {
+    return this.request('/workspaces/terminal', {
+      method: 'POST',
+      body: JSON.stringify({ command, workspacePath, workingDir, timeoutMs }),
+    });
   }
 
   // Tasks

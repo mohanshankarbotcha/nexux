@@ -65,14 +65,26 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
           )}
         </div>
 
-        {/* Global KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <div className="p-3.5 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-1">
-            <div className="text-[11px] text-slate-400 font-mono">Total Requests</div>
-            <div className="text-xl font-bold text-white font-mono">
-              {(summary?.totalRequests || 0).toLocaleString()}
+        {(!summary || summary.totalRequests === 0) && records.length === 0 ? (
+          <div className="py-20 text-center space-y-3 select-none">
+            <div className="w-12 h-12 rounded-xl bg-nexus-900 border border-nexus-border mx-auto flex items-center justify-center text-amber-400">
+              <Coins className="w-6 h-6" />
             </div>
+            <h2 className="text-base font-bold text-slate-100 font-mono">No usage yet</h2>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              Usage data and token telemetry will appear after your first AI request.
+            </p>
           </div>
+        ) : (
+          <>
+            {/* Global KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="p-3.5 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-1">
+                <div className="text-[11px] text-slate-400 font-mono">Total Requests</div>
+                <div className="text-xl font-bold text-white font-mono">
+                  {(summary?.totalRequests || 0).toLocaleString()}
+                </div>
+              </div>
 
           <div className="p-3.5 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-1">
             <div className="text-[11px] text-slate-400 font-mono">Input Tokens</div>
@@ -346,6 +358,8 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
             </table>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

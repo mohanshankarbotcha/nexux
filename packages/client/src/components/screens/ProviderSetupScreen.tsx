@@ -97,7 +97,8 @@ export const ProviderSetupScreen: React.FC<ProviderSetupScreenProps> = ({
   };
 
   const getProviderInfo = (id: ProviderId) => {
-    return providers.find((p) => p.id === id);
+    const list = Array.isArray(providers) ? providers : [];
+    return list.find((p) => p.id === id);
   };
 
   return (

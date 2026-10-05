@@ -42,7 +42,13 @@ export function createProviderRouter(): Router {
   // Save credentials securely
   router.post('/credentials', (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { openaiApiKey, geminiApiKey } = req.body;
+      let { openaiApiKey, geminiApiKey, provider, apiKey } = req.body;
+
+      if (provider === 'openai' && apiKey !== undefined) {
+        openaiApiKey = apiKey;
+      } else if (provider === 'gemini' && apiKey !== undefined) {
+        geminiApiKey = apiKey;
+      }
 
       // Update storage
       globalStorage.saveCredentials({
@@ -123,6 +129,7 @@ export function createProviderRouter(): Router {
       res.json({
         success: result.isValid,
         result,
+        validation: result,
       });
     } catch (err) {
       next(err);

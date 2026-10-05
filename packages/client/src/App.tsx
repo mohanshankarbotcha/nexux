@@ -9,33 +9,44 @@ import {
   WorkspaceInfo,
 } from '@nexus/core';
 import {
-  DockTabType,
   PlanData,
   ProviderStatusItem,
   ScreenType,
   TerminalEntry,
 } from './types/index.js';
 import { api } from './services/api.js';
-import { Header } from './components/layout/Header.js';
+import { TopBar } from './components/layout/TopBar.js';
+import { Sidebar } from './components/layout/Sidebar.js';
 import { StatusBar } from './components/layout/StatusBar.js';
-import { WelcomeScreen } from './components/screens/WelcomeScreen.js';
+import { ChatScreen } from './components/screens/ChatScreen.js';
+import { TerminalScreen } from './components/screens/TerminalScreen.js';
 import { WorkspaceScreen } from './components/screens/WorkspaceScreen.js';
+import { UsageScreen } from './components/screens/UsageScreen.js';
 import { DashboardScreen } from './components/screens/DashboardScreen.js';
 import { ProviderSetupScreen } from './components/screens/ProviderSetupScreen.js';
-import { UsageScreen } from './components/screens/UsageScreen.js';
 import { SettingsScreen } from './components/screens/SettingsScreen.js';
+import { WelcomeScreen } from './components/screens/WelcomeScreen.js';
+import { CommandPalette } from './components/common/CommandPalette.js';
+import { NewTaskModal } from './components/common/NewTaskModal.js';
 import { Folder, X } from 'lucide-react';
 
 export const App: React.FC = () => {
-  // Navigation & Screens
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('welcome');
+  // Navigation & Screen Modes (Primary: chat, terminal, workspace, usage)
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>('chat');
   const [isConnected, setIsConnected] = useState<boolean>(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+
+  // Modals
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
+  const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isProvidersModalOpen, setIsProvidersModalOpen] = useState(false);
+  const [modalPathInput, setModalPathInput] = useState('');
 
   // Workspace
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceInfo | null>(null);
   const [recentWorkspaces, setRecentWorkspaces] = useState<WorkspaceInfo[]>([]);
-  const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
-  const [modalPathInput, setModalPathInput] = useState('');
 
   // Providers
   const [providers, setProviders] = useState<ProviderStatusItem[]>([]);
@@ -98,8 +109,6 @@ export const App: React.FC = () => {
         const res = await api.openWorkspace(pathStr);
         setActiveWorkspace(res.workspace);
         setIsWorkspaceModalOpen(false);
-        // Switch straight to workspace screen
-        setCurrentScreen('workspace');
 
         // Refresh recent workspaces
         const wsRes = await api.getWorkspaces();
@@ -121,7 +130,12 @@ export const App: React.FC = () => {
                       id: s.id,
                       description: s.description,
                       targetFiles: s.targetFiles || [],
-                      status: s.status === 'in_progress' ? 'running' : (s.status === 'skipped' ? 'completed' : s.status),
+                      status:
+                        s.status === 'in_progress'
+                          ? 'running'
+                          : s.status === 'skipped'
+                          ? 'completed'
+                          : s.status,
                     })),
                   });
                 }
@@ -143,7 +157,6 @@ export const App: React.FC = () => {
 
   // Initial Bootstrapping
   useEffect(() => {
-    // 1. Health check & heartbeat
     const checkHealth = async () => {
       try {
         await api.getHealth();
@@ -155,17 +168,19 @@ export const App: React.FC = () => {
     checkHealth();
     const interval = setInterval(checkHealth, 6000);
 
-    // 2. Fetch providers, recent workspaces, tasks, usage
     refreshProviders();
     refreshTasks();
     refreshUsage();
 
-    api.getWorkspaces().then((res) => {
-      setRecentWorkspaces(res.workspaces);
-      if (res.workspaces.length > 0 && !activeWorkspace) {
-        setActiveWorkspace(res.workspaces[0]);
-      }
-    }).catch(() => {});
+    api
+      .getWorkspaces()
+      .then((res) => {
+        setRecentWorkspaces(res.workspaces);
+        if (res.workspaces.length > 0 && !activeWorkspace) {
+          setActiveWorkspace(res.workspaces[0]);
+        }
+      })
+      .catch(() => {});
 
     return () => clearInterval(interval);
   }, [refreshProviders, refreshTasks, refreshUsage]);
@@ -249,16 +264,52 @@ export const App: React.FC = () => {
     return () => unsubscribe();
   }, [refreshTasks, refreshUsage]);
 
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+K / Cmd+K: Command Palette
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+      // Ctrl+B / Cmd+B: Toggle Sidebar
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setIsSidebarCollapsed((prev) => !prev);
+      }
+      // Ctrl+` / Cmd+`: Toggle Terminal
+      else if ((e.ctrlKey || e.metaKey) && e.key === '`') {
+        e.preventDefault();
+        setCurrentScreen((prev) => (prev === 'terminal' ? 'chat' : 'terminal'));
+      }
+      // Escape: Close open modals
+      else if (e.key === 'Escape') {
+        setIsCommandPaletteOpen(false);
+        setIsNewTaskModalOpen(false);
+        setIsWorkspaceModalOpen(false);
+        setIsSettingsModalOpen(false);
+        setIsProvidersModalOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
   // Launch Task
-  const handleLaunchTask = async (prompt: string) => {
+  const handleLaunchTask = async (
+    prompt: string,
+    options?: { provider?: string; model?: string }
+  ) => {
     if (!activeWorkspace) {
-      alert('Please open a workspace directory before executing a coding task.');
+      alert('Please open or select a workspace directory before executing a coding task.');
       return;
     }
 
     try {
       setStreamingThought('');
       setActiveStatus('thinking');
+      setCurrentScreen('chat'); // Switch directly to CHAT mode
       const res = await api.createTask(prompt, activeWorkspace.path);
       setActiveTaskId(res.task.id);
       refreshTasks();
@@ -281,114 +332,217 @@ export const App: React.FC = () => {
     }
   };
 
-  // Manual terminal execution
+  // Real terminal execution from workspace screen
   const handleExecuteTerminal = async (command: string) => {
-    // Adds interactive terminal command log
-    setTerminalEntries((prev) => [
-      ...prev,
-      {
-        id: `term_${Date.now()}`,
-        timestamp: Date.now(),
-        command,
-        output: 'Interactive command sent to shell.',
-      },
-    ]);
+    if (!command.trim()) return;
+    try {
+      const res = await api.executeTerminalCommand(command, activeWorkspace?.path, '.');
+      const stdout = res.data?.stdout || '';
+      const stderr = res.data?.stderr || '';
+      const outputText =
+        (stdout && stderr ? `${stdout}\n${stderr}` : stdout || stderr) ||
+        (res.success
+          ? '(Command completed with no output)'
+          : `Execution failed: ${res.error || 'Unknown error'}`);
+
+      setTerminalEntries((prev) => [
+        ...prev,
+        {
+          id: `term_${Date.now()}`,
+          timestamp: Date.now(),
+          command,
+          output: outputText,
+          exitCode: res.data?.exitCode ?? (res.success ? 0 : 1),
+          isError: !res.success || (res.data?.exitCode !== 0 && res.data?.exitCode !== null),
+        },
+      ]);
+    } catch (err: any) {
+      setTerminalEntries((prev) => [
+        ...prev,
+        {
+          id: `term_err_${Date.now()}`,
+          timestamp: Date.now(),
+          command,
+          output: `Command failed: ${err.message}`,
+          exitCode: 1,
+          isError: true,
+        },
+      ]);
+    }
   };
 
-  const activeTask = tasks.find((t) => t.id === activeTaskId) || (tasks.length > 0 ? tasks[0] : null);
+  const activeTask =
+    tasks.find((t) => t.id === activeTaskId) || (tasks.length > 0 ? tasks[0] : null);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#070a12] text-slate-100 overflow-hidden font-sans">
-      {/* Top Header */}
-      <Header
+    <div className="h-screen w-screen flex flex-col bg-nexus-950 text-slate-100 overflow-hidden font-sans">
+      {/* Top Bar */}
+      <TopBar
         currentScreen={currentScreen}
-        onScreenChange={setCurrentScreen}
         activeWorkspace={activeWorkspace}
         onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
         isConnected={isConnected}
         activeTaskId={activeTaskId}
+        activeRole={activeRole}
+        activeStatus={activeStatus}
         onCancelActiveTask={handleCancelTask}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        onOpenSettings={() => setIsSettingsModalOpen(true)}
+        onOpenProviders={() => setIsProvidersModalOpen(true)}
+        providers={providers}
+        onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden relative">
-        {currentScreen === 'welcome' && (
-          <WelcomeScreen
-            recentWorkspaces={recentWorkspaces}
-            onOpenWorkspace={handleOpenWorkspace}
-            onNavigate={setCurrentScreen}
-            isProviderConfigured={anyProviderConfigured}
-          />
-        )}
+      {/* Main Layout: Left Sidebar + Screen Area */}
+      <div className="flex-1 flex overflow-hidden relative">
+        <Sidebar
+          currentScreen={currentScreen}
+          onScreenChange={(s) => setCurrentScreen(s)}
+          activeWorkspace={activeWorkspace}
+          recentWorkspaces={recentWorkspaces}
+          onOpenWorkspace={handleOpenWorkspace}
+          onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
+          onNewTask={() => setIsNewTaskModalOpen(true)}
+          onOpenSettings={() => setIsSettingsModalOpen(true)}
+          onOpenProviders={() => setIsProvidersModalOpen(true)}
+          providers={providers}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
+        />
 
-        {currentScreen === 'workspace' && (
-          <WorkspaceScreen
-            activeWorkspace={activeWorkspace}
-            onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
-            providers={providers}
-            liveEvents={liveEvents}
-            activeTask={activeTask}
-            onLaunchTask={handleLaunchTask}
-            onCancelTask={handleCancelTask}
-            activeRole={activeRole}
-            activeStatus={activeStatus}
-            plan={plan}
-            latestDiff={latestDiff}
-            terminalEntries={terminalEntries}
-            onExecuteTerminalCommand={handleExecuteTerminal}
-            streamingThought={streamingThought}
-            totalTokens={usageSummary?.totalTokens || 0}
-            totalCostUsd={usageSummary?.totalEstimatedCostUsd || 0}
-          />
-        )}
+        {/* Dynamic Screen View */}
+        <main className="flex-1 h-full overflow-hidden relative bg-nexus-950">
+          {currentScreen === 'chat' && (
+            <ChatScreen
+              activeWorkspace={activeWorkspace}
+              onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
+              activeTask={activeTask}
+              tasks={tasks}
+              onLaunchTask={handleLaunchTask}
+              onCancelTask={handleCancelTask}
+              activeRole={activeRole}
+              activeStatus={activeStatus}
+              plan={plan}
+              latestDiff={latestDiff}
+              streamingThought={streamingThought}
+              liveEvents={liveEvents}
+              providers={providers}
+              onNewTaskModal={() => setIsNewTaskModalOpen(true)}
+              onNavigateToWorkspace={() => setCurrentScreen('workspace')}
+              onNavigateToTerminal={() => setCurrentScreen('terminal')}
+            />
+          )}
 
-        {currentScreen === 'dashboard' && (
-          <DashboardScreen
-            tasks={tasks}
-            usageSummary={usageSummary}
-            providers={providers}
-            activeWorkspace={activeWorkspace}
-            onNavigate={setCurrentScreen}
-            onSelectTask={() => setCurrentScreen('workspace')}
-          />
-        )}
+          {currentScreen === 'terminal' && (
+            <TerminalScreen
+              activeWorkspace={activeWorkspace}
+              entries={terminalEntries}
+              onClear={() => setTerminalEntries([])}
+              onAddEntry={(entry) => setTerminalEntries((prev) => [...prev, entry])}
+            />
+          )}
 
-        {currentScreen === 'providers' && (
-          <ProviderSetupScreen
-            providers={providers}
-            onRefresh={refreshProviders}
-          />
-        )}
+          {currentScreen === 'workspace' && (
+            <WorkspaceScreen
+              activeWorkspace={activeWorkspace}
+              onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
+              providers={providers}
+              liveEvents={liveEvents}
+              activeTask={activeTask}
+              onLaunchTask={handleLaunchTask}
+              onCancelTask={handleCancelTask}
+              activeRole={activeRole}
+              activeStatus={activeStatus}
+              plan={plan}
+              latestDiff={latestDiff}
+              terminalEntries={terminalEntries}
+              onExecuteTerminalCommand={handleExecuteTerminal}
+              streamingThought={streamingThought}
+              totalTokens={usageSummary?.totalTokens || 0}
+              totalCostUsd={usageSummary?.totalEstimatedCostUsd || 0}
+            />
+          )}
 
-        {currentScreen === 'usage' && (
-          <UsageScreen
-            summary={usageSummary}
-            records={usageRecords}
-            onRefresh={refreshUsage}
-          />
-        )}
+          {currentScreen === 'usage' && (
+            <UsageScreen
+              summary={usageSummary}
+              records={usageRecords}
+              onRefresh={refreshUsage}
+            />
+          )}
 
-        {currentScreen === 'settings' && (
-          <SettingsScreen
-            activeWorkspace={activeWorkspace}
-            onUpdateWorkspaceRoot={handleOpenWorkspace}
-          />
-        )}
+          {currentScreen === 'dashboard' && (
+            <DashboardScreen
+              tasks={tasks}
+              usageSummary={usageSummary}
+              providers={providers}
+              activeWorkspace={activeWorkspace}
+              onNavigate={setCurrentScreen}
+              onSelectTask={() => setCurrentScreen('workspace')}
+            />
+          )}
+
+          {currentScreen === 'providers' && (
+            <ProviderSetupScreen
+              providers={providers}
+              onRefresh={refreshProviders}
+            />
+          )}
+
+          {currentScreen === 'settings' && (
+            <SettingsScreen
+              activeWorkspace={activeWorkspace}
+              onUpdateWorkspaceRoot={handleOpenWorkspace}
+            />
+          )}
+
+          {currentScreen === 'welcome' && (
+            <WelcomeScreen
+              recentWorkspaces={recentWorkspaces}
+              onOpenWorkspace={handleOpenWorkspace}
+              onNavigate={setCurrentScreen}
+              isProviderConfigured={anyProviderConfigured}
+            />
+          )}
+        </main>
       </div>
 
       {/* Bottom Status Bar */}
       <StatusBar
         workspacePath={activeWorkspace?.path}
-        gitBranch="master"
+        gitBranch="main"
         activeRole={activeRole}
         activeStatus={activeStatus}
         totalTokens={usageSummary?.totalTokens || 0}
         totalCostUsd={usageSummary?.totalEstimatedCostUsd || 0}
       />
 
+      {/* Command Palette Modal */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onNavigate={(screen) => setCurrentScreen(screen)}
+        onNewTask={() => setIsNewTaskModalOpen(true)}
+        onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
+        onOpenSettings={() => setIsSettingsModalOpen(true)}
+        onOpenProviders={() => setIsProvidersModalOpen(true)}
+        onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
+      />
+
+      {/* New Task Modal */}
+      <NewTaskModal
+        isOpen={isNewTaskModalOpen}
+        onClose={() => setIsNewTaskModalOpen(false)}
+        activeWorkspace={activeWorkspace}
+        recentWorkspaces={recentWorkspaces}
+        providers={providers}
+        onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
+        onLaunchTask={handleLaunchTask}
+      />
+
       {/* Open Workspace Modal Dialog */}
       {isWorkspaceModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-nexus-900 border border-nexus-border rounded-xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 text-slate-100 font-semibold font-mono text-sm">
@@ -433,28 +587,29 @@ export const App: React.FC = () => {
                   >
                     Quick open current repo
                   </button>
-                  {typeof window !== 'undefined' && window.nexusDesktop?.openDirectoryPicker && (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        const chosen = await window.nexusDesktop?.openDirectoryPicker();
-                        if (chosen) {
-                          setModalPathInput(chosen);
-                          handleOpenWorkspace(chosen);
-                        }
-                      }}
-                      className="text-xs text-amber-400 hover:underline font-mono"
-                    >
-                      Browse folder...
-                    </button>
-                  )}
+                  {typeof window !== 'undefined' &&
+                    window.nexusDesktop?.openDirectoryPicker && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const chosen = await window.nexusDesktop?.openDirectoryPicker();
+                          if (chosen) {
+                            setModalPathInput(chosen);
+                            handleOpenWorkspace(chosen);
+                          }
+                        }}
+                        className="text-xs text-amber-400 hover:underline font-mono"
+                      >
+                        Browse folder...
+                      </button>
+                    )}
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <button
                     type="button"
                     onClick={() => setIsWorkspaceModalOpen(false)}
-                    className="px-3 py-1.5 rounded bg-nexus-800 hover:bg-nexus-700 text-slate-300 text-xs font-medium"
+                    className="px-3 py-1.5 rounded bg-nexus-850 hover:bg-nexus-800 text-slate-300 text-xs font-medium"
                   >
                     Cancel
                   </button>
@@ -468,6 +623,56 @@ export const App: React.FC = () => {
                 </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal (Overlay) */}
+      {isSettingsModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="w-full max-w-4xl h-5/6 bg-nexus-900 border border-nexus-border rounded-xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="h-10 px-4 border-b border-nexus-border flex items-center justify-between bg-nexus-950">
+              <span className="text-xs font-mono font-semibold text-slate-200">
+                Workspace & System Settings
+              </span>
+              <button
+                onClick={() => setIsSettingsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-200 p-1"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto">
+              <SettingsScreen
+                activeWorkspace={activeWorkspace}
+                onUpdateWorkspaceRoot={handleOpenWorkspace}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Providers Modal (Overlay) */}
+      {isProvidersModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="w-full max-w-4xl h-5/6 bg-nexus-900 border border-nexus-border rounded-xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="h-10 px-4 border-b border-nexus-border flex items-center justify-between bg-nexus-950">
+              <span className="text-xs font-mono font-semibold text-slate-200">
+                AI Provider Configuration & Keys
+              </span>
+              <button
+                onClick={() => setIsProvidersModalOpen(false)}
+                className="text-slate-400 hover:text-slate-200 p-1"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto">
+              <ProviderSetupScreen
+                providers={providers}
+                onRefresh={refreshProviders}
+              />
+            </div>
           </div>
         </div>
       )}

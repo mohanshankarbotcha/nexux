@@ -12,7 +12,7 @@ import {
   WorkspaceTreeNode,
 } from '@nexus/core';
 
-export type ScreenType = 'welcome' | 'workspace' | 'dashboard' | 'providers' | 'usage' | 'settings';
+export type ScreenType = 'chat' | 'terminal' | 'workspace' | 'usage' | 'welcome' | 'dashboard' | 'providers' | 'settings';
 
 export interface OpenTab {
   id: string;

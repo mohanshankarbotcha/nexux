@@ -33,7 +33,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onNavigate,
   onSelectTask,
 }) => {
-  const configuredProviders = providers.filter((p) => p.isConfigured);
+  const providerList = Array.isArray(providers) ? providers : [];
+  const configuredProviders = providerList.filter((p) => p.isConfigured);
   const completedTasks = tasks.filter((t) => t.status === 'completed');
   const runningTasks = tasks.filter((t) => t.status === 'running' || t.status === 'pending');
 

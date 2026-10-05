@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { WorkspaceError } from '@nexus/core';
 import { globalWorkspaceService } from '../../workspace/workspace-service.js';
+import { TerminalTool } from '../../tools/terminal.js';
 
 export function createWorkspaceRouter(): Router {
   const router = Router();
@@ -90,6 +91,40 @@ export function createWorkspaceRouter(): Router {
 
       const searchResult = globalWorkspaceService.searchFiles(workspacePath, query, pattern);
       res.json({ success: true, result: searchResult });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Execute terminal command in workspace
+  router.post('/terminal', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { command, workspacePath, workingDir, timeoutMs } = req.body;
+      if (!command || typeof command !== 'string') {
+        throw new WorkspaceError('Command parameter is required');
+      }
+      const targetWorkspace =
+        workspacePath ||
+        globalWorkspaceService.getCurrentWorkspace()?.path ||
+        process.cwd();
+
+      const termTool = new TerminalTool();
+      const result = await termTool.execute(
+        { command, workingDir, timeoutMs },
+        {
+          workspaceRoot: targetWorkspace,
+          sessionId: `term_session_${Date.now()}`,
+          taskId: `term_cmd_${Date.now()}`,
+          agentRole: 'coordinator',
+        }
+      );
+
+      res.json({
+        success: result.success,
+        data: result.data,
+        error: result.error,
+        durationMs: result.durationMs,
+      });
     } catch (err) {
       next(err);
     }
