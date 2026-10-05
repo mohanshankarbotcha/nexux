@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { compileUninstaller, compileSetupInstaller, compilePortableRunner } from './compile-installer.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,14 +42,14 @@ for (const [pkg, distPath] of [
 }
 
 // 2. Prepare Release Directory
-console.log(`[1/6] Preparing release target: ${targetAppDir}`);
+console.log(`[1/8] Preparing release target: ${targetAppDir}`);
 if (fs.existsSync(targetAppDir)) {
   fs.rmSync(targetAppDir, { recursive: true, force: true });
 }
 fs.mkdirSync(targetAppDir, { recursive: true });
 
-// 3. Copy Electron Binaries & DLLs
-console.log('[2/6] Copying certified Electron runtime binaries and Chromium DLLs...');
+// 3. Copy Electron Binaries & Chromium DLLs
+console.log('[2/8] Copying certified Electron runtime binaries and Chromium DLLs...');
 fs.cpSync(electronDistDir, targetAppDir, { recursive: true });
 
 // 4. Rename executable to NEXUS_AI.exe
@@ -68,7 +70,7 @@ if (fs.existsSync(defaultAppAsar)) {
 }
 
 // 5. Build and Bundle resources/app/
-console.log('[3/6] Bundling NEXUS application payload into resources/app...');
+console.log('[3/8] Bundling NEXUS application payload into resources/app...');
 const appDir = path.join(targetAppDir, 'resources/app');
 fs.mkdirSync(appDir, { recursive: true });
 
@@ -101,21 +103,34 @@ if (fs.existsSync(desktopAssets)) {
 fs.cpSync(clientDist, path.join(appDir, 'client-dist'), { recursive: true });
 
 // 6. Bundle Node.js Runtime Dependencies
-console.log('[4/6] Installing self-contained production runtime dependencies in app payload...');
-cp.execSync('npm install --omit=dev --no-audit --no-fund --no-package-lock', {
+console.log('[4/8] Installing self-contained production runtime dependencies in app payload...');
+cp.execSync('npm.cmd install --omit=dev --no-audit --no-fund --no-package-lock', {
   cwd: appDir,
   stdio: 'inherit',
 });
 
-// Copy internal workspace packages into app node_modules
-console.log('[5/6] Linking internal workspace packages (@nexus/core, @nexus/server)...');
+// Copy internal workspace packages into app node_modules (excluding test files)
+console.log('[5/8] Linking internal workspace packages (@nexus/core, @nexus/server)...');
 const appNodeModules = path.join(appDir, 'node_modules/@nexus');
 fs.mkdirSync(appNodeModules, { recursive: true });
+
+function copyDistClean(srcDist, targetDist) {
+  fs.cpSync(srcDist, targetDist, {
+    recursive: true,
+    filter: (src) => {
+      const base = path.basename(src);
+      if (base.includes('.test.') || base.endsWith('.test.js') || base.endsWith('.test.d.ts') || base.endsWith('.test.ts')) {
+        return false;
+      }
+      return true;
+    },
+  });
+}
 
 // @nexus/core
 const appCoreDir = path.join(appNodeModules, 'core');
 fs.mkdirSync(appCoreDir, { recursive: true });
-fs.cpSync(coreDist, path.join(appCoreDir, 'dist'), { recursive: true });
+copyDistClean(coreDist, path.join(appCoreDir, 'dist'));
 fs.copyFileSync(
   path.join(rootDir, 'packages/core/package.json'),
   path.join(appCoreDir, 'package.json')
@@ -124,13 +139,18 @@ fs.copyFileSync(
 // @nexus/server
 const appServerDir = path.join(appNodeModules, 'server');
 fs.mkdirSync(appServerDir, { recursive: true });
-fs.cpSync(serverDist, path.join(appServerDir, 'dist'), { recursive: true });
+copyDistClean(serverDist, path.join(appServerDir, 'dist'));
 fs.copyFileSync(
   path.join(rootDir, 'packages/server/package.json'),
   path.join(appServerDir, 'package.json')
 );
 
-// 7. Write App Info and Windows Installer Helper
+// 7. Compile Native Uninstaller into application package
+console.log('[6/8] Compiling native uninstaller (uninstall.exe)...');
+const uninstallerExe = path.join(targetAppDir, 'uninstall.exe');
+compileUninstaller(uninstallerExe);
+
+// Write App Info and Windows Installer Helper
 const appInfo = {
   name: 'NEXUS.AI',
   version: '1.0.0',
@@ -144,7 +164,7 @@ const appInfo = {
     contextIsolation: true,
     nodeIntegration: false,
     sandbox: false,
-    dataDirectory: '%APPDATA%\\NEXUS_AI_DATA',
+    dataDirectory: '%LOCALAPPDATA%\\NEXUS_AI_DATA',
   },
 };
 fs.writeFileSync(path.join(targetAppDir, 'app-info.json'), JSON.stringify(appInfo, null, 2), 'utf-8');
@@ -158,8 +178,8 @@ set APP_DIR=%~dp0
 set EXE_PATH=%APP_DIR%NEXUS_AI.exe
 set SHORTCUT_NAME=NEXUS.AI.lnk
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut([System.IO.Path]::Combine([System.Environment]::GetFolderPath('Desktop'), '%SHORTCUT_NAME%')); $s.TargetPath = '%EXE_PATH%'; $s.WorkingDirectory = '%APP_DIR%'; $s.IconLocation = '%APP_DIR%assets\\icon.png'; $s.Save(); Write-Host 'Desktop shortcut created successfully!'"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $programs = [System.Environment]::GetFolderPath('Programs'); $s = $ws.CreateShortcut([System.IO.Path]::Combine($programs, '%SHORTCUT_NAME%')); $s.TargetPath = '%EXE_PATH%'; $s.WorkingDirectory = '%APP_DIR%'; $s.IconLocation = '%APP_DIR%assets\\icon.png'; $s.Save(); Write-Host 'Start Menu shortcut created successfully!'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut([System.IO.Path]::Combine([System.Environment]::GetFolderPath('Desktop'), '%SHORTCUT_NAME%')); $s.TargetPath = '%EXE_PATH%'; $s.WorkingDirectory = '%APP_DIR%'; $s.IconLocation = '%APP_DIR%assets\\icon.ico'; $s.Save(); Write-Host 'Desktop shortcut created successfully!'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $programs = [System.Environment]::GetFolderPath('Programs'); $s = $ws.CreateShortcut([System.IO.Path]::Combine($programs, '%SHORTCUT_NAME%')); $s.TargetPath = '%EXE_PATH%'; $s.WorkingDirectory = '%APP_DIR%'; $s.IconLocation = '%APP_DIR%assets\\icon.ico'; $s.Save(); Write-Host 'Start Menu shortcut created successfully!'"
 
 echo.
 echo NEXUS.AI installation complete! You can launch NEXUS.AI from your Desktop or Start Menu.
@@ -167,8 +187,8 @@ pause
 `;
 fs.writeFileSync(path.join(targetAppDir, 'Install_NEXUS_AI.bat'), setupBat, 'utf-8');
 
-// 8. Create Distribution ZIP Archive if tar is available
-console.log('[6/6] Generating portable ZIP archive: release/NEXUS_AI_Windows_x64.zip...');
+// 8. Generate Portable ZIP Archive
+console.log('[7/8] Generating portable ZIP archive: release/NEXUS_AI_Windows_x64.zip...');
 const zipFile = path.join(releaseDir, 'NEXUS_AI_Windows_x64.zip');
 if (fs.existsSync(zipFile)) {
   fs.unlinkSync(zipFile);
@@ -183,7 +203,48 @@ try {
   console.warn('      Could not generate zip via tar, skipping archive creation.');
 }
 
+// 9. Compile Windows Setup Installer (NEXUS_AI_1.0.0_Setup.exe)
+console.log('[8/8] Compiling Windows Setup Installer & Portable Executable...');
+const setupExe = path.join(releaseDir, 'NEXUS_AI_1.0.0_Setup.exe');
+compileSetupInstaller(zipFile, uninstallerExe, setupExe);
+
+// Also compile single-file portable runner NEXUS_AI_1.0.0_win_x64.exe
+const portableExe = path.join(releaseDir, 'NEXUS_AI_1.0.0_win_x64.exe');
+compilePortableRunner(zipFile, portableExe);
+
+// 10. Generate SHA-256 Checksums
+console.log('\nGenerating release checksums (SHA-256)...');
+function sha256File(filePath) {
+  const hash = crypto.createHash('sha256');
+  const buffer = fs.readFileSync(filePath);
+  hash.update(buffer);
+  return hash.digest('hex');
+}
+
+const checksumFiles = [
+  'NEXUS_AI_1.0.0_Setup.exe',
+  'NEXUS_AI_1.0.0_win_x64.exe',
+  'NEXUS_AI_Windows_x64.zip',
+];
+
+const checksumLines = [];
+for (const file of checksumFiles) {
+  const fullPath = path.join(releaseDir, file);
+  if (fs.existsSync(fullPath)) {
+    const sum = sha256File(fullPath);
+    checksumLines.push(`${sum}  ${file}`);
+    console.log(`  ${file}: ${sum}`);
+  }
+}
+
+const checksumsTxt = path.join(releaseDir, 'checksums.txt');
+fs.writeFileSync(checksumsTxt, checksumLines.join('\n') + '\n', 'utf-8');
+console.log(`Saved checksums to ${checksumsTxt}`);
+
 console.log('\n====================================================');
-console.log('  NEXUS.AI Windows Build Complete!');
-console.log('  Executable: ' + path.join(targetAppDir, 'NEXUS_AI.exe'));
+console.log('  NEXUS.AI Windows Release Build Complete!');
+console.log('  Installer:  ' + setupExe);
+console.log('  Portable:   ' + portableExe);
+console.log('  Archive:    ' + zipFile);
+console.log('  Checksums:  ' + checksumsTxt);
 console.log('====================================================\n');

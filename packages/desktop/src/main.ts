@@ -22,6 +22,13 @@ let serverManager: ServerManager | null = null;
 let runningServer: RunningServerInfo | null = null;
 
 async function createMainWindow(serverUrl: string): Promise<BrowserWindow> {
+  const iconCandidates = [
+    path.join(__dirname, '../assets/icon.png'),
+    path.join(__dirname, 'assets/icon.png'),
+    (process as any).resourcesPath ? path.join((process as any).resourcesPath, 'assets/icon.png') : null,
+  ].filter(Boolean) as string[];
+  const iconPath = iconCandidates.find((p) => fs.existsSync(p));
+
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -29,6 +36,7 @@ async function createMainWindow(serverUrl: string): Promise<BrowserWindow> {
     minHeight: 700,
     title: 'NEXUS.AI — Autonomous AI Coding Assistant',
     backgroundColor: '#070a12',
+    icon: iconPath,
     show: false,
     webPreferences: {
       preload: fs.existsSync(path.join(__dirname, 'preload.cjs'))
