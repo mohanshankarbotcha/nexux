@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,49 +14,55 @@ console.log('====================================================\n');
 
 // 1. Retrieve GitHub Token from Windows Credential Manager
 function getGitHubToken() {
-  const psScript = `
-$csharp = @'
-using System; using System.Runtime.InteropServices; using System.Text;
-public class CredentialHelper {
-    [DllImport("advapi32.dll", EntryPoint = "CredReadW", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern bool CredRead(string target, int type, int reservedFlag, out IntPtr credentialPtr);
-    [DllImport("advapi32.dll", EntryPoint = "CredFree", SetLastError = true)]
-    public static extern void CredFree(IntPtr credential);
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct CREDENTIAL {
-        public int Flags; public int Type; public string TargetName; public string Comment;
-        public long LastWritten; public int CredentialBlobSize; public IntPtr CredentialBlob;
-        public int Persist; public int AttributeCount; public IntPtr Attributes;
-        public string TargetAlias; public string UserName;
-    }
-    public static string GetSecret(string target, string encoding) {
-        IntPtr credPtr;
-        if (CredRead(target, 1, 0, out credPtr)) {
-            var cred = (CREDENTIAL)Marshal.PtrToStructure(credPtr, typeof(CREDENTIAL));
-            byte[] bytes = new byte[cred.CredentialBlobSize];
-            Marshal.Copy(cred.CredentialBlob, bytes, 0, cred.CredentialBlobSize);
-            CredFree(credPtr);
-            if (encoding == "utf8") return Encoding.UTF8.GetString(bytes);
-            return Encoding.Unicode.GetString(bytes);
-        }
-        return null;
-    }
-}
-'@
-Add-Type -TypeDefinition $csharp -Language CSharp
-$tok = [CredentialHelper]::GetSecret("git:https://github.com", "unicode")
-if (-not $tok) {
-    $tok = [CredentialHelper]::GetSecret("LegacyGeneric:target=GitHub - https://api.github.com/mohanshankarbotcha", "utf8")
-}
-Write-Output $tok
-`;
+  const tmpFile = path.join(os.tmpdir(), `get-gh-token-${Date.now()}.ps1`);
+  const psScript = [
+    '$csharp = @\'',
+    'using System;',
+    'using System.Runtime.InteropServices;',
+    'using System.Text;',
+    'public class CredentialHelper {',
+    '    [DllImport("advapi32.dll", EntryPoint = "CredReadW", CharSet = CharSet.Unicode, SetLastError = true)]',
+    '    public static extern bool CredRead(string target, int type, int reservedFlag, out IntPtr credentialPtr);',
+    '    [DllImport("advapi32.dll", EntryPoint = "CredFree", SetLastError = true)]',
+    '    public static extern void CredFree(IntPtr credential);',
+    '    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]',
+    '    public struct CREDENTIAL {',
+    '        public int Flags; public int Type; public string TargetName; public string Comment;',
+    '        public long LastWritten; public int CredentialBlobSize; public IntPtr CredentialBlob;',
+    '        public int Persist; public int AttributeCount; public IntPtr Attributes;',
+    '        public string TargetAlias; public string UserName;',
+    '    }',
+    '    public static string GetSecret(string target, string encoding) {',
+    '        IntPtr credPtr;',
+    '        if (CredRead(target, 1, 0, out credPtr)) {',
+    '            var cred = (CREDENTIAL)Marshal.PtrToStructure(credPtr, typeof(CREDENTIAL));',
+    '            byte[] bytes = new byte[cred.CredentialBlobSize];',
+    '            Marshal.Copy(cred.CredentialBlob, bytes, 0, cred.CredentialBlobSize);',
+    '            CredFree(credPtr);',
+    '            if (encoding == "utf8") return Encoding.UTF8.GetString(bytes);',
+    '            return Encoding.Unicode.GetString(bytes);',
+    '        }',
+    '        return null;',
+    '    }',
+    '}',
+    '\'@',
+    'Add-Type -TypeDefinition $csharp -Language CSharp',
+    '$tok = [CredentialHelper]::GetSecret("git:https://github.com", "unicode")',
+    'if (-not $tok) {',
+    '    $tok = [CredentialHelper]::GetSecret("LegacyGeneric:target=GitHub - https://api.github.com/mohanshankarbotcha", "utf8")',
+    '}',
+    'Write-Output $tok',
+  ].join('\r\n');
 
-  const output = cp.execSync('powershell -NoProfile -Command -', {
-    input: psScript,
-    encoding: 'utf-8',
-  }).trim();
-
-  return output.split('\n').map(s => s.trim()).filter(Boolean).pop();
+  fs.writeFileSync(tmpFile, psScript, 'utf-8');
+  try {
+    const output = cp.execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${tmpFile}"`, {
+      encoding: 'utf-8',
+    }).trim();
+    return output.split('\r\n').map((s) => s.trim()).filter(Boolean).pop();
+  } finally {
+    try { fs.unlinkSync(tmpFile); } catch {}
+  }
 }
 
 const token = getGitHubToken();
