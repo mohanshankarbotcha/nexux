@@ -39,7 +39,7 @@ interface ChatScreenProps {
   activeTask: Task | null;
   tasks: Task[];
   onSelectTask?: (taskId: string) => void;
-  onLaunchTask: (prompt: string) => Promise<void>;
+  onLaunchTask: (prompt: string, options?: { provider?: string; model?: string }) => Promise<void>;
   onCancelTask: () => Promise<void>;
   activeRole: AgentRole;
   activeStatus: AgentStatus;
@@ -84,6 +84,43 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     events: true,
   });
 
+  const providerList = Array.isArray(providers) ? providers : [];
+  const primaryConfigured = providerList.find((p) => p.isConfigured) || providerList[0];
+
+  const [selectedProvider, setSelectedProvider] = useState<string>(() => {
+    const saved = localStorage.getItem('nexus_selected_provider');
+    if (saved && providerList.some((p) => p.id === saved)) return saved;
+    return primaryConfigured?.id || 'gemini';
+  });
+
+  const [selectedModel, setSelectedModel] = useState<string>(() => {
+    const saved = localStorage.getItem('nexus_selected_model');
+    if (saved) return saved;
+    return primaryConfigured?.defaultModel || 'gemini-2.5-flash';
+  });
+
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target as Node)) {
+        setIsModelDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectModel = (providerId: string, modelName: string) => {
+    setSelectedProvider(providerId);
+    setSelectedModel(modelName);
+    localStorage.setItem('nexus_selected_provider', providerId);
+    localStorage.setItem('nexus_selected_model', modelName);
+    setIsModelDropdownOpen(false);
+  };
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -107,7 +144,10 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
 
     const text = promptInput.trim();
     setPromptInput('');
-    await onLaunchTask(text);
+    await onLaunchTask(text, {
+      provider: selectedProvider,
+      model: selectedModel,
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -204,8 +244,9 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     'Review recent changes and check git status',
   ];
 
-  const providerList = Array.isArray(providers) ? providers : [];
-  const primaryProvider = providerList.find((p) => p.isConfigured) || providerList[0];
+  const primaryProvider = primaryConfigured;
+  const geminiConfigured = Boolean(providerList.find((p) => p.id === 'gemini')?.isConfigured);
+  const openaiConfigured = Boolean(providerList.find((p) => p.id === 'openai')?.isConfigured);
 
   return (
     <div className="h-full flex flex-col bg-nexus-950 font-sans select-none overflow-hidden">
@@ -216,12 +257,27 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
           <span className="font-semibold text-slate-100">AI Coding Agent Activity</span>
           {activeTask && (
             <span className="text-[11px] text-slate-400 truncate max-w-sm hidden sm:inline">
-              · {activeTask.prompt.slice(0, 50)}...
+              · {activeTask.prompt.slice(0, 45)}...
             </span>
           )}
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 font-mono text-xs">
+          {/* Active Task Telemetry Badge */}
+          {activeTask && (
+            <div className="hidden md:flex items-center space-x-2 text-[11px] px-2 py-0.5 rounded bg-nexus-900 border border-nexus-border text-slate-300">
+              {activeTask.providerMetadata?.model && (
+                <span className="text-sky-400 font-bold">{activeTask.providerMetadata.model}</span>
+              )}
+              {activeTask.stage && (
+                <span className="text-slate-400">· {activeTask.stage}</span>
+              )}
+              {Boolean(activeTask.totalTokens) && (
+                <span className="text-amber-400">· {activeTask.totalTokens?.toLocaleString()} tok</span>
+              )}
+            </div>
+          )}
+
           {isRunning && (
             <button
               onClick={onCancelTask}
@@ -609,12 +665,98 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
             </div>
 
             {/* Right: Model & Send Button */}
-            <div className="flex items-center space-x-2 flex-shrink-0">
-              <span className="text-[11px] text-slate-400 px-2 py-0.5 rounded bg-nexus-950 border border-nexus-border hidden sm:inline">
-                {primaryProvider?.isConfigured
-                  ? primaryProvider.defaultModel || primaryProvider.name
-                  : 'Gemini 2.5 Flash'}
-              </span>
+            <div className="flex items-center space-x-2 flex-shrink-0 relative">
+              {/* Interactive Model Selector Dropdown */}
+              <div className="relative" ref={modelDropdownRef}>
+                <button
+                  type="button"
+                  disabled={isRunning}
+                  onClick={() => setIsModelDropdownOpen((prev) => !prev)}
+                  className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-nexus-950 hover:bg-nexus-850 border border-nexus-border hover:border-sky-500/50 text-[11px] font-mono text-slate-300 transition-colors shadow-sm disabled:opacity-50"
+                  title="Switch AI model for this task"
+                >
+                  <Cpu className="w-3 h-3 text-sky-400" />
+                  <span className="max-w-[130px] truncate font-medium">{selectedModel}</span>
+                  <ChevronDown className="w-3 h-3 text-slate-400" />
+                </button>
+
+                {isModelDropdownOpen && (
+                  <div className="absolute right-0 bottom-full mb-2 w-72 bg-nexus-900 border border-nexus-border rounded-xl shadow-2xl p-2.5 z-50 text-left space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-100">
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-2 py-0.5 flex items-center justify-between border-b border-nexus-border/60">
+                      <span>Select AI Coding Model</span>
+                      <span className="text-[9px] text-slate-500 font-normal">Active Session</span>
+                    </div>
+
+                    {/* Gemini Models */}
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-semibold text-sky-400 px-2 py-0.5 flex items-center justify-between">
+                        <span>Google Gemini</span>
+                        {geminiConfigured ? (
+                          <span className="text-[9px] text-emerald-400">Configured</span>
+                        ) : (
+                          <span className="text-[9px] text-amber-400">Needs API Key</span>
+                        )}
+                      </div>
+                      {['gemini-2.5-flash', 'gemini-2.5-pro'].map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => handleSelectModel('gemini', m)}
+                          className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-mono transition-colors flex items-center justify-between ${
+                            selectedModel === m && selectedProvider === 'gemini'
+                              ? 'bg-sky-950/80 text-sky-200 border border-sky-800/80 font-bold'
+                              : 'text-slate-300 hover:bg-nexus-850'
+                          }`}
+                        >
+                          <div className="truncate">
+                            <div>{m}</div>
+                            <div className="text-[9px] text-slate-400 font-sans">
+                              {m.includes('pro') ? 'Deep reasoning & architecture' : 'Fast autonomous coding'}
+                            </div>
+                          </div>
+                          {selectedModel === m && selectedProvider === 'gemini' && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-sky-400 flex-shrink-0 ml-1.5" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* OpenAI Models */}
+                    <div className="space-y-1 pt-1.5 border-t border-nexus-border/60">
+                      <div className="text-[10px] font-semibold text-emerald-400 px-2 py-0.5 flex items-center justify-between">
+                        <span>OpenAI</span>
+                        {openaiConfigured ? (
+                          <span className="text-[9px] text-emerald-400">Configured</span>
+                        ) : (
+                          <span className="text-[9px] text-amber-400">Needs API Key</span>
+                        )}
+                      </div>
+                      {['gpt-4o', 'gpt-4o-mini', 'o1-mini'].map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => handleSelectModel('openai', m)}
+                          className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-mono transition-colors flex items-center justify-between ${
+                            selectedModel === m && selectedProvider === 'openai'
+                              ? 'bg-emerald-950/80 text-emerald-200 border border-emerald-800/80 font-bold'
+                              : 'text-slate-300 hover:bg-nexus-850'
+                          }`}
+                        >
+                          <div className="truncate">
+                            <div>{m}</div>
+                            <div className="text-[9px] text-slate-400 font-sans">
+                              {m === 'gpt-4o' ? 'Flagship omni coder' : m === 'o1-mini' ? 'Math & reasoning' : 'Lightweight fast'}
+                            </div>
+                          </div>
+                          {selectedModel === m && selectedProvider === 'openai' && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 ml-1.5" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {isRunning ? (
                 <button

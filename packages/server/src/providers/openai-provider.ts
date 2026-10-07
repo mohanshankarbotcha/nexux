@@ -169,7 +169,11 @@ export class OpenAIProvider implements IModelProvider {
     const timeout = setTimeout(() => controller.abort(), request.timeoutMs || 90_000);
 
     if (request.abortSignal) {
-      request.abortSignal.addEventListener('abort', () => controller.abort());
+      if (request.abortSignal.aborted) {
+        controller.abort();
+      } else {
+        request.abortSignal.addEventListener('abort', () => controller.abort());
+      }
     }
 
     try {
@@ -232,6 +236,9 @@ export class OpenAIProvider implements IModelProvider {
       };
     } catch (err: unknown) {
       clearTimeout(timeout);
+      if (request.abortSignal?.aborted || (err as any)?.name === 'AbortError') {
+        throw new Error('Task was cancelled');
+      }
       if (err instanceof ProviderError) throw err;
       throw new ProviderError(
         `OpenAI request failed: ${err instanceof Error ? err.message : String(err)}`,
@@ -272,7 +279,11 @@ export class OpenAIProvider implements IModelProvider {
     const timeout = setTimeout(() => controller.abort(), request.timeoutMs || 90_000);
 
     if (request.abortSignal) {
-      request.abortSignal.addEventListener('abort', () => controller.abort());
+      if (request.abortSignal.aborted) {
+        controller.abort();
+      } else {
+        request.abortSignal.addEventListener('abort', () => controller.abort());
+      }
     }
 
     try {
@@ -406,6 +417,9 @@ export class OpenAIProvider implements IModelProvider {
       };
     } catch (err: unknown) {
       clearTimeout(timeout);
+      if (request.abortSignal?.aborted || (err as any)?.name === 'AbortError') {
+        throw new Error('Task was cancelled');
+      }
       if (err instanceof ProviderError) throw err;
       throw new ProviderError(
         `OpenAI streaming failed: ${err instanceof Error ? err.message : String(err)}`,

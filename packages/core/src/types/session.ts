@@ -46,6 +46,7 @@ export interface Task {
   sessionId: string;
   prompt: string;
   status: TaskStatus;
+  stage?: string;
   currentAgentRole?: AgentRole;
   plan?: TaskPlan;
   changedFiles: ChangedFile[];
@@ -57,6 +58,8 @@ export interface Task {
   updatedAt?: number;
   completedAt?: number;
   providerMetadata?: ProviderTaskMetadata;
+  totalTokens?: number;
+  totalCostUsd?: number;
   events?: NexusEvent[];
   usageRecords?: UsageRecord[];
 }

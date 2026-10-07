@@ -12,15 +12,21 @@ import { globalStorage } from '../../storage/storage-engine.js';
 import { globalModelRouter } from '../../providers/model-router.js';
 import { globalCoordinator } from '../../agent/coordinator.js';
 import { globalWorkspaceService } from '../../workspace/workspace-service.js';
+import { globalActiveTaskRegistry } from '../../tasks/active-task-registry.js';
 
 export function createTaskRouter(): Router {
   const router = Router();
-  const activeTaskControllers = new Map<string, AbortController>();
 
   // List all tasks
   router.get('/', (_req: Request, res: Response) => {
     const tasks = globalStorage.getAllTasks();
     res.json({ success: true, tasks });
+  });
+
+  // List currently running/active tasks
+  router.get('/active', (_req: Request, res: Response) => {
+    const activeTasks = globalActiveTaskRegistry.listActive();
+    res.json({ success: true, activeTasks });
   });
 
   // Global SSE stream for all workspace events
@@ -42,7 +48,7 @@ export function createTaskRouter(): Router {
   // Create and launch new task
   router.post('/', (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { prompt, sessionId, workspaceRoot, workspacePath } = req.body;
+      const { prompt, sessionId, workspaceRoot, workspacePath, provider, model } = req.body;
       if (!prompt || typeof prompt !== 'string') {
         throw new ValidationError('Task prompt is required');
       }
@@ -88,14 +94,27 @@ export function createTaskRouter(): Router {
         globalStorage.saveSession(session);
       }
 
+      const route = globalModelRouter.getRouteForRole('coordinator', {
+        provider,
+        model,
+      });
+
       const task: Task = {
         id: taskId,
         sessionId: taskSessionId,
         prompt,
         status: 'pending',
+        stage: 'created',
         changedFiles: [],
         activeAgents: [],
         createdAt: Date.now(),
+        providerMetadata: {
+          provider: route.provider.id,
+          model: route.model,
+          plannerModel: route.model,
+          coderModel: route.model,
+          reviewerModel: route.model,
+        },
       };
 
       globalStorage.saveTask(task);
@@ -109,16 +128,26 @@ export function createTaskRouter(): Router {
         prompt: task.prompt,
       });
 
-      // Launch async coordinator loop in background
+      // Register task with central active registry
       const controller = new AbortController();
-      activeTaskControllers.set(taskId, controller);
+      globalActiveTaskRegistry.register(taskId, {
+        sessionId: taskSessionId,
+        prompt,
+        workspaceRoot: targetWorkspace,
+        abortController: controller,
+        provider: route.provider.id,
+        model: route.model,
+      });
 
+      // Launch async coordinator loop in background
       globalCoordinator
         .run(prompt, {
           sessionId: taskSessionId,
           taskId,
           workspaceRoot: targetWorkspace,
           abortSignal: controller.signal,
+          provider: route.provider.id,
+          model: route.model,
         })
         .then((result) => {
           logger.info(`Task ${taskId} completed with status: ${result.data?.status || 'completed'}`);
@@ -127,7 +156,7 @@ export function createTaskRouter(): Router {
           logger.error(`Task ${taskId} execution failed:`, err);
         })
         .finally(() => {
-          activeTaskControllers.delete(taskId);
+          globalActiveTaskRegistry.unregister(taskId);
         });
 
       res.status(201).json({
@@ -142,18 +171,33 @@ export function createTaskRouter(): Router {
   // Cancel running task
   router.post('/:id/cancel', (req: Request, res: Response) => {
     const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-    const controller = activeTaskControllers.get(taskId);
-    if (controller) {
-      controller.abort();
-      activeTaskControllers.delete(taskId);
+    const result = globalActiveTaskRegistry.cancel(taskId, 'User cancelled task');
+
+    if (result.success) {
+      res.json({ success: true, message: result.message, taskId });
+    } else {
+      // Check if task exists in storage
       const task = globalStorage.getTask(taskId);
       if (task) {
         task.status = 'cancelled';
+        task.stage = 'cancelled';
+        task.completedAt = Date.now();
+        task.updatedAt = Date.now();
         globalStorage.saveTask(task);
+
+        globalEventBus.emit({
+          id: `evt_cancel_${Date.now()}`,
+          type: 'task_cancelled',
+          sessionId: task.sessionId,
+          taskId,
+          timestamp: Date.now(),
+          reason: 'User cancelled task',
+        });
+
+        res.json({ success: true, message: `Task ${taskId} cancelled`, taskId });
+      } else {
+        res.status(404).json({ success: false, error: 'Task not found' });
       }
-      res.json({ success: true, message: `Task ${taskId} cancelled` });
-    } else {
-      res.status(404).json({ success: false, error: 'Task not found or not currently active' });
     }
   });
 
@@ -167,6 +211,15 @@ export function createTaskRouter(): Router {
       res.status(404).json({ success: false, error: 'Task not found' });
       return;
     }
+
+    // Merge active status if task is currently active
+    const active = globalActiveTaskRegistry.get(taskId);
+    if (active) {
+      task.status = active.status;
+      task.stage = active.stage;
+      if (active.agentRole) task.currentAgentRole = active.agentRole;
+    }
+
     res.json({ success: true, task });
   });
 

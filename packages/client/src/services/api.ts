@@ -174,11 +174,13 @@ class ApiService {
   async createTask(
     prompt: string,
     workspaceRoot?: string,
-    sessionId?: string
+    sessionId?: string,
+    provider?: string,
+    model?: string
   ): Promise<{ task: Task }> {
     return this.request('/tasks', {
       method: 'POST',
-      body: JSON.stringify({ prompt, workspaceRoot, sessionId }),
+      body: JSON.stringify({ prompt, workspaceRoot, sessionId, provider, model }),
     });
   }
 

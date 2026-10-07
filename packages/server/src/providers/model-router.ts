@@ -62,25 +62,49 @@ export class ModelRouter {
     return false;
   }
 
-  getRouteForRole(role: AgentRole): { provider: IModelProvider; model: string } {
-    const route = this.routingTable[role] || this.routingTable['coordinator'];
-    if (!route) {
-      throw new ProviderError(`No model route configured for agent role [${role}]`, 'router');
+  getRouteForRole(
+    role: AgentRole,
+    override?: { provider?: ProviderId; model?: string }
+  ): { provider: IModelProvider; model: string } {
+    const defaultRoute = this.routingTable[role] || this.routingTable['coordinator'];
+    const targetProviderId = override?.provider || defaultRoute?.provider;
+
+    let providerInstance = targetProviderId ? this.providers.get(targetProviderId) : undefined;
+
+    // Fallback: if targeted provider is not configured or missing key, try any configured provider
+    if (!providerInstance || ('getApiKey' in providerInstance && !(providerInstance as any).getApiKey())) {
+      for (const p of this.providers.values()) {
+        if ('getApiKey' in p && (p as any).getApiKey()) {
+          providerInstance = p;
+          break;
+        }
+      }
     }
 
-    const providerInstance = this.providers.get(route.provider);
     if (!providerInstance) {
       throw new ProviderError(
-        `Provider '${route.provider}' is configured for role '${role}' but is not registered or credentials are missing`,
-        route.provider
+        `No configured AI model provider available. Please configure your Google Gemini or OpenAI API key in Provider Setup.`,
+        'router',
+        'PROVIDER_NOT_CONFIGURED',
+        400
       );
     }
 
-    return { provider: providerInstance, model: route.model };
+    const resolvedModel =
+      override?.model ||
+      (override?.provider && override.provider === providerInstance.id ? undefined : undefined) ||
+      (defaultRoute && defaultRoute.provider === providerInstance.id ? defaultRoute.model : undefined) ||
+      (providerInstance.id === 'openai' ? 'gpt-4o' : 'gemini-2.5-flash');
+
+    return { provider: providerInstance, model: resolvedModel };
   }
 
-  async executeForRole(role: AgentRole, request: Omit<ProviderRequest, 'model'>): Promise<ProviderResponse> {
-    const { provider, model } = this.getRouteForRole(role);
+  async executeForRole(
+    role: AgentRole,
+    request: Omit<ProviderRequest, 'model'>,
+    override?: { provider?: ProviderId; model?: string }
+  ): Promise<ProviderResponse> {
+    const { provider, model } = this.getRouteForRole(role, override);
     const fullRequest: ProviderRequest = {
       ...request,
       model,
@@ -91,9 +115,10 @@ export class ModelRouter {
   async streamForRole(
     role: AgentRole,
     request: Omit<ProviderRequest, 'model'>,
-    onChunk: (chunk: StreamChunk) => void
+    onChunk: (chunk: StreamChunk) => void,
+    override?: { provider?: ProviderId; model?: string }
   ): Promise<ProviderResponse> {
-    const { provider, model } = this.getRouteForRole(role);
+    const { provider, model } = this.getRouteForRole(role, override);
     const fullRequest: ProviderRequest = {
       ...request,
       model,

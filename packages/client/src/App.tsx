@@ -193,6 +193,17 @@ export const App: React.FC = () => {
         setLiveEvents((prev) => [...prev.slice(-400), event]);
 
         switch (event.type) {
+          case 'task_progress':
+            if (event.agentRole) setActiveRole(event.agentRole);
+            if (event.status === 'running' || event.status === 'pending') {
+              setActiveStatus('thinking');
+            }
+            break;
+
+          case 'task_heartbeat':
+            if (event.agentRole) setActiveRole(event.agentRole);
+            break;
+
           case 'agent_started':
             setActiveRole(event.agentRole);
             setActiveStatus('thinking');
@@ -204,7 +215,6 @@ export const App: React.FC = () => {
 
           case 'tool_started':
             setActiveStatus('executing_tool');
-            setStreamingThought('');
             break;
 
           case 'tool_completed':
@@ -238,20 +248,29 @@ export const App: React.FC = () => {
             break;
 
           case 'agent_completed':
-            setActiveStatus('idle');
+            // Intermediate agent completed: preserve active running status until task_completed
             setStreamingThought('');
             break;
 
           case 'task_completed':
             setActiveTaskId(null);
             setActiveStatus('idle');
+            setStreamingThought('');
             refreshTasks();
             refreshUsage();
+            break;
+
+          case 'task_cancelled':
+            setActiveTaskId(null);
+            setActiveStatus('idle');
+            setStreamingThought('');
+            refreshTasks();
             break;
 
           case 'task_failed':
             setActiveTaskId(null);
             setActiveStatus('failed');
+            setStreamingThought('');
             refreshTasks();
             break;
         }
@@ -310,7 +329,13 @@ export const App: React.FC = () => {
       setStreamingThought('');
       setActiveStatus('thinking');
       setCurrentScreen('chat'); // Switch directly to CHAT mode
-      const res = await api.createTask(prompt, activeWorkspace.path);
+      const res = await api.createTask(
+        prompt,
+        activeWorkspace.path,
+        undefined,
+        options?.provider,
+        options?.model
+      );
       setActiveTaskId(res.task.id);
       refreshTasks();
     } catch (err: any) {

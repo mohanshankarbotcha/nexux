@@ -4,6 +4,8 @@ import { ToolName } from './tool.js';
 
 export type NexusEventType =
   | 'task_started'
+  | 'task_progress'
+  | 'task_heartbeat'
   | 'agent_started'
   | 'agent_message'
   | 'tool_started'
@@ -28,6 +30,23 @@ export interface BaseNexusEvent {
 export interface TaskStartedEvent extends BaseNexusEvent {
   type: 'task_started';
   prompt: string;
+}
+
+export interface TaskProgressEvent extends BaseNexusEvent {
+  type: 'task_progress';
+  stage: string;
+  agentRole?: AgentRole;
+  status: TaskStatus;
+  message?: string;
+  percent?: number;
+}
+
+export interface TaskHeartbeatEvent extends BaseNexusEvent {
+  type: 'task_heartbeat';
+  stage: string;
+  agentRole?: AgentRole;
+  status: TaskStatus;
+  elapsedMs: number;
 }
 
 export interface AgentStartedEvent extends BaseNexusEvent {
@@ -98,6 +117,8 @@ export interface TaskCompletedEvent extends BaseNexusEvent {
   status: TaskStatus;
   summary: string;
   totalDurationMs: number;
+  totalTokens?: number;
+  totalCostUsd?: number;
 }
 
 export interface TaskFailedEvent extends BaseNexusEvent {
@@ -112,6 +133,8 @@ export interface TaskCancelledEvent extends BaseNexusEvent {
 
 export type NexusEvent =
   | TaskStartedEvent
+  | TaskProgressEvent
+  | TaskHeartbeatEvent
   | AgentStartedEvent
   | AgentMessageEvent
   | ToolStartedEvent

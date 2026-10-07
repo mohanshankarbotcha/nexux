@@ -19,11 +19,15 @@ import { ModelRouter, globalModelRouter } from '../providers/model-router.js';
 import { ToolRegistry, globalToolRegistry } from '../tools/tool-registry.js';
 import { StorageEngine, globalStorage } from '../storage/storage-engine.js';
 
+import { ProviderId } from '@nexus/core';
+
 export interface AgentExecutionContext {
   sessionId: string;
   taskId: string;
   workspaceRoot: string;
   abortSignal?: AbortSignal;
+  provider?: ProviderId;
+  model?: string;
 }
 
 export abstract class BaseAgent {
@@ -251,16 +255,26 @@ export abstract class BaseAgent {
     const startTime = Date.now();
     let response: ProviderResponse;
 
+    const override =
+      context.provider || context.model
+        ? { provider: context.provider, model: context.model }
+        : undefined;
+
     try {
       if (onChunk) {
-        response = await this.modelRouter.streamForRole(this.role, fullRequest, (chunk) => {
-          onChunk(chunk);
-          if (chunk.deltaText) {
-            this.emitAgentMessage(chunk.deltaText, context, true);
-          }
-        });
+        response = await this.modelRouter.streamForRole(
+          this.role,
+          fullRequest,
+          (chunk) => {
+            onChunk(chunk);
+            if (chunk.deltaText) {
+              this.emitAgentMessage(chunk.deltaText, context, true);
+            }
+          },
+          override
+        );
       } else {
-        response = await this.modelRouter.executeForRole(this.role, fullRequest);
+        response = await this.modelRouter.executeForRole(this.role, fullRequest, override);
       }
 
       const durationMs = Date.now() - startTime;
@@ -288,10 +302,23 @@ export abstract class BaseAgent {
         status: 'success',
       });
 
+      // Synchronize task tokens in storage
+      const currentTask = this.storage.getTask(context.taskId);
+      if (currentTask) {
+        currentTask.totalTokens = (currentTask.totalTokens || 0) + response.usage.totalTokens;
+        currentTask.totalCostUsd =
+          Math.round(((currentTask.totalCostUsd || 0) + estimatedCost) * 1_000_000) / 1_000_000;
+        this.storage.saveTask(currentTask);
+      }
+
       return response;
     } catch (err) {
       const durationMs = Date.now() - startTime;
       const errorMsg = err instanceof Error ? err.message : String(err);
+      const isCancelled =
+        context.abortSignal?.aborted ||
+        errorMsg.toLowerCase().includes('cancel') ||
+        errorMsg.toLowerCase().includes('aborted');
 
       // Record failed telemetry
       this.storage.recordUsage({
@@ -299,8 +326,8 @@ export abstract class BaseAgent {
         sessionId: context.sessionId,
         taskId: context.taskId,
         agent: this.role,
-        provider: 'gemini',
-        model: 'unknown',
+        provider: override?.provider || 'gemini',
+        model: override?.model || 'unknown',
         inputTokens: 0,
         outputTokens: 0,
         totalTokens: 0,
@@ -308,9 +335,13 @@ export abstract class BaseAgent {
         estimatedCostUsd: 0,
         timestamp: Date.now(),
         durationMs,
-        status: 'failed',
-        error: errorMsg,
+        status: isCancelled ? 'failed' : 'failed',
+        error: isCancelled ? 'Task cancelled' : errorMsg,
       });
+
+      if (isCancelled) {
+        throw new Error('Task was cancelled');
+      }
 
       throw err;
     }

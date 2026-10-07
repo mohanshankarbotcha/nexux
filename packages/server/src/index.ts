@@ -10,6 +10,7 @@ export * from './agent/index.js';
 export * from './workspace/workspace-service.js';
 export * from './context/index.js';
 export * from './storage/storage-engine.js';
+export * from './tasks/active-task-registry.js';
 export * from './api/app.js';
 
 export function startNexusServer(port: number = DEFAULT_SERVER_CONFIG.defaultPort) {
