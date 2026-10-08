@@ -62,7 +62,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
         </div>
 
         <div className="flex items-center space-x-1 text-slate-500 text-[10px]">
-          <span>NEXUS v1.0.0</span>
+          <span>NEXUS v2.0.0-rel (srv: 2.0.0-rel)</span>
         </div>
       </div>
     </footer>

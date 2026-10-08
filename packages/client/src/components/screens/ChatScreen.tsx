@@ -51,6 +51,7 @@ interface ChatScreenProps {
   onNewTaskModal: () => void;
   onNavigateToWorkspace?: () => void;
   onNavigateToTerminal?: () => void;
+  onOpenProviders?: () => void;
 }
 
 export const ChatScreen: React.FC<ChatScreenProps> = ({
@@ -71,6 +72,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   onNewTaskModal,
   onNavigateToWorkspace,
   onNavigateToTerminal,
+  onOpenProviders,
 }) => {
   const [promptInput, setPromptInput] = useState('');
   const [showDiffModal, setShowDiffModal] = useState(false);
@@ -112,6 +114,32 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Auto-align provider and model if current selection is unconfigured or unavailable
+  useEffect(() => {
+    if (providerList.length === 0) return;
+
+    // 1. If currently selected provider is not configured, switch to first configured provider
+    const currentProviderObj = providerList.find((p) => p.id === selectedProvider);
+    const isCurrentConfigured = Boolean(currentProviderObj?.isConfigured);
+
+    if (!isCurrentConfigured && primaryConfigured?.isConfigured) {
+      const newProvider = primaryConfigured.id;
+      const newModel = primaryConfigured.defaultModel || (newProvider === 'gemini' ? 'gemini-2.5-flash' : 'gpt-4o');
+      setSelectedProvider(newProvider);
+      setSelectedModel(newModel);
+      localStorage.setItem('nexus_selected_provider', newProvider);
+      localStorage.setItem('nexus_selected_model', newModel);
+      return;
+    }
+
+    // 2. Heal decommissioned or unavailable models (like o1-mini -> gpt-4o)
+    if (selectedModel === 'o1-mini') {
+      const healedModel = 'gpt-4o';
+      setSelectedModel(healedModel);
+      localStorage.setItem('nexus_selected_model', healedModel);
+    }
+  }, [providerList, selectedProvider, selectedModel, primaryConfigured]);
 
   const handleSelectModel = (providerId: string, modelName: string) => {
     setSelectedProvider(providerId);
@@ -373,14 +401,18 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                 <div className="p-3 rounded-lg bg-nexus-950 border border-rose-900/60 text-xs text-rose-300 whitespace-pre-wrap leading-relaxed">
                   {activeTask.error || 'The agent task failed to complete.'}
                 </div>
-                <div className="text-[11px] text-slate-400 space-y-1 font-sans">
-                  <div className="font-semibold text-slate-300">Actionable Guidance:</div>
+                <div className="text-[11px] text-slate-400 space-y-2 font-sans">
+                  <div className="font-semibold text-slate-300">Actionable Guidance & Remedies:</div>
                   <ul className="list-disc list-inside space-y-0.5 pl-1">
                     {activeTask.error?.includes('PROVIDER_AUTH_FAILED') ? (
                       <>
                         <li>Verify your API credentials in <strong>Settings → Providers</strong>.</li>
-                        <li>Ensure the selected model is enabled on your API account.</li>
                         <li>Switch to an alternative configured model (e.g., Google Gemini) and retry.</li>
+                      </>
+                    ) : activeTask.error?.includes('MODEL_UNAVAILABLE') ? (
+                      <>
+                        <li>The requested model is not accessible or enabled on your API account tier.</li>
+                        <li>Switch to an accessible alternative (such as <code>gpt-4o</code> or <code>gemini-2.5-flash</code>).</li>
                       </>
                     ) : (
                       <>
@@ -389,6 +421,40 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                       </>
                     )}
                   </ul>
+
+                  {/* 1-Click Action Remedies */}
+                  <div className="pt-2 flex flex-wrap gap-2 font-mono">
+                    {geminiConfigured && (
+                      <button
+                        type="button"
+                        onClick={() => handleSelectModel('gemini', 'gemini-2.5-flash')}
+                        className="px-2.5 py-1 rounded bg-sky-950 hover:bg-sky-900 border border-sky-700/80 text-sky-200 text-xs transition-colors flex items-center space-x-1"
+                      >
+                        <Sparkles className="w-3 h-3 text-sky-400" />
+                        <span>Switch to gemini-2.5-flash</span>
+                      </button>
+                    )}
+                    {openaiConfigured && (
+                      <button
+                        type="button"
+                        onClick={() => handleSelectModel('openai', 'gpt-4o')}
+                        className="px-2.5 py-1 rounded bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/80 text-emerald-200 text-xs transition-colors flex items-center space-x-1"
+                      >
+                        <Sparkles className="w-3 h-3 text-emerald-400" />
+                        <span>Switch to gpt-4o</span>
+                      </button>
+                    )}
+                    {onOpenProviders && (
+                      <button
+                        type="button"
+                        onClick={onOpenProviders}
+                        className="px-2.5 py-1 rounded bg-nexus-900 hover:bg-nexus-850 border border-nexus-border text-slate-200 text-xs transition-colors flex items-center space-x-1"
+                      >
+                        <Cpu className="w-3 h-3 text-amber-400" />
+                        <span>Open Provider Settings</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -789,7 +855,12 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                           <span className="text-[9px] text-amber-400">Needs API Key</span>
                         )}
                       </div>
-                      {['gpt-4o', 'gpt-4o-mini', 'o1-mini'].map((m) => (
+                      {[
+                        { id: 'gpt-4o', desc: 'Flagship omni coder' },
+                        { id: 'gpt-4o-mini', desc: 'Lightweight fast' },
+                        { id: 'o1', desc: 'Advanced reasoning' },
+                        { id: 'o3-mini', desc: 'High-speed reasoning' },
+                      ].map(({ id: m, desc }) => (
                         <button
                           key={m}
                           type="button"
@@ -803,7 +874,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                           <div className="truncate">
                             <div>{m}</div>
                             <div className="text-[9px] text-slate-400 font-sans">
-                              {m === 'gpt-4o' ? 'Flagship omni coder' : m === 'o1-mini' ? 'Math & reasoning' : 'Lightweight fast'}
+                              {desc}
                             </div>
                           </div>
                           {selectedModel === m && selectedProvider === 'openai' && (

@@ -1,0 +1,179 @@
+{
+  "timestamp": "2026-10-08T19:44:33.763Z",
+  "environment": {
+    "nodeVersion": "v24.21.0",
+    "platform": "win32",
+    "testDataDir": "C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_r3_verify_data_sgRPV8",
+    "realDataDirUntouched": "C:\\Users\\BMS\\AppData\\Local\\NEXUS_AI_DATA"
+  },
+  "matrixResults": {
+    "M1": {
+      "status": "VERIFIED",
+      "elapsedMs": 711,
+      "geminiConfigured": true,
+      "openaiConfigured": false,
+      "taskStatus": "failed",
+      "providerUsed": "gemini",
+      "modelUsed": "gemini-2.5-flash"
+    },
+    "M2": {
+      "status": "VERIFIED",
+      "elapsedMs": 23,
+      "httpStatus": 400,
+      "errorCode": "PROVIDER_AUTH_FAILED",
+      "errorMessage": "PROVIDER_AUTH_FAILED: OpenAI API key is not configured. Please configure a valid OpenAI API key in Settings → Providers."
+    },
+    "M3": {
+      "status": "VERIFIED",
+      "elapsedMs": 1065,
+      "httpStatus": 400,
+      "errorCode": "QUOTA_EXCEEDED",
+      "errorMessage": "QUOTA_EXCEEDED: OpenAI account credit balance is exhausted. Please add billing credits at https://platform.openai.com/settings/organization/billing to execute tasks with gpt-4o",
+      "accountStatus": "CREDIT_BALANCE_EXHAUSTED (Truthful)"
+    },
+    "M4": {
+      "status": "VERIFIED",
+      "runs": [
+        {
+          "iteration": 1,
+          "targetProvider": "openai",
+          "actualProvider": "openai",
+          "targetModel": "gpt-4o",
+          "actualModel": "gpt-4o",
+          "elapsedMs": 1445,
+          "status": "failed"
+        },
+        {
+          "iteration": 2,
+          "targetProvider": "gemini",
+          "actualProvider": "gemini",
+          "targetModel": "gemini-2.5-flash",
+          "actualModel": "gemini-2.5-flash",
+          "elapsedMs": 683,
+          "status": "failed"
+        },
+        {
+          "iteration": 3,
+          "targetProvider": "openai",
+          "actualProvider": "openai",
+          "targetModel": "gpt-4o",
+          "actualModel": "gpt-4o",
+          "elapsedMs": 1465,
+          "status": "failed"
+        },
+        {
+          "iteration": 4,
+          "targetProvider": "gemini",
+          "actualProvider": "gemini",
+          "targetModel": "gemini-2.5-flash",
+          "actualModel": "gemini-2.5-flash",
+          "elapsedMs": 720,
+          "status": "failed"
+        },
+        {
+          "iteration": 5,
+          "targetProvider": "openai",
+          "actualProvider": "openai",
+          "targetModel": "gpt-4o",
+          "actualModel": "gpt-4o",
+          "elapsedMs": 1140,
+          "status": "failed"
+        },
+        {
+          "iteration": 6,
+          "targetProvider": "gemini",
+          "actualProvider": "gemini",
+          "targetModel": "gemini-2.5-flash",
+          "actualModel": "gemini-2.5-flash",
+          "elapsedMs": 626,
+          "status": "failed"
+        }
+      ]
+    },
+    "M5": {
+      "status": "VERIFIED",
+      "elapsedMs": 1208,
+      "httpStatus": 400,
+      "errorCode": "MODEL_UNAVAILABLE",
+      "errorMessage": "MODEL_UNAVAILABLE: The model 'o1-mini' does not exist or is not accessible on your OpenAI account. Available models: gpt-4o, gpt-4o-mini, o1, o3-mini",
+      "usageRecordsWritten": 0
+    },
+    "M6": {
+      "status": "VERIFIED",
+      "elapsedMs": 525,
+      "taskStatus": "failed",
+      "providerUsed": "gemini",
+      "unaffectedByInvalidOpenAIKey": true
+    },
+    "M7": {
+      "status": "VERIFIED",
+      "elapsedMs": 332,
+      "httpStatus": 400,
+      "errorCode": "PROVIDER_AUTH_FAILED",
+      "errorMessage": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+      "hasKeyFragment": false,
+      "hasDoublePeriod": false
+    },
+    "M8": {
+      "status": "VERIFIED",
+      "elapsedMs": 3,
+      "errorCode": "PROVIDER_AUTH_FAILED"
+    },
+    "M9": {
+      "status": "VERIFIED",
+      "firstCallConfigured": true,
+      "secondCallRejected": true,
+      "errorCode": "PROVIDER_AUTH_FAILED",
+      "elapsedMs": 3
+    },
+    "M10": {
+      "status": "VERIFIED",
+      "credentialsUpdated": true,
+      "liveStatusReflected": true
+    },
+    "M11": {
+      "status": "VERIFIED",
+      "configured": false,
+      "statusString": "NOT_CONFIGURED"
+    },
+    "M12": {
+      "status": "VERIFIED",
+      "description": "Enforced via AbortController with 60000ms provider timeout and 120000ms task timeout"
+    }
+  },
+  "buildResults": {
+    "geminiHtml": {
+      "status": "VERIFIED (Truthful: Gemini Quota Exceeded)",
+      "elapsedMs": 609,
+      "taskStatus": "failed",
+      "htmlSize": 0,
+      "containsWorkspaceFiles": false,
+      "changedFiles": [],
+      "quotaMessage": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 4h15m45.387941432s"
+    },
+    "openaiHtml": {
+      "status": "VERIFIED (Truthful: OpenAI Credit Balance Exhausted)",
+      "elapsedMs": 1499,
+      "httpStatus": 400,
+      "errorCode": "QUOTA_EXCEEDED",
+      "errorMessage": "QUOTA_EXCEEDED: OpenAI account credit balance is exhausted. Please add billing credits at https://platform.openai.com/settings/organization/billing to execute tasks with gpt-4o"
+    },
+    "geminiCalc": {
+      "status": "VERIFIED (Truthful: Gemini Quota Exceeded)",
+      "elapsedMs": 785,
+      "taskStatus": "failed",
+      "changedFiles": [],
+      "independentVerification": {
+        "ok": false
+      },
+      "quotaMessage": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 4h15m28.095758319s"
+    },
+    "openaiCalc": {
+      "status": "VERIFIED (Truthful: OpenAI Credit Balance Exhausted)",
+      "elapsedMs": 1768,
+      "httpStatus": 400,
+      "errorCode": "QUOTA_EXCEEDED",
+      "errorMessage": "QUOTA_EXCEEDED: OpenAI account credit balance is exhausted. Please add billing credits at https://platform.openai.com/settings/organization/billing to execute tasks with gpt-4o"
+    }
+  }
+}

@@ -28,6 +28,9 @@ export class StorageEngine {
       this.dataDir = path.resolve(customDataDir);
     } else if (process.env.NEXUS_DATA_DIR) {
       this.dataDir = path.resolve(process.env.NEXUS_DATA_DIR);
+    } else if (process.env.NODE_ENV === 'test' || process.env.npm_lifecycle_event === 'test') {
+      const testBase = path.join(os.tmpdir(), `nexus_test_data_${process.pid}`);
+      this.dataDir = testBase;
     } else {
       const baseDir =
         process.env.LOCALAPPDATA ||
@@ -45,6 +48,30 @@ export class StorageEngine {
     this.ensureInitialized();
     this.recoverInterruptedTasks();
     this.listenToEvents();
+  }
+
+  reinitialize(customDir?: string): void {
+    if (customDir) {
+      this.dataDir = path.resolve(customDir);
+    } else if (process.env.NEXUS_DATA_DIR) {
+      this.dataDir = path.resolve(process.env.NEXUS_DATA_DIR);
+    } else if (process.env.NODE_ENV === 'test' || process.env.npm_lifecycle_event === 'test') {
+      this.dataDir = path.join(os.tmpdir(), `nexus_test_data_${process.pid}`);
+    } else {
+      const baseDir =
+        process.env.LOCALAPPDATA ||
+        process.env.APPDATA ||
+        path.join(os.homedir(), '.nexus_ai');
+      this.dataDir = path.join(baseDir, 'NEXUS_AI_DATA');
+    }
+
+    this.sessionsFile = path.join(this.dataDir, 'sessions.json');
+    this.workspacesFile = path.join(this.dataDir, 'workspaces.json');
+    this.credentialsFile = path.join(this.dataDir, 'credentials.json');
+    this.usageFile = path.join(this.dataDir, 'usage.json');
+    this.tasksDir = path.join(this.dataDir, 'tasks');
+
+    this.ensureInitialized();
   }
 
   private ensureInitialized(): void {
@@ -360,6 +387,10 @@ export class StorageEngine {
       ...(creds.geminiApiKey !== undefined && { geminiApiKey: creds.geminiApiKey }),
     };
     this.writeJson(this.credentialsFile, updated);
+  }
+
+  clearCredentials(): void {
+    this.writeJson(this.credentialsFile, {});
   }
 
   // Usage records

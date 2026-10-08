@@ -11,6 +11,8 @@ import {
   ProviderError,
   logger,
   ToolDefinition,
+  isPlaceholderOrFixtureKey,
+  sanitizeErrorMessage,
 } from '@nexus/core';
 
 export interface OpenAIProviderOptions {
@@ -26,6 +28,8 @@ export class OpenAIProvider implements IModelProvider {
   private apiKey?: string;
   private baseUrl: string;
   private fetchFn: typeof fetch;
+  private cachedModels: string[] = [];
+  private modelsCachedAt = 0;
 
   constructor(options: OpenAIProviderOptions = {}) {
     this.apiKey = options.apiKey;
@@ -35,6 +39,8 @@ export class OpenAIProvider implements IModelProvider {
 
   setApiKey(key: string): void {
     this.apiKey = key.trim();
+    this.cachedModels = [];
+    this.modelsCachedAt = 0;
   }
 
   getApiKey(): string | undefined {
@@ -47,7 +53,18 @@ export class OpenAIProvider implements IModelProvider {
       return {
         provider: 'openai',
         isValid: false,
+        code: 'PROVIDER_AUTH_FAILED',
         message: 'OpenAI API key is not configured',
+        testedAt,
+      };
+    }
+
+    if (isPlaceholderOrFixtureKey(this.apiKey)) {
+      return {
+        provider: 'openai',
+        isValid: false,
+        code: 'PROVIDER_AUTH_FAILED',
+        message: 'Placeholder or test fixture OpenAI API key detected. Please configure a valid OpenAI API key in Settings.',
         testedAt,
       };
     }
@@ -62,17 +79,24 @@ export class OpenAIProvider implements IModelProvider {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        const msg = (errorData as any)?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
+        const rawMsg = (errorData as any)?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
+        const cleanMsg = sanitizeErrorMessage(rawMsg).replace(/\.+$/, '');
         return {
           provider: 'openai',
           isValid: false,
-          message: `Validation failed: ${msg}`,
+          code: res.status === 401 ? 'PROVIDER_AUTH_FAILED' : 'PROVIDER_REQUEST_FAILED',
+          message: `Validation failed: ${cleanMsg}`,
           testedAt,
         };
       }
 
       const data = (await res.json()) as { data?: { id: string }[] };
-      const availableModels = data.data?.map((m) => m.id).slice(0, 15) || [];
+      const allModels = data.data?.map((m) => m.id) || [];
+      this.cachedModels = allModels;
+      this.modelsCachedAt = testedAt;
+
+      const priorityModels = ['gpt-4o', 'gpt-4o-mini', 'o1', 'o3-mini'].filter((m) => allModels.includes(m));
+      const availableModels = priorityModels.length > 0 ? priorityModels : allModels.slice(0, 15);
 
       return {
         provider: 'openai',
@@ -85,10 +109,80 @@ export class OpenAIProvider implements IModelProvider {
       return {
         provider: 'openai',
         isValid: false,
-        message: `Network error during validation: ${err instanceof Error ? err.message : String(err)}`,
+        code: 'NETWORK_ERROR',
+        message: `Network error during validation: ${sanitizeErrorMessage(err instanceof Error ? err.message : String(err))}`,
         testedAt,
       };
     }
+  }
+
+  async validateModel(model: string): Promise<ProviderValidationResult> {
+    const testedAt = Date.now();
+    if (this.cachedModels.length === 0 || testedAt - this.modelsCachedAt > 300_000) {
+      const credVal = await this.validateCredentials();
+      if (!credVal.isValid) return credVal;
+    }
+
+    const isAvailable = this.cachedModels.includes(model);
+    if (!isAvailable) {
+      const suggested = ['gpt-4o', 'gpt-4o-mini', 'o1', 'o3-mini'].filter((m) => this.cachedModels.includes(m));
+      return {
+        provider: 'openai',
+        isValid: false,
+        code: 'MODEL_UNAVAILABLE',
+        message: `The model '${model}' does not exist or is not accessible on your OpenAI account. Available models: ${suggested.join(', ')}.`,
+        availableModels: suggested,
+        testedAt,
+      };
+    }
+
+    // Lightweight verification of generation capability & quota
+    try {
+      const probeRes = await this.fetchFn(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: 'ping' }],
+          max_tokens: 1,
+        }),
+      });
+
+      if (!probeRes.ok) {
+        const errData = (await probeRes.json().catch(() => ({}))) as any;
+        const errObj = errData?.error;
+        if (errObj?.code === 'credit_balance_exhausted' || errObj?.type === 'insufficient_quota') {
+          return {
+            provider: 'openai',
+            isValid: false,
+            code: 'QUOTA_EXCEEDED',
+            message: `OpenAI account credit balance is exhausted. Please add billing credits at https://platform.openai.com/settings/organization/billing to execute tasks with ${model}.`,
+            testedAt,
+          };
+        }
+        if (probeRes.status === 404 || errObj?.code === 'model_not_found') {
+          return {
+            provider: 'openai',
+            isValid: false,
+            code: 'MODEL_UNAVAILABLE',
+            message: `The model '${model}' is not accessible on your OpenAI account.`,
+            testedAt,
+          };
+        }
+      }
+    } catch {
+      // Ignore network timeout during probe; fallback to standard complete
+    }
+
+    return {
+      provider: 'openai',
+      isValid: true,
+      message: `Model '${model}' is accessible on OpenAI`,
+      testedAt,
+    };
   }
 
   private formatTools(tools?: ToolDefinition[]) {
@@ -205,9 +299,17 @@ export class OpenAIProvider implements IModelProvider {
 
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        const errMsg = (errJson as any)?.error?.message || `HTTP ${res.status}`;
-        const code = res.status === 401 ? 'PROVIDER_AUTH_FAILED' : res.status === 429 ? 'PROVIDER_RATE_LIMIT' : 'PROVIDER_REQUEST_FAILED';
-        throw new ProviderError(`OpenAI completion failed: ${errMsg}`, 'openai', code, res.status, errJson);
+        const rawMsg = (errJson as any)?.error?.message || `HTTP ${res.status}`;
+        const cleanMsg = sanitizeErrorMessage(rawMsg).replace(/\.+$/, '');
+        const code =
+          res.status === 401
+            ? 'PROVIDER_AUTH_FAILED'
+            : res.status === 404 || cleanMsg.toLowerCase().includes('does not exist') || cleanMsg.toLowerCase().includes('not have access')
+            ? 'MODEL_UNAVAILABLE'
+            : res.status === 429
+            ? 'PROVIDER_RATE_LIMIT'
+            : 'PROVIDER_REQUEST_FAILED';
+        throw new ProviderError(`OpenAI completion failed: ${cleanMsg}`, 'openai', code, res.status, errJson);
       }
 
       const data = (await res.json()) as any;
@@ -323,9 +425,17 @@ export class OpenAIProvider implements IModelProvider {
 
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        const errMsg = (errJson as any)?.error?.message || `HTTP ${res.status}`;
-        const code = res.status === 401 ? 'PROVIDER_AUTH_FAILED' : res.status === 429 ? 'PROVIDER_RATE_LIMIT' : 'PROVIDER_REQUEST_FAILED';
-        throw new ProviderError(`OpenAI streaming failed: ${errMsg}`, 'openai', code, res.status, errJson);
+        const rawMsg = (errJson as any)?.error?.message || `HTTP ${res.status}`;
+        const cleanMsg = sanitizeErrorMessage(rawMsg).replace(/\.+$/, '');
+        const code =
+          res.status === 401
+            ? 'PROVIDER_AUTH_FAILED'
+            : res.status === 404 || cleanMsg.toLowerCase().includes('does not exist') || cleanMsg.toLowerCase().includes('not have access')
+            ? 'MODEL_UNAVAILABLE'
+            : res.status === 429
+            ? 'PROVIDER_RATE_LIMIT'
+            : 'PROVIDER_REQUEST_FAILED';
+        throw new ProviderError(`OpenAI streaming failed: ${cleanMsg}`, 'openai', code, res.status, errJson);
       }
 
       if (!res.body) {

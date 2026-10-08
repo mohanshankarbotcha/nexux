@@ -25,7 +25,11 @@ class ApiService {
 
     if (!response.ok) {
       const errorMsg = data?.error?.message || data?.error || `HTTP error ${response.status}`;
-      throw new Error(errorMsg);
+      const err: any = new Error(errorMsg);
+      err.data = data;
+      err.task = data?.task;
+      err.errorCode = data?.errorCode;
+      throw err;
     }
 
     return data as T;
@@ -156,8 +160,9 @@ class ApiService {
   }
 
   // Tasks
-  async getTasks(): Promise<{ tasks: Task[] }> {
-    return this.request('/tasks');
+  async getTasks(options?: { limit?: number }): Promise<{ tasks: Task[] }> {
+    const qs = options?.limit ? `?limit=${options.limit}` : '';
+    return this.request(`/tasks${qs}`);
   }
 
   async getTask(

@@ -31,6 +31,16 @@ async function makeRequest(app: any, method: string, pathUrl: string, body?: any
 }
 
 test('Phase 3 / Provider Suite', { concurrency: 1 }, async (t) => {
+  const testDataDir = path.join(os.tmpdir(), `nexus_provider_test_${Date.now()}`);
+  fs.mkdirSync(testDataDir, { recursive: true });
+  globalStorage.reinitialize(testDataDir);
+
+  t.after(() => {
+    try {
+      fs.rmSync(testDataDir, { recursive: true, force: true });
+    } catch {}
+  });
+
   await t.test('Masking - maskKey safely masks secrets without full disclosure', () => {
     assert.equal(maskKey(undefined), null);
     assert.equal(maskKey(''), null);
@@ -75,7 +85,7 @@ test('Phase 3 / Provider Suite', { concurrency: 1 }, async (t) => {
   await t.test('Onboarding - configuring OpenAI only', async () => {
     const app = createNexusApp();
     const updateRes = await makeRequest(app, 'POST', '/api/providers/credentials', {
-      openaiApiKey: 'sk-testkey123456789012345678',
+      openaiApiKey: 'sk-proj-livekey123456789012345678',
       geminiApiKey: '',
     });
 
@@ -85,7 +95,7 @@ test('Phase 3 / Provider Suite', { concurrency: 1 }, async (t) => {
     const statusRes = await makeRequest(app, 'GET', '/api/providers/status');
     assert.equal(statusRes.body.hasAnyValidProvider, true);
     assert.equal(statusRes.body.providers.openai.configured, true);
-    assert.ok(statusRes.body.providers.openai.maskedKey.startsWith('sk-t'));
+    assert.ok(statusRes.body.providers.openai.maskedKey.startsWith('sk-p'));
     assert.equal(statusRes.body.providers.gemini.configured, false);
   });
 
@@ -109,8 +119,8 @@ test('Phase 3 / Provider Suite', { concurrency: 1 }, async (t) => {
   await t.test('Onboarding - configuring both providers', async () => {
     const app = createNexusApp();
     const updateRes = await makeRequest(app, 'POST', '/api/providers/credentials', {
-      openaiApiKey: 'sk-testopenai1234567890abcdef',
-      geminiApiKey: 'AIzaSyGemini1234567890abcdef',
+      openaiApiKey: 'sk-proj-validkey1234567890abcdef',
+      geminiApiKey: 'AIzaSyLiveGemini1234567890abcdef',
     });
 
     assert.equal(updateRes.status, 200);
@@ -127,7 +137,7 @@ test('Phase 3 / Provider Suite', { concurrency: 1 }, async (t) => {
     const app = createNexusApp();
     const res = await makeRequest(app, 'POST', '/api/providers/validate', {
       provider: 'openai',
-      apiKey: 'sk-intentionally-invalid-key',
+      apiKey: 'sk-intentionally-invalid-key-testing',
     });
 
     assert.equal(res.status, 200);

@@ -8,6 +8,7 @@ import {
   globalEventBus,
   resolveSafePath,
   logger,
+  sanitizeErrorMessage,
 } from '@nexus/core';
 import { ExplorerAgent, ExplorationResult } from './explorer.js';
 import { PlannerAgent } from './planner.js';
@@ -497,9 +498,11 @@ export class CoordinatorAgent extends BaseAgent {
       const status: TaskStatus = isCancelled ? 'cancelled' : 'failed';
       const stage = isCancelled ? 'cancelled' : 'failed';
 
+      const failingRole = (stagesRun.length > 0 ? stagesRun[stagesRun.length - 1] : 'coordinator') as AgentRole;
       task.status = status;
       task.stage = stage;
-      task.error = errorMsg;
+      task.currentAgentRole = failingRole;
+      task.error = sanitizeErrorMessage(errorMsg);
       task.completedAt = Date.now();
       this.storage.saveTask(task);
 

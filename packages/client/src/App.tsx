@@ -337,6 +337,9 @@ export const App: React.FC = () => {
     } catch (err: any) {
       setActiveStatus('failed');
       await refreshTasks();
+      if (err.task?.id) {
+        setActiveTaskId(err.task.id);
+      }
       console.warn(`Task launch preflight notice: ${err.message}`);
     }
   };
@@ -453,6 +456,7 @@ export const App: React.FC = () => {
               onNewTaskModal={() => setIsNewTaskModalOpen(true)}
               onNavigateToWorkspace={() => setCurrentScreen('workspace')}
               onNavigateToTerminal={() => setCurrentScreen('terminal')}
+              onOpenProviders={() => setIsProvidersModalOpen(true)}
             />
           )}
 

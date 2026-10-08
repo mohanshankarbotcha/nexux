@@ -16,6 +16,11 @@ export interface IModelProvider {
   validateCredentials(): Promise<ProviderValidationResult>;
 
   /**
+   * Validates if a specific model is accessible on this provider.
+   */
+  validateModel?(model: string): Promise<ProviderValidationResult>;
+
+  /**
    * Executes a complete completion / tool calling request.
    */
   complete(request: ProviderRequest): Promise<ProviderResponse>;

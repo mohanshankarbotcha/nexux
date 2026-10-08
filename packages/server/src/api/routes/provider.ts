@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { maskKey, ProviderError, ProviderId } from '@nexus/core';
+import { maskKey, ProviderError, ProviderId, isPlaceholderOrFixtureKey } from '@nexus/core';
 import { globalStorage } from '../../storage/storage-engine.js';
 import { globalModelRouter } from '../../providers/model-router.js';
 import { OpenAIProvider } from '../../providers/openai-provider.js';
@@ -11,29 +11,39 @@ export function createProviderRouter(): Router {
   // Get status of configured providers (never reveals keys!)
   router.get('/status', (req: Request, res: Response) => {
     const creds = globalStorage.getCredentials();
-    const openaiConfigured = Boolean(creds.openaiApiKey && creds.openaiApiKey.trim().length > 0);
-    const geminiConfigured = Boolean(creds.geminiApiKey && creds.geminiApiKey.trim().length > 0);
+    const openaiHasKey = Boolean(
+      creds.openaiApiKey && creds.openaiApiKey.trim().length > 0 && !isPlaceholderOrFixtureKey(creds.openaiApiKey)
+    );
+    const geminiHasKey = Boolean(
+      creds.geminiApiKey && creds.geminiApiKey.trim().length > 0 && !isPlaceholderOrFixtureKey(creds.geminiApiKey)
+    );
 
     res.json({
       success: true,
       providers: {
         openai: {
-          configured: openaiConfigured,
+          configured: openaiHasKey,
+          status: openaiHasKey ? 'VALID' : 'NOT_CONFIGURED',
           id: 'openai',
           name: 'OpenAI',
           maskedKey: maskKey(creds.openaiApiKey),
+          models: ['gpt-4o', 'gpt-4o-mini', 'o1', 'o3-mini'],
+          defaultModel: 'gpt-4o',
         },
         gemini: {
-          configured: geminiConfigured,
+          configured: geminiHasKey,
+          status: geminiHasKey ? 'VALID' : 'NOT_CONFIGURED',
           id: 'gemini',
           name: 'Google Gemini',
           maskedKey: maskKey(creds.geminiApiKey),
+          models: ['gemini-2.5-flash', 'gemini-2.5-pro'],
+          defaultModel: 'gemini-2.5-flash',
         },
       },
-      hasAnyValidProvider: openaiConfigured || geminiConfigured,
+      hasAnyValidProvider: openaiHasKey || geminiHasKey,
       activeProviders: [
-        ...(openaiConfigured ? ['openai'] : []),
-        ...(geminiConfigured ? ['gemini'] : []),
+        ...(openaiHasKey ? ['openai'] : []),
+        ...(geminiHasKey ? ['gemini'] : []),
       ],
       routingTable: globalModelRouter.getRoutingTable(),
     });
@@ -125,7 +135,13 @@ export function createProviderRouter(): Router {
         validator = provider;
       }
 
-      const result = await validator.validateCredentials();
+      let result;
+      if (req.body.model && typeof (validator as any).validateModel === 'function') {
+        result = await (validator as any).validateModel(req.body.model);
+      } else {
+        result = await validator.validateCredentials();
+      }
+
       res.json({
         success: result.isValid,
         result,

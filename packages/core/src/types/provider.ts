@@ -83,10 +83,28 @@ export interface ProviderCredentials {
   geminiApiKey?: string;
 }
 
+export type ProviderErrorCode =
+  | 'PROVIDER_AUTH_FAILED'
+  | 'MODEL_UNAVAILABLE'
+  | 'RATE_LIMITED'
+  | 'QUOTA_EXCEEDED'
+  | 'CONTEXT_TOO_LARGE'
+  | 'UNSUPPORTED_PARAMETER'
+  | 'NETWORK_ERROR'
+  | 'REQUEST_TIMEOUT'
+  | 'SAFETY_BLOCKED'
+  | 'FILESYSTEM_ERROR'
+  | 'TOOL_ERROR'
+  | 'VERIFICATION_FAILED'
+  | 'PROVIDER_NOT_CONFIGURED'
+  | 'PROVIDER_REQUEST_FAILED'
+  | 'UNKNOWN';
+
 export interface ProviderValidationResult {
   provider: ProviderId;
   isValid: boolean;
   message: string;
+  code?: ProviderErrorCode;
   availableModels?: string[];
   testedAt: number;
 }

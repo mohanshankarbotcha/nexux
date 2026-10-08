@@ -112,10 +112,22 @@ export const TopBar: React.FC<TopBarProps> = ({
             </button>
           </div>
         ) : activeTaskId ? (
-          <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-nexus-900 border border-nexus-border text-[11px] font-mono text-slate-400">
-            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-            <span>Task Active</span>
-          </div>
+          activeStatus === 'failed' ? (
+            <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-rose-950/40 border border-rose-500/30 text-[11px] font-mono text-rose-300">
+              <AlertCircle className="w-3 h-3 text-rose-400" />
+              <span>Task Failed</span>
+            </div>
+          ) : activeStatus === 'completed' ? (
+            <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-500/30 text-[11px] font-mono text-emerald-300">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>Task Completed</span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-nexus-900 border border-nexus-border text-[11px] font-mono text-slate-400">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>Task Loaded</span>
+            </div>
+          )
         ) : null}
       </div>
 

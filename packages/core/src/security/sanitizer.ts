@@ -89,3 +89,35 @@ export function maskKey(key?: string): string | null {
   }
   return `${trimmed.slice(0, 4)}••••••••${trimmed.slice(-4)}`;
 }
+
+/**
+ * Detects whether an API key is a dummy test fixture or placeholder pattern.
+ */
+export function isPlaceholderOrFixtureKey(key?: string): boolean {
+  if (!key || typeof key !== 'string') return true;
+  const trimmed = key.trim();
+  if (trimmed.length < 15) return true;
+  const lower = trimmed.toLowerCase();
+  return (
+    lower.startsWith('sk-test') ||
+    lower.includes('obviously-fake') ||
+    lower.includes('your-api-key') ||
+    lower.includes('dummy') ||
+    lower.includes('developer-audit') ||
+    lower.startsWith('aizasygemini') ||
+    lower === 'sk-intentionally-invalid-key'
+  );
+}
+
+/**
+ * Strips raw API key fragments, double periods, and credential leaks from error messages.
+ */
+export function sanitizeErrorMessage(message?: string): string {
+  if (!message || typeof message !== 'string') return '';
+  return message
+    .replace(/sk-[a-zA-Z0-9*_-]{8,}/g, '[REDACTED_KEY]')
+    .replace(/AIzaSy[a-zA-Z0-9*_-]{8,}/g, '[REDACTED_KEY]')
+    .replace(/AQ\.[a-zA-Z0-9*_-]{8,}/g, '[REDACTED_KEY]')
+    .replace(/\.{2,}/g, '.')
+    .trim();
+}

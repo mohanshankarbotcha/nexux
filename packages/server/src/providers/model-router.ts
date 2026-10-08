@@ -39,8 +39,8 @@ export class ModelRouter {
   initializeFromStorage(storage: StorageEngine = globalStorage): void {
     const creds = storage.getCredentials();
 
-    const openai = new OpenAIProvider({ apiKey: creds.openaiApiKey });
-    const gemini = new GeminiProvider({ apiKey: creds.geminiApiKey });
+    const openai = new OpenAIProvider({ apiKey: creds.openaiApiKey || '' });
+    const gemini = new GeminiProvider({ apiKey: creds.geminiApiKey || '' });
 
     this.registerProvider(openai);
     this.registerProvider(gemini);
@@ -67,16 +67,33 @@ export class ModelRouter {
     override?: { provider?: ProviderId; model?: string }
   ): { provider: IModelProvider; model: string } {
     const defaultRoute = this.routingTable[role] || this.routingTable['coordinator'];
-    const targetProviderId = override?.provider || defaultRoute?.provider;
+    let providerInstance: IModelProvider | undefined;
 
-    let providerInstance = targetProviderId ? this.providers.get(targetProviderId) : undefined;
-
-    // Fallback: if targeted provider is not configured or missing key, try any configured provider
-    if (!providerInstance || ('getApiKey' in providerInstance && !(providerInstance as any).getApiKey())) {
-      for (const p of this.providers.values()) {
-        if ('getApiKey' in p && (p as any).getApiKey()) {
-          providerInstance = p;
-          break;
+    if (override?.provider) {
+      providerInstance = this.providers.get(override.provider);
+      if (!providerInstance) {
+        throw new ProviderError(
+          `Requested provider '${override.provider}' is not supported.`,
+          'router',
+          'PROVIDER_NOT_CONFIGURED',
+          400
+        );
+      }
+    } else {
+      // Default resolution: prefer default route provider if configured, or first configured provider
+      const defaultProviderId = defaultRoute?.provider || 'gemini';
+      const candidate = this.providers.get(defaultProviderId);
+      if (candidate && 'getApiKey' in candidate && (candidate as any).getApiKey()) {
+        providerInstance = candidate;
+      } else {
+        for (const p of this.providers.values()) {
+          if ('getApiKey' in p && (p as any).getApiKey()) {
+            providerInstance = p;
+            break;
+          }
+        }
+        if (!providerInstance) {
+          providerInstance = candidate || this.providers.get('gemini');
         }
       }
     }
@@ -92,7 +109,6 @@ export class ModelRouter {
 
     const resolvedModel =
       override?.model ||
-      (override?.provider && override.provider === providerInstance.id ? undefined : undefined) ||
       (defaultRoute && defaultRoute.provider === providerInstance.id ? defaultRoute.model : undefined) ||
       (providerInstance.id === 'openai' ? 'gpt-4o' : 'gemini-2.5-flash');
 

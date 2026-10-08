@@ -7,6 +7,7 @@ import {
   ValidationError,
   globalEventBus,
   logger,
+  sanitizeErrorMessage,
 } from '@nexus/core';
 import { globalStorage } from '../../storage/storage-engine.js';
 import { globalModelRouter } from '../../providers/model-router.js';
@@ -17,9 +18,13 @@ import { globalActiveTaskRegistry } from '../../tasks/active-task-registry.js';
 export function createTaskRouter(): Router {
   const router = Router();
 
-  // List all tasks
-  router.get('/', (_req: Request, res: Response) => {
-    const tasks = globalStorage.getAllTasks();
+  // List tasks with optional pagination limit
+  router.get('/', (req: Request, res: Response) => {
+    const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : undefined;
+    let tasks = globalStorage.getAllTasks();
+    if (limit && limit > 0) {
+      tasks = tasks.slice(-limit);
+    }
     res.json({ success: true, tasks });
   });
 
@@ -36,11 +41,20 @@ export function createTaskRouter(): Router {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders?.();
 
+    const heartbeat = setInterval(() => {
+      try {
+        res.write(': heartbeat\n\n');
+      } catch {
+        clearInterval(heartbeat);
+      }
+    }, 15_000);
+
     const unsubscribe = globalEventBus.onAll((event) => {
       res.write(NexusEventBus.formatSSE(event));
     });
 
     _req.on('close', () => {
+      clearInterval(heartbeat);
       unsubscribe();
     });
   });
@@ -54,12 +68,12 @@ export function createTaskRouter(): Router {
       }
 
       if (!globalModelRouter.hasAnyConfiguredProvider()) {
-        throw new ProviderError(
-          'Cannot execute task: No AI model provider is configured. Please configure an OpenAI or Google Gemini API key.',
-          'router',
-          'PROVIDER_NOT_CONFIGURED',
-          400
-        );
+        const errorMsg = 'Cannot execute task: No AI model provider is configured. Please configure an OpenAI or Google Gemini API key in Settings → Providers.';
+        return res.status(400).json({
+          success: false,
+          error: `PROVIDER_AUTH_FAILED: ${errorMsg}`,
+          errorCode: 'PROVIDER_AUTH_FAILED',
+        });
       }
 
       const taskId = `task_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -103,13 +117,14 @@ export function createTaskRouter(): Router {
       const validation = await route.provider.validateCredentials();
       if (!validation.isValid) {
         logger.warn(`Task preflight failed for provider ${route.provider.id}: ${validation.message}`);
+        const cleanMsg = sanitizeErrorMessage(validation.message).replace(/\.+$/, '');
         const failedTask: Task = {
           id: taskId,
           sessionId: taskSessionId,
           prompt,
           status: 'failed',
           stage: 'failed',
-          error: `PROVIDER_AUTH_FAILED: ${validation.message}. Please configure a valid ${route.provider.name} API key in Settings/Providers.`,
+          error: `PROVIDER_AUTH_FAILED: ${cleanMsg}. Please configure a valid ${route.provider.name} API key in Settings → Providers.`,
           changedFiles: [],
           activeAgents: [],
           createdAt: Date.now(),
@@ -135,10 +150,60 @@ export function createTaskRouter(): Router {
 
         res.status(400).json({
           success: false,
+          errorCode: 'PROVIDER_AUTH_FAILED',
           error: failedTask.error,
           task: failedTask,
         });
         return;
+      }
+
+      // Preflight model availability check
+      if (typeof (route.provider as any).validateModel === 'function') {
+        const modelValidation = await (route.provider as any).validateModel(route.model);
+        if (!modelValidation.isValid) {
+          logger.warn(
+            `Task preflight model check failed for ${route.provider.id} model ${route.model}: ${modelValidation.message}`
+          );
+          const cleanMsg = sanitizeErrorMessage(modelValidation.message).replace(/\.+$/, '');
+          const errCode = modelValidation.code || 'MODEL_UNAVAILABLE';
+          const failedTask: Task = {
+            id: taskId,
+            sessionId: taskSessionId,
+            prompt,
+            status: 'failed',
+            stage: 'failed',
+            error: `${errCode}: ${cleanMsg}`,
+            changedFiles: [],
+            activeAgents: [],
+            createdAt: Date.now(),
+            completedAt: Date.now(),
+            providerMetadata: {
+              provider: route.provider.id,
+              model: route.model,
+              plannerModel: route.model,
+              coderModel: route.model,
+              reviewerModel: route.model,
+            },
+          };
+          globalStorage.saveTask(failedTask);
+
+          globalEventBus.emit({
+            id: `evt_${Date.now()}`,
+            type: 'task_failed',
+            sessionId: failedTask.sessionId,
+            taskId: failedTask.id,
+            timestamp: Date.now(),
+            error: failedTask.error || 'Model unavailable',
+          });
+
+          res.status(400).json({
+            success: false,
+            errorCode: errCode,
+            error: failedTask.error,
+            task: failedTask,
+          });
+          return;
+        }
       }
 
       const task: Task = {

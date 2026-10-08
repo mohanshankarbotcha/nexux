@@ -11,6 +11,8 @@ import {
   ProviderError,
   logger,
   ToolDefinition,
+  isPlaceholderOrFixtureKey,
+  sanitizeErrorMessage,
 } from '@nexus/core';
 
 export interface GeminiProviderOptions {
@@ -26,6 +28,8 @@ export class GeminiProvider implements IModelProvider {
   private apiKey?: string;
   private baseUrl: string;
   private fetchFn: typeof fetch;
+  private cachedModels: string[] = [];
+  private modelsCachedAt = 0;
 
   constructor(options: GeminiProviderOptions = {}) {
     this.apiKey = options.apiKey;
@@ -35,6 +39,8 @@ export class GeminiProvider implements IModelProvider {
 
   setApiKey(key: string): void {
     this.apiKey = key.trim();
+    this.cachedModels = [];
+    this.modelsCachedAt = 0;
   }
 
   getApiKey(): string | undefined {
@@ -47,7 +53,18 @@ export class GeminiProvider implements IModelProvider {
       return {
         provider: 'gemini',
         isValid: false,
+        code: 'PROVIDER_AUTH_FAILED',
         message: 'Gemini API key is not configured',
+        testedAt,
+      };
+    }
+
+    if (isPlaceholderOrFixtureKey(this.apiKey)) {
+      return {
+        provider: 'gemini',
+        isValid: false,
+        code: 'PROVIDER_AUTH_FAILED',
+        message: 'Placeholder or test fixture Gemini API key detected. Please configure a valid Gemini API key in Settings.',
         testedAt,
       };
     }
@@ -59,17 +76,30 @@ export class GeminiProvider implements IModelProvider {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        const msg = (errorData as any)?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
+        const rawMsg = (errorData as any)?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
+        const cleanMsg = sanitizeErrorMessage(rawMsg).replace(/\.+$/, '');
+        const code =
+          (res.status === 400 && cleanMsg.toLowerCase().includes('api_key')) || cleanMsg.toLowerCase().includes('invalid api key')
+            ? 'PROVIDER_AUTH_FAILED'
+            : 'PROVIDER_REQUEST_FAILED';
         return {
           provider: 'gemini',
           isValid: false,
-          message: `Validation failed: ${msg}`,
+          code,
+          message: `Validation failed: ${cleanMsg}`,
           testedAt,
         };
       }
 
       const data = (await res.json()) as { models?: { name: string }[] };
-      const availableModels = data.models?.map((m) => m.name.replace('models/', '')).slice(0, 15) || [];
+      const allModels = data.models?.map((m) => m.name.replace('models/', '')) || [];
+      this.cachedModels = allModels;
+      this.modelsCachedAt = testedAt;
+
+      const priorityModels = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash'].filter((m) =>
+        allModels.includes(m)
+      );
+      const availableModels = priorityModels.length > 0 ? priorityModels : allModels.slice(0, 15);
 
       return {
         provider: 'gemini',
@@ -82,10 +112,68 @@ export class GeminiProvider implements IModelProvider {
       return {
         provider: 'gemini',
         isValid: false,
-        message: `Network error during validation: ${err instanceof Error ? err.message : String(err)}`,
+        code: 'NETWORK_ERROR',
+        message: `Network error during validation: ${sanitizeErrorMessage(err instanceof Error ? err.message : String(err))}`,
         testedAt,
       };
     }
+  }
+
+  async validateModel(model: string): Promise<ProviderValidationResult> {
+    const testedAt = Date.now();
+    if (this.cachedModels.length === 0 || testedAt - this.modelsCachedAt > 300_000) {
+      const credVal = await this.validateCredentials();
+      if (!credVal.isValid) return credVal;
+    }
+
+    const isAvailable = this.cachedModels.includes(model);
+    if (!isAvailable) {
+      const suggested = ['gemini-2.5-flash', 'gemini-2.5-pro'].filter((m) => this.cachedModels.includes(m));
+      return {
+        provider: 'gemini',
+        isValid: false,
+        code: 'MODEL_UNAVAILABLE',
+        message: `The model '${model}' does not exist or is not accessible on your Google Gemini account. Available models: ${suggested.join(', ')}.`,
+        availableModels: suggested,
+        testedAt,
+      };
+    }
+
+    // Probe generating 1 token to catch quota limits early before running coordinator
+    try {
+      const probeRes = await this.fetchFn(
+        `${this.baseUrl}/models/${model}:generateContent?key=${this.apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'ping' }] }],
+            generationConfig: { maxOutputTokens: 1 },
+          }),
+        }
+      );
+
+      if (probeRes.status === 429) {
+        const errJson = (await probeRes.json().catch(() => ({}))) as any;
+        const msg = errJson?.error?.message || 'Quota exceeded';
+        return {
+          provider: 'gemini',
+          isValid: false,
+          code: 'QUOTA_EXCEEDED',
+          message: `Google Gemini API quota exceeded or rate limit reached: ${sanitizeErrorMessage(msg)}`,
+          testedAt,
+        };
+      }
+    } catch {
+      // Ignore probe network glitch; let execution proceed
+    }
+
+    return {
+      provider: 'gemini',
+      isValid: true,
+      message: `Model '${model}' is accessible on Google Gemini`,
+      testedAt,
+    };
   }
 
   private formatTools(tools?: ToolDefinition[]) {
@@ -216,13 +304,18 @@ export class GeminiProvider implements IModelProvider {
 
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        const errMsg = (errJson as any)?.error?.message || `HTTP ${res.status}`;
-        const code = res.status === 400 && errMsg.toLowerCase().includes('api_key')
-          ? 'PROVIDER_AUTH_FAILED'
-          : res.status === 429
-          ? 'PROVIDER_RATE_LIMIT'
-          : 'PROVIDER_REQUEST_FAILED';
-        throw new ProviderError(`Gemini completion failed: ${errMsg}`, 'gemini', code, res.status, errJson);
+        const rawMsg = (errJson as any)?.error?.message || `HTTP ${res.status}`;
+        const cleanMsg = sanitizeErrorMessage(rawMsg).replace(/\.+$/, '');
+        const isQuota = cleanMsg.toLowerCase().includes('quota') || cleanMsg.toLowerCase().includes('resource has been exhausted');
+        const code =
+          (res.status === 400 && cleanMsg.toLowerCase().includes('api_key')) || cleanMsg.toLowerCase().includes('invalid api key')
+            ? 'PROVIDER_AUTH_FAILED'
+            : res.status === 404 || cleanMsg.toLowerCase().includes('not found') || cleanMsg.toLowerCase().includes('is not supported')
+            ? 'MODEL_UNAVAILABLE'
+            : res.status === 429
+            ? (isQuota ? 'QUOTA_EXCEEDED' : 'PROVIDER_RATE_LIMIT')
+            : 'PROVIDER_REQUEST_FAILED';
+        throw new ProviderError(`Gemini completion failed: ${cleanMsg}`, 'gemini', code, res.status, errJson);
       }
 
       const data = (await res.json()) as any;
@@ -337,13 +430,18 @@ export class GeminiProvider implements IModelProvider {
 
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        const errMsg = (errJson as any)?.error?.message || `HTTP ${res.status}`;
-        const code = res.status === 400 && errMsg.toLowerCase().includes('api_key')
-          ? 'PROVIDER_AUTH_FAILED'
-          : res.status === 429
-          ? 'PROVIDER_RATE_LIMIT'
-          : 'PROVIDER_REQUEST_FAILED';
-        throw new ProviderError(`Gemini streaming failed: ${errMsg}`, 'gemini', code, res.status, errJson);
+        const rawMsg = (errJson as any)?.error?.message || `HTTP ${res.status}`;
+        const cleanMsg = sanitizeErrorMessage(rawMsg).replace(/\.+$/, '');
+        const isQuota = cleanMsg.toLowerCase().includes('quota') || cleanMsg.toLowerCase().includes('resource has been exhausted');
+        const code =
+          (res.status === 400 && cleanMsg.toLowerCase().includes('api_key')) || cleanMsg.toLowerCase().includes('invalid api key')
+            ? 'PROVIDER_AUTH_FAILED'
+            : res.status === 404 || cleanMsg.toLowerCase().includes('not found') || cleanMsg.toLowerCase().includes('is not supported')
+            ? 'MODEL_UNAVAILABLE'
+            : res.status === 429
+            ? (isQuota ? 'QUOTA_EXCEEDED' : 'PROVIDER_RATE_LIMIT')
+            : 'PROVIDER_REQUEST_FAILED';
+        throw new ProviderError(`Gemini streaming failed: ${cleanMsg}`, 'gemini', code, res.status, errJson);
       }
 
       if (!res.body) {
