@@ -4,11 +4,13 @@ import { UsageRecord } from './usage.js';
 
 export type TaskStatus =
   | 'pending'
+  | 'validating'
   | 'running'
   | 'awaiting_approval'
   | 'completed'
   | 'failed'
-  | 'cancelled';
+  | 'cancelled'
+  | 'timeout';
 
 export interface ChangedFile {
   filePath: string;
@@ -60,6 +62,8 @@ export interface Task {
   providerMetadata?: ProviderTaskMetadata;
   totalTokens?: number;
   totalCostUsd?: number;
+  taskType?: 'chat' | 'work';
+  complexity?: 'S' | 'M' | 'L' | 'XL';
   events?: NexusEvent[];
   usageRecords?: UsageRecord[];
 }

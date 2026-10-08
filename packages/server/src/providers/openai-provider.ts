@@ -103,12 +103,18 @@ export class OpenAIProvider implements IModelProvider {
     }));
   }
 
+  private isReasoningModel(model: string): boolean {
+    const m = model.toLowerCase();
+    return m.startsWith('o1') || m.startsWith('o3') || m.startsWith('o4');
+  }
+
   private formatMessages(request: ProviderRequest) {
     const messages: any[] = [];
+    const isReasoning = this.isReasoningModel(request.model);
 
     if (request.systemInstruction) {
       messages.push({
-        role: 'system',
+        role: isReasoning ? 'developer' : 'system',
         content: request.systemInstruction,
       });
     }
@@ -150,14 +156,22 @@ export class OpenAIProvider implements IModelProvider {
     }
 
     const startTime = Date.now();
+    const isReasoning = this.isReasoningModel(request.model);
     const payload: any = {
       model: request.model,
       messages: this.formatMessages(request),
-      temperature: request.temperature ?? 0.2,
     };
 
+    if (!isReasoning) {
+      payload.temperature = request.temperature ?? 0.2;
+    }
+
     if (request.maxOutputTokens) {
-      payload.max_tokens = request.maxOutputTokens;
+      if (isReasoning) {
+        payload.max_completion_tokens = request.maxOutputTokens;
+      } else {
+        payload.max_tokens = request.maxOutputTokens;
+      }
     }
 
     const tools = this.formatTools(request.tools);
@@ -258,16 +272,24 @@ export class OpenAIProvider implements IModelProvider {
     }
 
     const startTime = Date.now();
+    const isReasoning = this.isReasoningModel(request.model);
     const payload: any = {
       model: request.model,
       messages: this.formatMessages(request),
-      temperature: request.temperature ?? 0.2,
       stream: true,
       stream_options: { include_usage: true },
     };
 
+    if (!isReasoning) {
+      payload.temperature = request.temperature ?? 0.2;
+    }
+
     if (request.maxOutputTokens) {
-      payload.max_tokens = request.maxOutputTokens;
+      if (isReasoning) {
+        payload.max_completion_tokens = request.maxOutputTokens;
+      } else {
+        payload.max_tokens = request.maxOutputTokens;
+      }
     }
 
     const tools = this.formatTools(request.tools);

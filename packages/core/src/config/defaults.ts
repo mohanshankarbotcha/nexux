@@ -39,3 +39,14 @@ export const DEFAULT_SERVER_CONFIG = {
   defaultPort: 3000,
   apiPrefix: '/api',
 };
+
+export const DEFAULT_EXECUTION_DEADLINES = {
+  connectTimeoutMs: 10_000,
+  firstByteTimeoutMs: 30_000,
+  idleStreamTimeoutMs: 20_000,
+  providerRequestTimeoutMs: 60_000,
+  reasoningModelTimeoutMs: 120_000,
+  toolExecutionTimeoutMs: 60_000,
+  taskExecutionTimeoutMs: 600_000,
+  staleHeartbeatThresholdMs: 25_000,
+};

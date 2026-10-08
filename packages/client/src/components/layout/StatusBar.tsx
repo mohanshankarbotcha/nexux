@@ -20,24 +20,24 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   totalCostUsd = 0,
 }) => {
   return (
-    <footer className="h-6 border-t border-nexus-border bg-nexus-950 px-3 flex items-center justify-between text-[11px] text-slate-400 select-none font-mono">
+    <footer className="h-6 border-t border-nexus-border bg-nexus-950 px-3 flex items-center justify-between text-[11px] text-slate-400 select-none font-mono min-w-0">
       {/* Left: Git & Workspace */}
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-1 hover:text-slate-200 transition-colors cursor-default">
+      <div className="flex items-center space-x-4 min-w-0 truncate">
+        <div className="flex items-center space-x-1 hover:text-slate-200 transition-colors cursor-default flex-shrink-0">
           <GitBranch className="w-3 h-3 text-sky-400" />
           <span>{gitBranch}</span>
         </div>
 
         {workspacePath && (
-          <div className="flex items-center space-x-1 hover:text-slate-200 transition-colors truncate max-w-sm">
-            <FolderGit2 className="w-3 h-3 text-slate-500" />
+          <div className="flex items-center space-x-1 hover:text-slate-200 transition-colors truncate max-w-xs min-w-0">
+            <FolderGit2 className="w-3 h-3 text-slate-500 flex-shrink-0" />
             <span className="truncate">{workspacePath}</span>
           </div>
         )}
       </div>
 
       {/* Center: Agent State */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 flex-shrink-0">
         <div className="flex items-center space-x-1.5">
           <Activity
             className={`w-3 h-3 ${
@@ -51,11 +51,13 @@ export const StatusBar: React.FC<StatusBarProps> = ({
       </div>
 
       {/* Right: Tokens & Cost */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 flex-shrink-0">
         <div className="flex items-center space-x-1 hover:text-slate-200">
           <Coins className="w-3 h-3 text-amber-400" />
           <span>
-            {totalTokens.toLocaleString()} tokens (~${totalCostUsd.toFixed(4)})
+            {totalTokens > 0
+              ? `${totalTokens.toLocaleString()} tokens (~$${totalCostUsd.toFixed(4)})`
+              : 'No usage yet'}
           </span>
         </div>
 

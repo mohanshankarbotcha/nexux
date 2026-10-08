@@ -171,9 +171,9 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       status:
         activeRole === 'coordinator' && isRunning
           ? 'running'
+          : activeTask?.status === 'failed' && (activeTask.currentAgentRole === 'coordinator' || !activeTask.currentAgentRole)
+          ? 'failed'
           : activeTask?.status === 'completed'
-          ? 'completed'
-          : activeTask
           ? 'completed'
           : 'waiting',
     },
@@ -184,6 +184,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       status:
         activeRole === 'explorer' && isRunning
           ? 'running'
+          : activeTask?.status === 'failed' && activeTask.currentAgentRole === 'explorer'
+          ? 'failed'
           : liveEvents.some((e) => e.type === 'tool_completed' && (e.toolName === 'search_files' || e.toolName === 'list_files' || e.toolName === 'read_file'))
           ? 'completed'
           : 'waiting',
@@ -195,6 +197,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       status:
         activeRole === 'planner' && isRunning
           ? 'running'
+          : activeTask?.status === 'failed' && activeTask.currentAgentRole === 'planner'
+          ? 'failed'
           : plan
           ? 'completed'
           : 'waiting',
@@ -206,6 +210,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       status:
         activeRole === 'coder' && isRunning
           ? 'running'
+          : activeTask?.status === 'failed' && activeTask.currentAgentRole === 'coder'
+          ? 'failed'
           : liveEvents.some((e) => e.type === 'tool_completed' && (e.toolName === 'write_file' || e.toolName === 'edit_file'))
           ? 'completed'
           : 'waiting',
@@ -217,9 +223,9 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       status:
         activeRole === 'debugger' && isRunning
           ? 'running'
+          : activeTask?.status === 'failed' && activeTask.currentAgentRole === 'debugger'
+          ? 'failed'
           : liveEvents.some((e) => e.type === 'command_completed' && e.exitCode !== 0)
-          ? 'running'
-          : activeTask?.status === 'completed'
           ? 'completed'
           : 'waiting',
     },
@@ -230,6 +236,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       status:
         activeRole === 'reviewer' && isRunning
           ? 'running'
+          : activeTask?.status === 'failed' && activeTask.currentAgentRole === 'reviewer'
+          ? 'failed'
           : activeTask?.status === 'completed'
           ? 'completed'
           : 'waiting',
@@ -350,78 +358,128 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
               </div>
             )}
 
-            {/* Structured Agent Stages Pipeline */}
-            <div className="rounded-xl bg-nexus-900/50 border border-nexus-border overflow-hidden">
-              <button
-                onClick={() =>
-                  setExpandedSections((prev) => ({ ...prev, stages: !prev.stages }))
-                }
-                className="w-full px-4 py-2.5 bg-nexus-900/80 flex items-center justify-between text-xs font-mono text-slate-300 hover:bg-nexus-850 transition-colors"
-              >
-                <div className="flex items-center space-x-2">
-                  <Activity className="w-3.5 h-3.5 text-indigo-400" />
-                  <span className="font-semibold">Specialist Agent Pipeline</span>
-                  <span className="text-[10px] text-slate-500">
-                    ({isRunning ? `Active: ${activeRole}` : 'Idle'})
+            {/* Error Panel for Failed Tasks */}
+            {activeTask?.status === 'failed' && (
+              <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-800/80 space-y-3 font-mono">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-2 text-rose-400 font-bold">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>TASK EXECUTION FAILED</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-rose-900/60 text-rose-200 border border-rose-700">
+                    STATUS: FAILED
                   </span>
                 </div>
-                {expandedSections.stages ? (
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                ) : (
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                )}
-              </button>
-
-              {expandedSections.stages && (
-                <div className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-                  {agentStages.map((stage) => {
-                    const isStageRunning = stage.status === 'running';
-                    const isStageDone = stage.status === 'completed';
-                    return (
-                      <div
-                        key={stage.role}
-                        className={`p-2.5 rounded-lg border text-xs font-mono flex flex-col justify-between space-y-2 transition-all ${
-                          isStageRunning
-                            ? 'bg-sky-950/40 border-sky-500/60 shadow-sm shadow-sky-500/10'
-                            : isStageDone
-                            ? 'bg-nexus-950/60 border-emerald-900/40'
-                            : 'bg-nexus-950/30 border-nexus-border/40 opacity-70'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span
-                            className={`font-semibold text-[11px] ${
-                              isStageRunning
-                                ? 'text-sky-300'
-                                : isStageDone
-                                ? 'text-emerald-400'
-                                : 'text-slate-400'
-                            }`}
-                          >
-                            {stage.name}
-                          </span>
-                          {isStageRunning ? (
-                            <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
-                          ) : isStageDone ? (
-                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                          ) : (
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-                          )}
-                        </div>
-
-                        <div className="text-[10px] text-slate-400 leading-tight">
-                          {isStageRunning
-                            ? 'Executing...'
-                            : isStageDone
-                            ? 'Done'
-                            : 'Waiting'}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="p-3 rounded-lg bg-nexus-950 border border-rose-900/60 text-xs text-rose-300 whitespace-pre-wrap leading-relaxed">
+                  {activeTask.error || 'The agent task failed to complete.'}
                 </div>
-              )}
-            </div>
+                <div className="text-[11px] text-slate-400 space-y-1 font-sans">
+                  <div className="font-semibold text-slate-300">Actionable Guidance:</div>
+                  <ul className="list-disc list-inside space-y-0.5 pl-1">
+                    {activeTask.error?.includes('PROVIDER_AUTH_FAILED') ? (
+                      <>
+                        <li>Verify your API credentials in <strong>Settings → Providers</strong>.</li>
+                        <li>Ensure the selected model is enabled on your API account.</li>
+                        <li>Switch to an alternative configured model (e.g., Google Gemini) and retry.</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>Review the tool execution log and terminal outputs below.</li>
+                        <li>Check if your workspace contains required files or permissions.</li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Assistant Final Response / Summary */}
+            {activeTask?.resultSummary && activeTask.status === 'completed' && (
+              <div className="p-4 rounded-xl bg-nexus-900/80 border border-nexus-border-bright/80 space-y-2">
+                <div className="flex items-center space-x-2 text-xs font-mono text-emerald-400 font-semibold">
+                  <Bot className="w-4 h-4" />
+                  <span>ASSISTANT RESPONSE</span>
+                </div>
+                <div className="text-xs text-slate-200 whitespace-pre-wrap font-mono leading-relaxed pl-3 border-l-2 border-emerald-500">
+                  {activeTask.resultSummary}
+                </div>
+              </div>
+            )}
+
+            {/* Structured Agent Stages Pipeline */}
+            {activeTask?.taskType !== 'chat' && (
+              <div className="rounded-xl bg-nexus-900/50 border border-nexus-border overflow-hidden">
+                <button
+                  onClick={() =>
+                    setExpandedSections((prev) => ({ ...prev, stages: !prev.stages }))
+                  }
+                  className="w-full px-4 py-2.5 bg-nexus-900/80 flex items-center justify-between text-xs font-mono text-slate-300 hover:bg-nexus-850 transition-colors"
+                >
+                  <div className="flex items-center space-x-2">
+                    <Activity className="w-3.5 h-3.5 text-indigo-400" />
+                    <span className="font-semibold">Specialist Agent Pipeline</span>
+                    <span className="text-[10px] text-slate-500">
+                      ({isRunning ? `Active: ${activeRole}` : 'Idle'})
+                    </span>
+                  </div>
+                  {expandedSections.stages ? (
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  ) : (
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  )}
+                </button>
+
+                {expandedSections.stages && (
+                  <div className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                    {agentStages.map((stage) => {
+                      const isStageRunning = stage.status === 'running';
+                      const isStageDone = stage.status === 'completed';
+                      return (
+                        <div
+                          key={stage.role}
+                          className={`p-2.5 rounded-lg border text-xs font-mono flex flex-col justify-between space-y-2 transition-all ${
+                            isStageRunning
+                              ? 'bg-sky-950/40 border-sky-500/60 shadow-sm shadow-sky-500/10'
+                              : isStageDone
+                              ? 'bg-nexus-950/60 border-emerald-900/40'
+                              : 'bg-nexus-950/30 border-nexus-border/40 opacity-70'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span
+                              className={`font-semibold text-[11px] ${
+                                isStageRunning
+                                  ? 'text-sky-300'
+                                  : isStageDone
+                                  ? 'text-emerald-400'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {stage.name}
+                            </span>
+                            {isStageRunning ? (
+                              <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
+                            ) : isStageDone ? (
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+                            )}
+                          </div>
+
+                          <div className="text-[10px] text-slate-400 leading-tight">
+                            {isStageRunning
+                              ? 'Executing...'
+                              : isStageDone
+                              ? 'Done'
+                              : 'Waiting'}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Streaming Thought / Reasoning Box */}
             {streamingThought && (

@@ -65,10 +65,16 @@ export class StorageEngine {
     try {
       const tasks = this.getAllTasks();
       for (const task of tasks) {
-        if (task.status === 'running') {
-          logger.warn(`StorageEngine: Recovering interrupted task '${task.id}' from prior session`);
+        if (
+          task.status === 'running' ||
+          task.status === 'pending' ||
+          task.status === 'validating' ||
+          task.status === 'awaiting_approval'
+        ) {
+          logger.warn(`StorageEngine: Recovering interrupted task '${task.id}' from prior session with code SERVER_RESTART`);
           task.status = 'failed';
-          task.error = 'Task execution was interrupted by application shutdown';
+          task.stage = 'failed';
+          task.error = 'SERVER_RESTART: Task execution was interrupted by application shutdown';
           task.completedAt = task.completedAt || Date.now();
           task.updatedAt = Date.now();
           this.saveTask(task);

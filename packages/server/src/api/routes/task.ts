@@ -46,7 +46,7 @@ export function createTaskRouter(): Router {
   });
 
   // Create and launch new task
-  router.post('/', (req: Request, res: Response, next: NextFunction) => {
+  router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { prompt, sessionId, workspaceRoot, workspacePath, provider, model } = req.body;
       if (!prompt || typeof prompt !== 'string') {
@@ -98,6 +98,48 @@ export function createTaskRouter(): Router {
         provider,
         model,
       });
+
+      // Preflight credential validation before launching task runner
+      const validation = await route.provider.validateCredentials();
+      if (!validation.isValid) {
+        logger.warn(`Task preflight failed for provider ${route.provider.id}: ${validation.message}`);
+        const failedTask: Task = {
+          id: taskId,
+          sessionId: taskSessionId,
+          prompt,
+          status: 'failed',
+          stage: 'failed',
+          error: `PROVIDER_AUTH_FAILED: ${validation.message}. Please configure a valid ${route.provider.name} API key in Settings/Providers.`,
+          changedFiles: [],
+          activeAgents: [],
+          createdAt: Date.now(),
+          completedAt: Date.now(),
+          providerMetadata: {
+            provider: route.provider.id,
+            model: route.model,
+            plannerModel: route.model,
+            coderModel: route.model,
+            reviewerModel: route.model,
+          },
+        };
+        globalStorage.saveTask(failedTask);
+
+        globalEventBus.emit({
+          id: `evt_${Date.now()}`,
+          type: 'task_failed',
+          sessionId: failedTask.sessionId,
+          taskId: failedTask.id,
+          timestamp: Date.now(),
+          error: failedTask.error || 'Validation failed',
+        });
+
+        res.status(400).json({
+          success: false,
+          error: failedTask.error,
+          task: failedTask,
+        });
+        return;
+      }
 
       const task: Task = {
         id: taskId,

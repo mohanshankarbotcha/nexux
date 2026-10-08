@@ -144,7 +144,10 @@ export class ActiveTaskRegistry {
     });
   }
 
-  cancel(taskId: string, reason = 'Task cancelled by user'): { success: boolean; message: string } {
+  cancel(
+    taskId: string,
+    reason = 'Task cancelled by user'
+  ): { success: boolean; message: string; alreadyTerminal?: boolean; status?: string } {
     const entry = this.activeTasks.get(taskId);
     if (entry) {
       logger.info(`ActiveTaskRegistry: Cancelling active task ${taskId}. Reason: ${reason}`);
@@ -179,21 +182,33 @@ export class ActiveTaskRegistry {
         reason,
       });
 
-      return { success: true, message: `Task ${taskId} cancelled successfully` };
+      return {
+        success: true,
+        message: `Task ${taskId} cancelled successfully`,
+        alreadyTerminal: false,
+        status: 'cancelled',
+      };
     }
 
     // Check recently terminated cache
     if (this.recentlyTerminated.has(taskId)) {
+      const termStatus = this.recentlyTerminated.get(taskId);
       return {
         success: true,
-        message: `Task ${taskId} was already in terminal state '${this.recentlyTerminated.get(taskId)}'`,
+        message: `Task ${taskId} was already in terminal state '${termStatus}'`,
+        alreadyTerminal: true,
+        status: termStatus,
       };
     }
 
     // If not in active memory, check persistent storage
     const storedTask = this.storage.getTask(taskId);
     if (storedTask) {
-      if (storedTask.status === 'running' || storedTask.status === 'pending') {
+      if (
+        storedTask.status === 'running' ||
+        storedTask.status === 'pending' ||
+        storedTask.status === 'validating'
+      ) {
         storedTask.status = 'cancelled';
         storedTask.stage = 'cancelled';
         storedTask.completedAt = Date.now();
@@ -210,13 +225,20 @@ export class ActiveTaskRegistry {
           reason,
         });
 
-        return { success: true, message: `Task ${taskId} cancelled successfully` };
+        return {
+          success: true,
+          message: `Task ${taskId} cancelled successfully`,
+          alreadyTerminal: false,
+          status: 'cancelled',
+        };
       }
 
       this.recentlyTerminated.set(taskId, storedTask.status);
       return {
         success: true,
         message: `Task ${taskId} was already in terminal state '${storedTask.status}'`,
+        alreadyTerminal: true,
+        status: storedTask.status,
       };
     }
 

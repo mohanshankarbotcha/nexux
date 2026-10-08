@@ -65,6 +65,21 @@ export class CoordinatorAgent extends BaseAgent {
     this.contextEngine = contextEngine;
   }
 
+  private isConversationalGreeting(prompt: string): boolean {
+    const trimmed = prompt.trim().toLowerCase();
+    const conversational = [
+      'hi', 'hello', 'hey', 'hiii', 'hiya', 'greetings', 'good morning',
+      'good afternoon', 'good evening', 'who are you', 'what are you',
+      'what can you do', 'help', 'thanks', 'thank you', 'how are you'
+    ];
+    if (conversational.includes(trimmed)) return true;
+    if (trimmed.length < 30 && conversational.some((c) => trimmed.startsWith(c) || trimmed.endsWith(c))) {
+      const codeKeywords = ['code', 'build', 'create', 'write', 'fix', 'debug', 'test', 'file', 'script', 'function', 'app'];
+      return !codeKeywords.some((k) => trimmed.includes(k));
+    }
+    return false;
+  }
+
   /**
    * Assesses whether a task requires deep exploration and planning or can be directly implemented.
    */
@@ -175,6 +190,104 @@ export class CoordinatorAgent extends BaseAgent {
         provider: activeRoute.provider.id,
         model: activeRoute.model,
       });
+    }
+
+    // Fast-path: Conversational greetings and inquiries (taskType: 'chat')
+    if (this.isConversationalGreeting(prompt)) {
+      task.taskType = 'chat';
+      task.status = 'running';
+      task.stage = 'chatting';
+      this.storage.saveTask(task);
+
+      globalActiveTaskRegistry.updateStage(context.taskId, 'chatting', 'coordinator', 'Responding to user query');
+
+      try {
+        const directResponse = await activeRoute.provider.complete({
+          requestId: `req_${Date.now()}`,
+          model: activeRoute.model,
+          messages: [
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          systemInstruction:
+            'You are NEXUS.AI, an elite autonomous AI software engineering desktop application. Respond concisely, politely, and professionally to the user greeting or inquiry. State that you are ready to explore the codebase, plan features, write code, run terminal commands, and verify software in the current workspace.',
+          abortSignal: context.abortSignal,
+        });
+
+        const reqId = `req_${Date.now()}`;
+        const callDuration = Date.now() - startTime;
+
+        // Save usage record
+        this.storage.recordUsage({
+          requestId: reqId,
+          taskId: context.taskId,
+          sessionId: context.sessionId,
+          agent: this.role,
+          provider: activeRoute.provider.id,
+          model: activeRoute.model,
+          inputTokens: directResponse.usage.inputTokens,
+          outputTokens: directResponse.usage.outputTokens,
+          totalTokens: directResponse.usage.totalTokens,
+          isEstimated: Boolean(directResponse.usage.isEstimated),
+          estimatedCostUsd: 0,
+          timestamp: Date.now(),
+          durationMs: callDuration,
+          status: 'success',
+        });
+
+        const reply = directResponse.content;
+        const totalDurationMs = Date.now() - startTime;
+
+        task.status = 'completed';
+        task.stage = 'completed';
+        task.resultSummary = reply;
+        task.completedAt = Date.now();
+        task.totalTokens = directResponse.usage.totalTokens;
+        this.storage.saveTask(task);
+
+        globalActiveTaskRegistry.complete(context.taskId, reply);
+        this.emitAgentCompleted(reply, context);
+
+        this.eventBus.emit({
+          id: `evt_${Date.now()}`,
+          type: 'agent_message',
+          sessionId: context.sessionId,
+          taskId: context.taskId,
+          timestamp: Date.now(),
+          agentRole: 'coordinator',
+          content: reply,
+        });
+
+        this.eventBus.emit({
+          id: `evt_${Date.now()}`,
+          type: 'task_completed',
+          sessionId: context.sessionId,
+          taskId: context.taskId,
+          timestamp: Date.now(),
+          status: 'completed',
+          summary: reply,
+          totalDurationMs,
+          totalTokens: directResponse.usage.totalTokens,
+        });
+
+        return {
+          summary: reply,
+          success: true,
+          data: {
+            taskId: context.taskId,
+            status: 'completed',
+            summary: reply,
+            changedFiles: [],
+            stagesRun: ['coordinator'],
+            totalDurationMs,
+            totalTokens: directResponse.usage.totalTokens,
+          },
+        };
+      } catch (chatErr: any) {
+        logger.error(`Conversational fast-path failed:`, chatErr);
+      }
     }
 
     try {

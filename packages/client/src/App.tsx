@@ -253,7 +253,6 @@ export const App: React.FC = () => {
             break;
 
           case 'task_completed':
-            setActiveTaskId(null);
             setActiveStatus('idle');
             setStreamingThought('');
             refreshTasks();
@@ -261,14 +260,12 @@ export const App: React.FC = () => {
             break;
 
           case 'task_cancelled':
-            setActiveTaskId(null);
             setActiveStatus('idle');
             setStreamingThought('');
             refreshTasks();
             break;
 
           case 'task_failed':
-            setActiveTaskId(null);
             setActiveStatus('failed');
             setStreamingThought('');
             refreshTasks();
@@ -337,10 +334,10 @@ export const App: React.FC = () => {
         options?.model
       );
       setActiveTaskId(res.task.id);
-      refreshTasks();
     } catch (err: any) {
       setActiveStatus('failed');
-      alert(`Could not start task: ${err.message}`);
+      await refreshTasks();
+      console.warn(`Task launch preflight notice: ${err.message}`);
     }
   };
 
@@ -410,6 +407,7 @@ export const App: React.FC = () => {
         activeTaskId={activeTaskId}
         activeRole={activeRole}
         activeStatus={activeStatus}
+        activeModel={activeTask?.providerMetadata?.model}
         onCancelActiveTask={handleCancelTask}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
@@ -538,8 +536,8 @@ export const App: React.FC = () => {
         gitBranch="main"
         activeRole={activeRole}
         activeStatus={activeStatus}
-        totalTokens={usageSummary?.totalTokens || 0}
-        totalCostUsd={usageSummary?.totalEstimatedCostUsd || 0}
+        totalTokens={activeTask?.totalTokens ?? 0}
+        totalCostUsd={activeTask?.totalCostUsd ?? 0}
       />
 
       {/* Command Palette Modal */}

@@ -24,6 +24,7 @@ interface TopBarProps {
   activeTaskId: string | null;
   activeRole: AgentRole;
   activeStatus: AgentStatus;
+  activeModel?: string;
   onCancelActiveTask: () => void;
   onOpenCommandPalette: () => void;
   onOpenSettings: () => void;
@@ -40,6 +41,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   activeTaskId,
   activeRole,
   activeStatus,
+  activeModel,
   onCancelActiveTask,
   onOpenCommandPalette,
   onOpenSettings,
@@ -140,9 +142,10 @@ export const TopBar: React.FC<TopBarProps> = ({
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
           <span className="hidden sm:inline text-[11px]">
-            {primaryProvider?.isConfigured
-              ? primaryProvider.defaultModel || primaryProvider.name
-              : 'Setup AI Keys'}
+            {activeModel ||
+              (primaryProvider?.isConfigured
+                ? primaryProvider.defaultModel || primaryProvider.name
+                : 'Setup AI Keys')}
           </span>
           <span
             className={`w-1.5 h-1.5 rounded-full ${

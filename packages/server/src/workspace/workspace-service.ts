@@ -17,22 +17,26 @@ import { StorageEngine, globalStorage } from '../storage/storage-engine.js';
 import { globalFileCache } from '../cache/file-cache.js';
 
 // Files and directories to ignore by default in file trees and broad searches
-const DEFAULT_IGNORED_DIRS = new Set([
+export const DEFAULT_IGNORED_DIRS = new Set([
   '.git',
   'node_modules',
   'dist',
   'build',
+  'release',
+  'out',
   '.cache',
   '.next',
   '.turbo',
   'coverage',
+  '.freebuff',
   'NEXUS_AI_DATA',
 ]);
 
-const BINARY_EXTENSIONS = new Set([
+export const BINARY_EXTENSIONS = new Set([
   '.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp', '.pdf', '.exe',
   '.dll', '.zip', '.tar', '.gz', '.7z', '.bin', '.iso', '.mp3',
-  '.mp4', '.mov', '.avi', '.woff', '.woff2', '.ttf', '.eot', '.wasm'
+  '.mp4', '.mov', '.avi', '.woff', '.woff2', '.ttf', '.eot', '.wasm',
+  '.pak', '.pdb', '.obj', '.node', '.dylib', '.so'
 ]);
 
 export class WorkspaceService {

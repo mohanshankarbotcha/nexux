@@ -9,7 +9,12 @@ import {
   globalEventBus,
   logger,
 } from '@nexus/core';
-import { WorkspaceService, globalWorkspaceService } from '../workspace/workspace-service.js';
+import {
+  WorkspaceService,
+  globalWorkspaceService,
+  DEFAULT_IGNORED_DIRS,
+  BINARY_EXTENSIONS,
+} from '../workspace/workspace-service.js';
 import { globalFileCache } from '../cache/file-cache.js';
 
 export interface ContextSourceItem {
@@ -216,6 +221,18 @@ export class ContextEngine {
 
     for (const [relPath, data] of sortedCandidates) {
       if (items.length >= maxFiles || currentBytes >= maxBytes || currentTokens >= maxTokens) {
+        omittedFiles.push(relPath);
+        continue;
+      }
+
+      const ext = path.extname(relPath).toLowerCase();
+      if (BINARY_EXTENSIONS.has(ext)) {
+        omittedFiles.push(relPath);
+        continue;
+      }
+
+      const parts = relPath.replace(/\\/g, '/').split('/');
+      if (parts.some((p) => DEFAULT_IGNORED_DIRS.has(p))) {
         omittedFiles.push(relPath);
         continue;
       }

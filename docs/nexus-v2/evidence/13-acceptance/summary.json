@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-10-08T14:30:56.950Z",
+  "scenarios": {
+    "A4": {
+      "status": "PASSED",
+      "reason": "Invalid credentials rejected during preflight with zero ledger rows written",
+      "errorReported": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: sk-test-********************2345. You can find your API key at https://platform.openai.com/account/api-keys."
+    },
+    "A8": {
+      "status": "PASSED",
+      "recoveredTaskId": "task_interrupted_1791469857453",
+      "finalStatus": "failed",
+      "errorCode": "SERVER_RESTART: Task execution was interrupted by application shutdown"
+    },
+    "A5": {
+      "status": "PASSED",
+      "signalAborted": true,
+      "idempotentResult": {
+        "success": true,
+        "message": "Task task_cancel_1791469857480 was already in terminal state 'cancelled'",
+        "alreadyTerminal": true,
+        "status": "cancelled"
+      }
+    },
+    "W0": {
+      "status": "PASSED",
+      "taskType": "chat",
+      "durationMs": 1602,
+      "responsePreview": "Hello! I am NEXUS.AI. I am ready to explore the codebase, plan features, write code, run terminal commands, and verify s"
+    },
+    "A2": {
+      "status": "PASSED",
+      "workspacePath": "C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_calculator_acceptance_1791469859095",
+      "createdFiles": [
+        "calculator.py",
+        "README.md"
+      ],
+      "operationsVerified": {
+        "addition": true,
+        "subtraction": true,
+        "multiplication": true,
+        "division": true
+      },
+      "independentExecPass": true,
+      "taskTokens": 9159,
+      "usageRecordsCount": 7,
+      "durationMs": 81780
+    },
+    "A1": {
+      "status": "NOT VERIFIED",
+      "reason": "OpenAI API key in environment is a non-functional mock/test key (tested and confirmed 401 in A4). Per Standing Rule R5, mock providers are prohibited from claiming pass."
+    }
+  }
+}
