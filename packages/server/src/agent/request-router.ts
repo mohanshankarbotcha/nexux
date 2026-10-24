@@ -7,6 +7,7 @@ import {
   logger,
 } from '@nexus/core';
 import { globalModelRouter } from '../providers/model-router.js';
+import { globalReferenceResolver } from '../context/reference-resolver.js';
 
 export class RequestRouter {
   /**
@@ -146,8 +147,71 @@ export class RequestRouter {
   async route(
     prompt: string,
     workspaceRoot: string,
-    options?: { provider?: string; model?: string }
+    options?: { provider?: string; model?: string; sessionId?: string }
   ): Promise<RouteDecision> {
+    // 0. Conversational Reference Resolution (Prompt 05)
+    if (options?.sessionId) {
+      try {
+        const ref = await globalReferenceResolver.resolveReference(prompt, options.sessionId, workspaceRoot);
+        if (ref.resolved) {
+          if (ref.type === 'file') {
+            return {
+              category: 'workspace_read',
+              profile: 'S2',
+              confidence: 0.95,
+              targets: ref.target ? [ref.target] : [],
+              needs: ['workspace'],
+              risk: 'low',
+              reason: `Resolved reference to '${ref.target}' via ${ref.source}`,
+            };
+          } else if (ref.type === 'command') {
+            return {
+              category: 'small_change',
+              profile: 'S3',
+              confidence: 0.95,
+              targets: ref.target ? [ref.target] : [],
+              needs: ['terminal'],
+              risk: 'medium',
+              reason: `Resolved command reference "${ref.target}" via ${ref.source}`,
+            };
+          } else if (ref.type === 'changeset') {
+            return {
+              category: 'conversation',
+              profile: 'S1',
+              confidence: 0.95,
+              targets: [],
+              needs: [],
+              risk: 'low',
+              reason: `Resolved request to explain recent changeset via ${ref.source}`,
+            };
+          } else if (ref.type === 'error') {
+            return {
+              category: 'small_change',
+              profile: 'S3',
+              confidence: 0.95,
+              targets: [],
+              needs: ['terminal', 'workspace'],
+              risk: 'medium',
+              reason: `Resolved bug/error fix reference via ${ref.source}`,
+            };
+          }
+        } else if (ref.type === 'clarification') {
+          return {
+            category: 'clarify_or_authorize',
+            profile: 'S5',
+            confidence: 0.95,
+            targets: ref.candidates || [],
+            needs: [],
+            risk: 'low',
+            clarification: ref.clarificationQuestion,
+            reason: `Unresolved or ambiguous reference requires clarification (${ref.source})`,
+          };
+        }
+      } catch (err: any) {
+        logger.debug(`RequestRouter: Reference resolution error: ${err.message}`);
+      }
+    }
+
     const preSignal = this.detectPreSignals(prompt, workspaceRoot);
     if (preSignal) {
       logger.info(`RequestRouter: fast-path pre-signal decision (${preSignal.profile}) for prompt: "${prompt.slice(0, 50)}..."`);

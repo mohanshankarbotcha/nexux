@@ -25,6 +25,7 @@ import { globalClaimChecker } from '../tools/claim-checker.js';
 import { globalEvidenceLedger } from '../tools/evidence-ledger.js';
 import { globalActiveTaskRegistry } from '../tasks/active-task-registry.js';
 import { globalTracer } from '../tracing/tracer.js';
+import { globalWorkingSetManager, globalContextPackBuilder } from '../context/index.js';
 
 export interface SupervisorOptions {
   workspaceRoot: string;
@@ -124,6 +125,18 @@ export class EngineeringSupervisor {
     }
 
     const result = await toolReg.execute(name, input, context);
+
+    try {
+      globalWorkingSetManager.recordToolResult(
+        context.sessionId,
+        context.workspaceRoot,
+        name,
+        input,
+        result.data || result.error,
+        result.evidenceId || callId,
+        result.success
+      );
+    } catch {}
 
     if (name === 'terminal') {
       bus.emit({
@@ -602,6 +615,11 @@ Always include complete source code and automated tests (e.g. unittest, jest, py
       };
       verificationChecks.push(checkResult);
 
+      try {
+        const wsState = globalWorkingSetManager.getOrCreateSession(options.sessionId, options.workspaceRoot);
+        wsState.lastTestCommand = check.command;
+      } catch {}
+
       // --- STAGE 5: TARGETED DEBUGGER LOOP (if check failed) ---
       if (!passed) {
         logger.warn(`Verification check failed: ${check.command}. Entering targeted debugger.`);
@@ -611,6 +629,15 @@ Always include complete source code and automated tests (e.g. unittest, jest, py
         const errorSignature = diagnostics.diagnostics.length > 0
           ? diagnostics.diagnostics.map((d) => d.message).join('; ')
           : rawOutput.slice(0, 200);
+
+        try {
+          globalWorkingSetManager.recordLastError(
+            options.sessionId,
+            errorSignature,
+            check.command,
+            diagnostics.diagnostics.map((d) => d.message)
+          );
+        } catch {}
 
         const loopErrCheck = antiLoop.recordError(errorSignature);
         if (loopErrCheck.isLoop) {

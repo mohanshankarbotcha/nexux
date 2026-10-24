@@ -24,6 +24,7 @@ import { globalTracer } from '../tracing/tracer.js';
 import { globalRequestRouter } from './request-router.js';
 import { globalFastPaths, FastPathContext } from './fast-paths.js';
 import { globalEngineeringSupervisor } from './supervisor.js';
+import { globalConversationManager, globalWorkingSetManager, globalContextPackBuilder } from '../context/index.js';
 
 export interface CoordinatorResult {
   taskId: string;
@@ -210,11 +211,15 @@ export class CoordinatorAgent extends BaseAgent {
         throw new Error('Task cancelled');
       }
 
+      // Record conversation turn (Prompt 05)
+      globalConversationManager.addTurn(context.sessionId, { role: 'user', content: prompt });
+
       // Request Router Decision & Fast Paths (Prompt 03 S1 / S2)
-    const routeDecision = await globalRequestRouter.route(prompt, context.workspaceRoot, {
-      provider: activeRoute.provider.id,
-      model: activeRoute.model,
-    });
+      const routeDecision = await globalRequestRouter.route(prompt, context.workspaceRoot, {
+        provider: activeRoute.provider.id,
+        model: activeRoute.model,
+        sessionId: context.sessionId,
+      });
 
     this.eventBus.emit({
       id: `evt_${Date.now()}`,
@@ -249,6 +254,7 @@ export class CoordinatorAgent extends BaseAgent {
       try {
         const reply = await globalFastPaths.executeS1(task, fastContext, routeDecision);
         s1Span.end();
+        globalConversationManager.addTurn(context.sessionId, { role: 'assistant', content: reply });
         globalActiveTaskRegistry.complete(context.taskId, reply);
         this.emitAgentCompleted(reply, context);
         return {
@@ -285,6 +291,7 @@ export class CoordinatorAgent extends BaseAgent {
       try {
         const reply = await globalFastPaths.executeS2(task, fastContext, routeDecision);
         s2Span.end();
+        globalConversationManager.addTurn(context.sessionId, { role: 'assistant', content: reply });
         globalActiveTaskRegistry.complete(context.taskId, reply);
         this.emitAgentCompleted(reply, context);
         return {
@@ -313,6 +320,7 @@ export class CoordinatorAgent extends BaseAgent {
       const question = routeDecision.clarification || 'Could you please clarify your request before proceeding?';
       task.resultSummary = question;
       this.storage.saveTask(task);
+      globalConversationManager.addTurn(context.sessionId, { role: 'assistant', content: question });
       globalActiveTaskRegistry.complete(context.taskId, question);
 
       this.eventBus.emit({
@@ -372,6 +380,8 @@ export class CoordinatorAgent extends BaseAgent {
         });
 
         workflowSpan.end();
+        globalConversationManager.addTurn(context.sessionId, { role: 'assistant', content: finalReport.summary });
+        globalWorkingSetManager.recordChangeSet(context.sessionId, finalReport.changeSet);
         globalActiveTaskRegistry.complete(context.taskId, finalReport.summary);
         this.emitAgentCompleted(finalReport.summary, context);
 
