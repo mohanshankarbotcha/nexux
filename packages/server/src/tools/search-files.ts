@@ -7,12 +7,18 @@ import {
   ToolCallContext,
   ToolDefinition,
   ToolName,
+  ToolRiskClass,
   ToolExecutionError,
+  resolveWorkspacePath,
+  resolveSafePath,
 } from '@nexus/core';
 import { globalWorkspaceService } from '../workspace/workspace-service.js';
 
 export class SearchFilesTool extends BaseTool<SearchFilesInput, SearchFilesOutput> {
   readonly name: ToolName = 'search_files';
+  override readonly riskClass: ToolRiskClass = 'read';
+  override readonly concurrencySafe = true;
+
   readonly definition: ToolDefinition = {
     name: 'search_files',
     description: 'Searches for text content across files in the workspace.',
@@ -41,11 +47,20 @@ export class SearchFilesTool extends BaseTool<SearchFilesInput, SearchFilesOutpu
   };
 
   protected async run(input: SearchFilesInput, context: ToolCallContext): Promise<SearchFilesOutput> {
-    if (!input.query) {
+    if (!input.query || typeof input.query !== 'string') {
       throw new ToolExecutionError(this.name, 'query is required');
     }
 
-    const searchRoot = input.directoryPath || context.workspaceRoot;
+    let searchRoot = context.workspaceRoot;
+    if (input.directoryPath) {
+      const resolved = resolveWorkspacePath(context.workspaceRoot, input.directoryPath);
+      if (resolved.status === 'resolved' && resolved.resolvedPath) {
+        searchRoot = resolved.resolvedPath;
+      } else {
+        searchRoot = resolveSafePath(context.workspaceRoot, input.directoryPath);
+      }
+    }
+
     return globalWorkspaceService.searchFiles(
       searchRoot,
       input.query,

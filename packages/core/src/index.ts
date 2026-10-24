@@ -12,7 +12,9 @@ export * from './config/defaults.js';
 
 export * from './errors/nexus-error.js';
 export * from './security/path-guard.js';
+export * from './security/path-resolver.js';
 export * from './security/sanitizer.js';
+export * from './diagnostics/diagnostics-parser.js';
 export * from './logging/logger.js';
 export * from './events/event-bus.js';
 export * from './cache/lru-cache.js';

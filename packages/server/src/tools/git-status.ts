@@ -7,11 +7,15 @@ import {
   ToolCallContext,
   ToolDefinition,
   ToolName,
+  ToolRiskClass,
   resolveSafePath,
 } from '@nexus/core';
 
 export class GitStatusTool extends BaseTool<Record<string, unknown>, GitStatusOutput> {
   readonly name: ToolName = 'git_status';
+  override readonly riskClass: ToolRiskClass = 'read';
+  override readonly concurrencySafe = true;
+
   readonly definition: ToolDefinition = {
     name: 'git_status',
     description: 'Inspects current git status (modified, added, deleted, and untracked files).',
@@ -59,22 +63,20 @@ export class GitStatusTool extends BaseTool<Record<string, unknown>, GitStatusOu
       const statusCode = line.slice(0, 2);
       const filePath = line.slice(3).trim();
 
-      if (statusCode.includes('M')) {
+      if (statusCode === '??') {
+        untracked.push(filePath);
+      } else if (statusCode.includes('M')) {
         modified.push(filePath);
       } else if (statusCode.includes('A')) {
         added.push(filePath);
       } else if (statusCode.includes('D')) {
         deleted.push(filePath);
-      } else if (statusCode === '??') {
-        untracked.push(filePath);
       }
     }
 
-    const isClean = modified.length === 0 && added.length === 0 && deleted.length === 0 && untracked.length === 0;
-
     return {
       branch,
-      isClean,
+      isClean: modified.length === 0 && added.length === 0 && deleted.length === 0 && untracked.length === 0,
       modified,
       added,
       deleted,

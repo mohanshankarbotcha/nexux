@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { spawn } from 'node:child_process';
 import {
   BaseTool,
@@ -8,6 +10,7 @@ import {
   ToolCallContext,
   ToolDefinition,
   ToolName,
+  ToolRiskClass,
   ToolExecutionError,
   SecurityViolationError,
   resolveSafePath,
@@ -94,6 +97,9 @@ function getSanitizedEnv(): NodeJS.ProcessEnv {
 
 export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
   readonly name: ToolName = 'terminal';
+  override readonly riskClass: ToolRiskClass = 'exec';
+  override readonly concurrencySafe = false;
+
   readonly definition: ToolDefinition = {
     name: 'terminal',
     description: 'Executes a command within the authorized workspace terminal environment.',
@@ -106,7 +112,7 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
         },
         timeoutMs: {
           type: 'number',
-          description: 'Maximum execution time in milliseconds (default: 60,000)',
+          description: 'Maximum execution time in milliseconds (default: 60,000, max: 300,000 for package installs)',
         },
         maxOutputBytes: {
           type: 'number',
@@ -136,12 +142,17 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
     }
 
     const startTime = Date.now();
-    const timeoutMs = Math.min(input.timeoutMs || DEFAULT_TOOL_CONFIG.terminalTimeoutMs, 120_000);
+    // Rule R7: Timeout override up to 300s (5 minutes) for package installations
+    const timeoutMs = Math.min(input.timeoutMs || DEFAULT_TOOL_CONFIG.terminalTimeoutMs, 300_000);
     const maxOutputBytes = input.maxOutputBytes || DEFAULT_TOOL_CONFIG.terminalMaxOutputBytes;
 
     const cwd = input.workingDir
       ? resolveSafePath(context.workspaceRoot, input.workingDir)
       : resolveSafePath(context.workspaceRoot, '.');
+
+    const cmdId = `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const logDir = path.join(context.workspaceRoot, '.nexus', 'logs', 'terminal');
+    const logPath = path.join(logDir, `${cmdId}.log`);
 
     const bus = context.eventBus || globalEventBus;
     bus.emit({
@@ -158,6 +169,7 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
       let stderr = '';
       let timedOut = false;
       let killed = false;
+      let fullLog = `--- Command: ${input.command} ---\n--- Working Dir: ${cwd} ---\n\n`;
 
       // Platform shell
       const isWindows = process.platform === 'win32';
@@ -198,8 +210,10 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
 
       let truncatedStdout = false;
       child.stdout.on('data', (chunk: Buffer) => {
+        const str = chunk.toString('utf-8');
+        fullLog += str;
         if (truncatedStdout) return;
-        stdout += chunk.toString('utf-8');
+        stdout += str;
         if (Buffer.byteLength(stdout, 'utf-8') > maxOutputBytes) {
           stdout = stdout.slice(0, maxOutputBytes) + '\n...[OUTPUT TRUNCATED]';
           truncatedStdout = true;
@@ -208,22 +222,29 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
 
       let truncatedStderr = false;
       child.stderr.on('data', (chunk: Buffer) => {
+        const str = chunk.toString('utf-8');
+        fullLog += str;
         if (truncatedStderr) return;
-        stderr += chunk.toString('utf-8');
+        stderr += str;
         if (Buffer.byteLength(stderr, 'utf-8') > maxOutputBytes) {
           stderr = stderr.slice(0, maxOutputBytes) + '\n...[OUTPUT TRUNCATED]';
           truncatedStderr = true;
         }
       });
 
-      child.on('close', (code) => {
+      child.on('close', (code, signal) => {
         clearTimeout(timer);
         const durationMs = Date.now() - startTime;
 
         const sanitizedStdout = sanitizeString(stdout);
         const sanitizedStderr = sanitizeString(stderr);
 
-        const bus = context.eventBus || globalEventBus;
+        // Persist full output log
+        try {
+          fs.mkdirSync(logDir, { recursive: true });
+          fs.writeFileSync(logPath, sanitizeString(fullLog), 'utf-8');
+        } catch {}
+
         bus.emit({
           id: `evt_${Date.now()}`,
           type: 'command_completed',
@@ -239,10 +260,12 @@ export class TerminalTool extends BaseTool<TerminalInput, TerminalOutput> {
         resolve({
           command: sanitizeString(input.command),
           exitCode: timedOut ? -1 : code,
+          signal: signal || null,
           stdout: sanitizedStdout,
           stderr: sanitizedStderr,
           timedOut,
           durationMs,
+          logPath,
         });
       });
 

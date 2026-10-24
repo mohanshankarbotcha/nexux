@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import {
   BaseTool,
 } from './base-tool.js';
@@ -9,6 +10,7 @@ import {
   ToolCallContext,
   ToolDefinition,
   ToolName,
+  ToolRiskClass,
   ToolExecutionError,
   resolveSafePath,
   getSafeRelativePath,
@@ -16,12 +18,16 @@ import {
   AgentRole,
 } from '@nexus/core';
 import { globalFileCache } from '../cache/file-cache.js';
+import { globalCheckpointManager } from '../storage/checkpoint-manager.js';
 
 export class WriteFileTool extends BaseTool<WriteFileInput, WriteFileOutput> {
   readonly name: ToolName = 'write_file';
+  override readonly riskClass: ToolRiskClass = 'write';
+  override readonly concurrencySafe = false;
+
   readonly definition: ToolDefinition = {
     name: 'write_file',
-    description: 'Writes content to a file in the workspace. Automatically creates parent directories.',
+    description: 'Writes content to a file in the workspace. Automatically creates parent directories and checkpoints existing files.',
     parameters: {
       type: 'object',
       properties: {
@@ -37,20 +43,27 @@ export class WriteFileTool extends BaseTool<WriteFileInput, WriteFileOutput> {
           type: 'boolean',
           description: 'Set to true if overwriting an existing file is intended',
         },
+        requiresApproval: {
+          type: 'boolean',
+          description: 'Whether writing requires explicit user confirmation',
+        },
       },
       required: ['filePath', 'content'],
     },
   };
 
   protected async run(input: WriteFileInput, context: ToolCallContext): Promise<WriteFileOutput> {
-    if (!input.filePath) {
+    if (!input.filePath || typeof input.filePath !== 'string') {
       throw new ToolExecutionError(this.name, 'filePath is required');
     }
     if (input.content === undefined || input.content === null) {
       throw new ToolExecutionError(this.name, 'content is required');
     }
 
-    const safePath = resolveSafePath(context.workspaceRoot, input.filePath);
+    const safePath = resolveSafePath(context.workspaceRoot, input.filePath, {
+      checkProtected: true,
+      allowAppRepoMutation: context.allowAppRepoMutation,
+    });
     const relPath = getSafeRelativePath(context.workspaceRoot, safePath);
     const exists = fs.existsSync(safePath);
 
@@ -61,6 +74,21 @@ export class WriteFileTool extends BaseTool<WriteFileInput, WriteFileOutput> {
       );
     }
 
+    // Rule R6: Snapshot pre-existing file before first modification in this task
+    let checkpointCreated = false;
+    let checkpointPath: string | undefined;
+    if (exists && context.taskId) {
+      const record = await globalCheckpointManager.createSnapshot(
+        context.workspaceRoot,
+        context.taskId,
+        relPath
+      );
+      if (record) {
+        checkpointCreated = true;
+        checkpointPath = record.snapshotPath;
+      }
+    }
+
     const dir = path.dirname(safePath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -69,6 +97,7 @@ export class WriteFileTool extends BaseTool<WriteFileInput, WriteFileOutput> {
     fs.writeFileSync(safePath, input.content, 'utf-8');
     globalFileCache.invalidate(safePath);
     const bytesWritten = Buffer.byteLength(input.content, 'utf-8');
+    const sha256 = crypto.createHash('sha256').update(input.content, 'utf-8').digest('hex');
 
     // Emit file changed event
     const bus = context.eventBus || globalEventBus;
@@ -91,6 +120,9 @@ export class WriteFileTool extends BaseTool<WriteFileInput, WriteFileOutput> {
       filePath: relPath,
       bytesWritten,
       isCreated: !exists,
+      sha256,
+      checkpointCreated,
+      checkpointPath,
     };
   }
 }

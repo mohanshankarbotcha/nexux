@@ -19,6 +19,7 @@ import { globalFileCache } from '../cache/file-cache.js';
 // Files and directories to ignore by default in file trees and broad searches
 export const DEFAULT_IGNORED_DIRS = new Set([
   '.git',
+  '.nexus',
   'node_modules',
   'dist',
   'build',

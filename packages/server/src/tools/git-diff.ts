@@ -8,12 +8,16 @@ import {
   ToolCallContext,
   ToolDefinition,
   ToolName,
+  ToolRiskClass,
   resolveSafePath,
   getSafeRelativePath,
 } from '@nexus/core';
 
 export class GitDiffTool extends BaseTool<GitDiffInput, GitDiffOutput> {
   readonly name: ToolName = 'git_diff';
+  override readonly riskClass: ToolRiskClass = 'read';
+  override readonly concurrencySafe = true;
+
   readonly definition: ToolDefinition = {
     name: 'git_diff',
     description: 'Inspects git diff in the workspace or for a specific file.',
@@ -60,12 +64,14 @@ export class GitDiffTool extends BaseTool<GitDiffInput, GitDiffOutput> {
       };
     }
 
-    const diffOutput = result.stdout || '';
-    const fileHeaders = diffOutput.match(/^diff --git/gm) || [];
+    const diff = result.stdout || '';
+    // Count files changed by counting diff --git occurrences
+    const matches = diff.match(/^diff --git/gm);
+    const filesChanged = matches ? matches.length : 0;
 
     return {
-      diff: diffOutput,
-      filesChanged: fileHeaders.length,
+      diff,
+      filesChanged,
     };
   }
 }

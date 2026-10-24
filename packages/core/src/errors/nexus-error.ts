@@ -5,6 +5,7 @@ export type NexusErrorCode =
   | 'WORKSPACE_ERROR'
   | 'WORKSPACE_NOT_FOUND'
   | 'PATH_TRAVERSAL_DETECTED'
+  | 'PROTECTED_PATH_VIOLATION'
   | 'TOOL_EXECUTION_FAILED'
   | 'TOOL_TIMEOUT'
   | 'COMMAND_REJECTED'
@@ -104,6 +105,15 @@ export class PathTraversalError extends SecurityViolationError {
     super(
       `Access denied: path traversal attempt outside workspace boundary: "${pathAttempted}"`,
       'PATH_TRAVERSAL_DETECTED'
+    );
+  }
+}
+
+export class ProtectedPathError extends SecurityViolationError {
+  constructor(pathAttempted: string, reason: string) {
+    super(
+      `Access denied: '${pathAttempted}' is a protected path. ${reason}`,
+      'PROTECTED_PATH_VIOLATION'
     );
   }
 }

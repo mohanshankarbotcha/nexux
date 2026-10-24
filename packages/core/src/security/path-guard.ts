@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { PathTraversalError, SecurityViolationError } from '../errors/nexus-error.js';
+import { PathTraversalError, SecurityViolationError, ProtectedPathError } from '../errors/nexus-error.js';
 
 // Windows drive letter / path normalizer
 export function normalizeStandardPath(p: string): string {
@@ -67,15 +67,117 @@ function verifyNoSymlinkEscape(normalizedRoot: string, resolvedTarget: string, o
   }
 }
 
+export interface PathGuardOptions {
+  checkSymlinks?: boolean;
+  checkProtected?: boolean;
+  allowAppRepoMutation?: boolean;
+}
+
+export interface ProtectedCheckResult {
+  isProtected: boolean;
+  reason?: string;
+}
+
+/**
+ * Checks if a target path is a protected system, credential, or repository path under Rule R5.
+ */
+export function isProtectedPath(
+  resolvedTarget: string,
+  workspaceRoot: string,
+  options?: { allowAppRepoMutation?: boolean }
+): ProtectedCheckResult {
+  const normTarget = normalizeStandardPath(resolvedTarget);
+  const normRoot = normalizeStandardPath(workspaceRoot);
+  const relPath = path.relative(normRoot, normTarget).replace(/\\/g, '/');
+  const lowerRel = relPath.toLowerCase();
+  const baseName = path.basename(normTarget).toLowerCase();
+
+  // 1. App data folders (%LOCALAPPDATA%\NEXUS_AI_DATA, .nexus_data)
+  const localAppData = process.env.LOCALAPPDATA ? normalizeStandardPath(process.env.LOCALAPPDATA) : '';
+  if (localAppData && normTarget.toLowerCase().startsWith(path.join(localAppData, 'nexus_ai_data').toLowerCase())) {
+    return {
+      isProtected: true,
+      reason: 'Application user data and credentials directory is strictly protected (Rule R5).',
+    };
+  }
+  if (lowerRel.includes('.nexus_data') || lowerRel.includes('nexus_test_data')) {
+    return {
+      isProtected: true,
+      reason: 'Application runtime data directory is protected from modification (Rule R5).',
+    };
+  }
+
+  // 2. Checkpoints and evidence internals (.nexus/checkpoints, .nexus/evidence)
+  if (lowerRel.startsWith('.nexus/checkpoints') || lowerRel.startsWith('.nexus/evidence')) {
+    return {
+      isProtected: true,
+      reason: 'NEXUS.AI checkpoint snapshots and evidence ledgers are immutable (Rule R5).',
+    };
+  }
+
+  // 3. Git internals (.git)
+  if (lowerRel === '.git' || lowerRel.startsWith('.git/')) {
+    return {
+      isProtected: true,
+      reason: 'Git internal repository structures (.git) cannot be modified directly (Rule R5).',
+    };
+  }
+
+  // 4. Credential and secret key files
+  if (
+    baseName === '.env' ||
+    baseName.startsWith('.env.') ||
+    baseName.endsWith('.env') ||
+    baseName.endsWith('.pem') ||
+    baseName.endsWith('.key') ||
+    baseName === 'id_rsa' ||
+    baseName === 'id_ed25519' ||
+    baseName === 'credentials.json' ||
+    baseName.startsWith('service-account')
+  ) {
+    return {
+      isProtected: true,
+      reason: 'Credential, environment, or secret key files are protected from agent modification (Rule R5).',
+    };
+  }
+
+  // 5. App repository protection: protect the host application repo itself if workspaceRoot is the app repo
+  if (!options?.allowAppRepoMutation) {
+    try {
+      const rootPkgPath = path.join(normRoot, 'package.json');
+      if (fs.existsSync(rootPkgPath)) {
+        const pkgContent = JSON.parse(fs.readFileSync(rootPkgPath, 'utf-8'));
+        if (pkgContent?.name === 'nexus-ai-workspace') {
+          // If workspace is the NEXUS repo itself, protect packages, node_modules, and root configs
+          if (
+            lowerRel.startsWith('packages/') ||
+            lowerRel.startsWith('node_modules/') ||
+            baseName === 'package.json' ||
+            baseName === 'tsconfig.json' ||
+            baseName === 'pnpm-workspace.yaml'
+          ) {
+            return {
+              isProtected: true,
+              reason: 'NEXUS.AI core application source code is protected against self-mutation without explicit developer opt-in (Rule R5).',
+            };
+          }
+        }
+      }
+    } catch {}
+  }
+
+  return { isProtected: false };
+}
+
 /**
  * Validates and safely resolves a relative or absolute path against a workspace root.
  * Guarantees that the resulting path cannot escape the workspace root via ../, null bytes, or symlinks.
- * Throws PathTraversalError or SecurityViolationError if an escape attempt is detected.
+ * Throws PathTraversalError, SecurityViolationError, or ProtectedPathError if violation detected.
  */
 export function resolveSafePath(
   workspaceRoot: string,
   targetPath: string,
-  options?: { checkSymlinks?: boolean }
+  options?: PathGuardOptions
 ): string {
   if (!workspaceRoot || typeof workspaceRoot !== 'string') {
     throw new SecurityViolationError('Invalid workspace root directory');
@@ -112,6 +214,16 @@ export function resolveSafePath(
     verifyNoSymlinkEscape(normalizedRoot, resolvedTarget, targetPath);
   }
 
+  // Verify protected paths if requested
+  if (options?.checkProtected) {
+    const protectedCheck = isProtectedPath(resolvedTarget, normalizedRoot, {
+      allowAppRepoMutation: options.allowAppRepoMutation,
+    });
+    if (protectedCheck.isProtected) {
+      throw new ProtectedPathError(targetPath, protectedCheck.reason || 'Protected file access disallowed');
+    }
+  }
+
   return resolvedTarget;
 }
 
@@ -124,4 +236,3 @@ export function getSafeRelativePath(workspaceRoot: string, absolutePath: string)
   const rel = path.relative(normalizedRoot, safeAbsolute);
   return rel.replace(/\\/g, '/');
 }
-
