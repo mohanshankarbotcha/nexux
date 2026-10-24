@@ -1,0 +1,39 @@
+{
+  "datasetSize": 125,
+  "correctCount": 124,
+  "accuracy": 99.2,
+  "targetAccuracy": 95.0,
+  "status": "PASSED",
+  "confusionMatrix": {
+    "conversation": {
+      "conversation": 29,
+      "workspace_read": 0,
+      "engineering": 0,
+      "clarify_or_authorize": 0
+    },
+    "workspace_read": {
+      "conversation": 0,
+      "workspace_read": 41,
+      "engineering": 0,
+      "clarify_or_authorize": 0
+    },
+    "engineering": {
+      "conversation": 0,
+      "workspace_read": 0,
+      "engineering": 30,
+      "clarify_or_authorize": 0
+    },
+    "clarify_or_authorize": {
+      "conversation": 0,
+      "workspace_read": 0,
+      "engineering": 1,
+      "clarify_or_authorize": 24
+    }
+  },
+  "fastPathVerifications": {
+    "S1_DirectAnswer": "PASSED",
+    "S1_Clarification": "PASSED",
+    "S2_OutsideWorkspaceRefusal": "PASSED",
+    "S5_DestructiveHighRiskAuthorization": "PASSED"
+  }
+}

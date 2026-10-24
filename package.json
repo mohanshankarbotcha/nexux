@@ -16,6 +16,7 @@
     "build:client": "npm run build --workspace=packages/client",
     "build:desktop": "npm run build --workspace=packages/desktop",
     "test": "npm run test --workspaces --if-present",
+    "eval:v2": "node scripts/eval-suite-v2.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "dev:server": "npm run dev --workspace=packages/server",
     "dev:client": "npm run dev --workspace=packages/client",

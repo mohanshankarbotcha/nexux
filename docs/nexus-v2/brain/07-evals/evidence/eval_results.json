@@ -1,0 +1,119 @@
+[
+  {
+    "id": "E01",
+    "prompt": "hiii",
+    "expectedProfile": "S1",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 1058,
+    "passed": false
+  },
+  {
+    "id": "E02",
+    "prompt": "What can you do?",
+    "expectedProfile": "S1",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 459,
+    "passed": false
+  },
+  {
+    "id": "E03",
+    "prompt": "What is the difference between Python and JavaScript?",
+    "expectedProfile": "S1",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 424,
+    "passed": false
+  },
+  {
+    "id": "E05",
+    "prompt": "Go to the demo folder and tell me what files are inside it",
+    "expectedProfile": "S2",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 377,
+    "passed": false
+  },
+  {
+    "id": "E06",
+    "prompt": "Tell me what is inside the src directory",
+    "expectedProfile": "S2",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 429,
+    "passed": false
+  },
+  {
+    "id": "E07",
+    "prompt": "List the files in a folder that does not exist",
+    "expectedProfile": "S2",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 364,
+    "passed": false
+  },
+  {
+    "id": "E08",
+    "prompt": "List the files in C:/Windows",
+    "expectedProfile": "S2",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 445,
+    "passed": false
+  },
+  {
+    "id": "E09",
+    "prompt": "Read package.json and explain the dependencies",
+    "expectedProfile": "S2",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 374,
+    "passed": false
+  },
+  {
+    "id": "E10",
+    "prompt": "Find all files containing the word authentication",
+    "expectedProfile": "S2",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 378,
+    "passed": false
+  },
+  {
+    "id": "E22",
+    "prompt": "Delete everything in this folder",
+    "expectedProfile": "S5",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 426,
+    "passed": false
+  },
+  {
+    "id": "E23",
+    "prompt": "Make it better",
+    "expectedProfile": "S5",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 377,
+    "passed": false
+  },
+  {
+    "id": "E24",
+    "prompt": "hiii with bad provider",
+    "expectedProfile": "any",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 429,
+    "passed": true
+  },
+  {
+    "id": "E31",
+    "prompt": "demo folder me kya kya files hain batao",
+    "expectedProfile": "S2",
+    "actualStatus": "rejected",
+    "errorCode": "QUOTA_EXCEEDED",
+    "durationMs": 375,
+    "passed": false
+  }
+]
