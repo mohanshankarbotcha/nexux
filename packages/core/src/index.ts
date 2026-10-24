@@ -5,6 +5,7 @@ export * from './types/workspace.js';
 export * from './types/session.js';
 export * from './types/events.js';
 export * from './types/usage.js';
+export * from './types/trace.js';
 
 export * from './config/pricing.js';
 export * from './config/defaults.js';

@@ -1,5 +1,6 @@
 import { ToolDefinition, ToolName, ToolResult, ToolCallContext, ToolExecutionError } from '@nexus/core';
 import { ITool } from './base-tool.js';
+import { globalTracer } from '../tracing/tracer.js';
 
 export class ToolRegistry {
   private tools = new Map<ToolName, ITool>();
@@ -29,7 +30,24 @@ export class ToolRegistry {
     if (!tool) {
       throw new ToolExecutionError(name, `Tool '${name}' is not registered`);
     }
-    return tool.execute(input, context);
+    const tracerSpan = context.taskId
+      ? globalTracer.startSpan(context.taskId, `Tool: ${name}`, 'tool', {
+          metadata: typeof input === 'object' && input !== null ? (input as Record<string, unknown>) : undefined,
+        })
+      : null;
+
+    try {
+      const result = await tool.execute(input, context);
+      if (tracerSpan) {
+        tracerSpan.end({ error: result.success ? undefined : result.error });
+      }
+      return result;
+    } catch (err: any) {
+      if (tracerSpan) {
+        tracerSpan.end({ error: err.message });
+      }
+      throw err;
+    }
   }
 }
 

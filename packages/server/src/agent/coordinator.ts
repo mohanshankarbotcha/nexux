@@ -20,6 +20,7 @@ import { ContextEngine, globalContextEngine, TaskContextPackage } from '../conte
 import { ModelRouter, globalModelRouter } from '../providers/model-router.js';
 import { ToolRegistry, globalToolRegistry } from '../tools/tool-registry.js';
 import { globalActiveTaskRegistry } from '../tasks/active-task-registry.js';
+import { globalTracer } from '../tracing/tracer.js';
 
 export interface CoordinatorResult {
   taskId: string;
@@ -202,6 +203,11 @@ export class CoordinatorAgent extends BaseAgent {
 
       globalActiveTaskRegistry.updateStage(context.taskId, 'chatting', 'coordinator', 'Responding to user query');
 
+      const greetingSpan = globalTracer.startSpan(context.taskId, 'Direct Greeting Response', 'model_request', {
+        provider: activeRoute.provider.id,
+        model: activeRoute.model,
+      });
+
       try {
         const directResponse = await activeRoute.provider.complete({
           requestId: `req_${Date.now()}`,
@@ -216,6 +222,8 @@ export class CoordinatorAgent extends BaseAgent {
             'You are NEXUS.AI, an elite autonomous AI software engineering desktop application. Respond concisely, politely, and professionally to the user greeting or inquiry. State that you are ready to explore the codebase, plan features, write code, run terminal commands, and verify software in the current workspace.',
           abortSignal: context.abortSignal,
         });
+
+        greetingSpan.end({ tokenUsage: directResponse.usage });
 
         const reqId = `req_${Date.now()}`;
         const callDuration = Date.now() - startTime;
@@ -311,7 +319,9 @@ export class CoordinatorAgent extends BaseAgent {
         if (context.abortSignal?.aborted) throw new Error('Task cancelled');
         stagesRun.push('explorer');
         globalActiveTaskRegistry.updateStage(context.taskId, 'exploring', 'explorer', 'Exploring workspace repository structure');
+        const expSpan = globalTracer.startSpan(context.taskId, 'Explorer Agent', 'model_request');
         const expRes = await this.explorer.run(prompt, context);
+        expSpan.end({ error: expRes.success ? undefined : expRes.summary });
         if (expRes.success && expRes.data) {
           exploration = expRes.data;
         }
@@ -323,7 +333,9 @@ export class CoordinatorAgent extends BaseAgent {
         if (context.abortSignal?.aborted) throw new Error('Task cancelled');
         stagesRun.push('planner');
         globalActiveTaskRegistry.updateStage(context.taskId, 'planning', 'planner', 'Synthesizing implementation plan');
+        const planSpan = globalTracer.startSpan(context.taskId, 'Planner Agent', 'model_request');
         const planRes = await this.planner.run(prompt, context, { exploration });
+        planSpan.end({ error: planRes.success ? undefined : planRes.summary });
         if (planRes.success && planRes.data) {
           plan = planRes.data;
           task.plan = plan;
@@ -335,10 +347,12 @@ export class CoordinatorAgent extends BaseAgent {
       if (context.abortSignal?.aborted) throw new Error('Task cancelled');
       stagesRun.push('coder');
       globalActiveTaskRegistry.updateStage(context.taskId, 'coding', 'coder', 'Implementing code and writing files to workspace');
+      const coderSpan = globalTracer.startSpan(context.taskId, 'Coder Agent', 'model_request');
       const coderRes = await this.coder.run(prompt, context, {
         plan,
         relevantFiles: exploration?.relevantFiles || contextPackage.items.map((i) => i.relativePath),
       });
+      coderSpan.end({ error: coderRes.success ? undefined : coderRes.summary });
 
       if (!coderRes.success) {
         throw new Error(coderRes.summary || 'Coding stage failed to implement changes');
@@ -354,6 +368,7 @@ export class CoordinatorAgent extends BaseAgent {
       let verificationSuccess = true;
       if (complexity.needsVerification && plan?.steps) {
         globalActiveTaskRegistry.updateStage(context.taskId, 'verifying', 'coordinator', 'Running verification and tests');
+        const verSpan = globalTracer.startSpan(context.taskId, 'Verification Stage', 'verify');
         for (const step of plan.steps) {
           if (step.verificationCommand) {
             if (context.abortSignal?.aborted) throw new Error('Task cancelled');
@@ -386,16 +401,19 @@ export class CoordinatorAgent extends BaseAgent {
               // Stage 5: Debugger (triggered on failure)
               stagesRun.push('debugger');
               globalActiveTaskRegistry.updateStage(context.taskId, 'debugging', 'debugger', 'Diagnosing test failure');
+              const debugSpan = globalTracer.startSpan(context.taskId, 'Debugger Agent', 'model_request');
               const debugRes = await this.debuggerAgent.run(prompt, context, {
                 failureOutput: cmdRes.data?.stderr || cmdRes.data?.stdout,
                 command: step.verificationCommand,
               });
+              debugSpan.end({ error: debugRes.success ? undefined : debugRes.summary });
               if (debugRes.data?.fixed) {
                 verificationSuccess = true;
               }
             }
           }
         }
+        verSpan.end();
       }
 
       // Physical verification of files created on disk
@@ -428,10 +446,12 @@ export class CoordinatorAgent extends BaseAgent {
       if (context.abortSignal?.aborted) throw new Error('Task cancelled');
       stagesRun.push('reviewer');
       globalActiveTaskRegistry.updateStage(context.taskId, 'reviewing', 'reviewer', 'Reviewing diffs and verifying code quality');
+      const revSpan = globalTracer.startSpan(context.taskId, 'Reviewer Agent', 'model_request');
       const reviewRes = await this.reviewer.run(prompt, context, {
         changedFiles: verifiedFiles,
         verificationSuccess,
       });
+      revSpan.end({ error: reviewRes.success ? undefined : reviewRes.summary });
 
       const totalDurationMs = Date.now() - startTime;
       const finalSummary = reviewRes.summary || coderRes.summary;

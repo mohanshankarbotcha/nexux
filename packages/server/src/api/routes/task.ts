@@ -14,6 +14,7 @@ import { globalModelRouter } from '../../providers/model-router.js';
 import { globalCoordinator } from '../../agent/coordinator.js';
 import { globalWorkspaceService } from '../../workspace/workspace-service.js';
 import { globalActiveTaskRegistry } from '../../tasks/active-task-registry.js';
+import { globalTracer } from '../../tracing/tracer.js';
 
 export function createTaskRouter(): Router {
   const router = Router();
@@ -68,15 +69,16 @@ export function createTaskRouter(): Router {
       }
 
       if (!globalModelRouter.hasAnyConfiguredProvider()) {
-        const errorMsg = 'Cannot execute task: No AI model provider is configured. Please configure an OpenAI or Google Gemini API key in Settings → Providers.';
-        return res.status(400).json({
-          success: false,
-          error: `PROVIDER_AUTH_FAILED: ${errorMsg}`,
-          errorCode: 'PROVIDER_AUTH_FAILED',
-        });
+        throw new ProviderError(
+          'Cannot execute task: No AI model provider is configured. Please configure an OpenAI or Google Gemini API key in Settings → Providers.',
+          'router',
+          'PROVIDER_NOT_CONFIGURED',
+          400
+        );
       }
 
       const taskId = `task_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const routeSpan = globalTracer.startSpan(taskId, 'Request Route & Validation', 'route');
       const taskSessionId = sessionId || `session_${Date.now()}`;
       // Target workspace directory
       const targetWorkspace =
@@ -113,9 +115,17 @@ export function createTaskRouter(): Router {
         model,
       });
 
+      const preflightSpan = globalTracer.startSpan(taskId, 'Provider Preflight Check', 'preflight', {
+        parentId: routeSpan.span.spanId,
+        provider: route.provider.id,
+        model: route.model,
+      });
+
       // Preflight credential validation before launching task runner
       const validation = await route.provider.validateCredentials();
       if (!validation.isValid) {
+        preflightSpan.end({ error: validation.message });
+        routeSpan.end({ error: validation.message });
         logger.warn(`Task preflight failed for provider ${route.provider.id}: ${validation.message}`);
         const cleanMsg = sanitizeErrorMessage(validation.message).replace(/\.+$/, '');
         const failedTask: Task = {
@@ -161,6 +171,8 @@ export function createTaskRouter(): Router {
       if (typeof (route.provider as any).validateModel === 'function') {
         const modelValidation = await (route.provider as any).validateModel(route.model);
         if (!modelValidation.isValid) {
+          preflightSpan.end({ error: modelValidation.message });
+          routeSpan.end({ error: modelValidation.message });
           logger.warn(
             `Task preflight model check failed for ${route.provider.id} model ${route.model}: ${modelValidation.message}`
           );
@@ -205,6 +217,9 @@ export function createTaskRouter(): Router {
           return;
         }
       }
+
+      preflightSpan.end();
+      routeSpan.end();
 
       const task: Task = {
         id: taskId,
@@ -342,6 +357,22 @@ export function createTaskRouter(): Router {
     const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const records = globalStorage.getUsageRecords().filter((u) => u.taskId === taskId);
     res.json({ success: true, records });
+  });
+
+  // Get timeline spans for a task
+  router.get('/:id/timeline', (req: Request, res: Response) => {
+    const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const timeline = globalTracer.getTimeline(taskId);
+    res.json({ success: true, timeline });
+  });
+
+  // Export timeline as JSON
+  router.get('/:id/timeline/export', (req: Request, res: Response) => {
+    const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const json = globalTracer.exportTimelineJson(taskId);
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="task-${taskId}-timeline.json"`);
+    res.send(json);
   });
 
   // Server-Sent Events (SSE) stream for real-time task events

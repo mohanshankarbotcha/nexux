@@ -1,0 +1,644 @@
+{
+  "gemini": {
+    "C1": [
+      {
+        "taskId": "task_1792861433066_pt31m",
+        "status": "completed",
+        "durationMs": 3437,
+        "firstProgressMs": 1606,
+        "firstOutputMs": 3432,
+        "stage": "completed",
+        "summary": "Hello! I am NEXUS.AI, ready to explore the codebase, plan features, write code, run terminal command",
+        "modelCalls": 1,
+        "toolCalls": 0,
+        "spans": [
+          {
+            "taskId": "task_1792861433066_pt31m",
+            "spanId": "span_1792861433066_vhfe5",
+            "name": "Request Route & Validation",
+            "type": "route",
+            "start": 1792861433066,
+            "status": "completed",
+            "durationMs": 1263
+          },
+          {
+            "taskId": "task_1792861433066_pt31m",
+            "spanId": "span_1792861433075_p5061",
+            "parentId": "span_1792861433066_vhfe5",
+            "name": "Provider Preflight Check",
+            "type": "preflight",
+            "start": 1792861433075,
+            "provider": "gemini",
+            "model": "gemini-2.5-flash",
+            "status": "completed",
+            "durationMs": 1254
+          },
+          {
+            "taskId": "task_1792861433066_pt31m",
+            "spanId": "span_1792861434376_rzcnf",
+            "name": "Direct Greeting Response",
+            "type": "model_request",
+            "start": 1792861434376,
+            "provider": "gemini",
+            "model": "gemini-2.5-flash",
+            "status": "completed",
+            "durationMs": 1249,
+            "tokenUsage": {
+              "inputTokens": 61,
+              "outputTokens": 32,
+              "totalTokens": 119,
+              "isEstimated": false
+            }
+          }
+        ],
+        "changedFiles": []
+      },
+      {
+        "taskId": "task_1792861437239_ap3ma",
+        "status": "completed",
+        "durationMs": 3218,
+        "firstProgressMs": 1377,
+        "firstOutputMs": 3213,
+        "stage": "completed",
+        "summary": "Hello! I am NEXUS.AI, ready to explore the codebase, plan features, write code, run terminal command",
+        "modelCalls": 1,
+        "toolCalls": 0,
+        "spans": [
+          {
+            "taskId": "task_1792861437239_ap3ma",
+            "spanId": "span_1792861437239_mpn9u",
+            "name": "Request Route & Validation",
+            "type": "route",
+            "start": 1792861437239,
+            "status": "completed",
+            "durationMs": 1328
+          },
+          {
+            "taskId": "task_1792861437239_ap3ma",
+            "spanId": "span_1792861437246_xdfm4",
+            "parentId": "span_1792861437239_mpn9u",
+            "name": "Provider Preflight Check",
+            "type": "preflight",
+            "start": 1792861437246,
+            "provider": "gemini",
+            "model": "gemini-2.5-flash",
+            "status": "completed",
+            "durationMs": 1321
+          },
+          {
+            "taskId": "task_1792861437239_ap3ma",
+            "spanId": "span_1792861438609_skbf2",
+            "name": "Direct Greeting Response",
+            "type": "model_request",
+            "start": 1792861438609,
+            "provider": "gemini",
+            "model": "gemini-2.5-flash",
+            "status": "completed",
+            "durationMs": 1394,
+            "tokenUsage": {
+              "inputTokens": 61,
+              "outputTokens": 33,
+              "totalTokens": 136,
+              "isEstimated": false
+            }
+          }
+        ],
+        "changedFiles": []
+      },
+      {
+        "taskId": "task_1792861441468_f9k2x",
+        "status": "completed",
+        "durationMs": 2976,
+        "firstProgressMs": 1141,
+        "firstOutputMs": 2973,
+        "stage": "completed",
+        "summary": "Hello! I am NEXUS.AI, ready to explore the codebase, plan features, write code, run terminal command",
+        "modelCalls": 1,
+        "toolCalls": 0,
+        "spans": [
+          {
+            "taskId": "task_1792861441468_f9k2x",
+            "spanId": "span_1792861441468_hb8q7",
+            "name": "Request Route & Validation",
+            "type": "route",
+            "start": 1792861441468,
+            "status": "completed",
+            "durationMs": 1092
+          },
+          {
+            "taskId": "task_1792861441468_f9k2x",
+            "spanId": "span_1792861441474_xcwiv",
+            "parentId": "span_1792861441468_hb8q7",
+            "name": "Provider Preflight Check",
+            "type": "preflight",
+            "start": 1792861441474,
+            "provider": "gemini",
+            "model": "gemini-2.5-flash",
+            "status": "completed",
+            "durationMs": 1086
+          },
+          {
+            "taskId": "task_1792861441468_f9k2x",
+            "spanId": "span_1792861442603_5s5da",
+            "name": "Direct Greeting Response",
+            "type": "model_request",
+            "start": 1792861442603,
+            "provider": "gemini",
+            "model": "gemini-2.5-flash",
+            "status": "completed",
+            "durationMs": 1384,
+            "tokenUsage": {
+              "inputTokens": 61,
+              "outputTokens": 33,
+              "totalTokens": 136,
+              "isEstimated": false
+            }
+          }
+        ],
+        "changedFiles": []
+      }
+    ],
+    "C2": [
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 58.526726796s",
+        "durationMs": 615,
+        "firstProgressMs": 615,
+        "firstOutputMs": 615,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 56.943835955s",
+        "durationMs": 575,
+        "firstProgressMs": 575,
+        "firstOutputMs": 575,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 55.14085974s",
+        "durationMs": 788,
+        "firstProgressMs": 788,
+        "firstOutputMs": 788,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C3": [
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 53.570383446s",
+        "durationMs": 561,
+        "firstProgressMs": 561,
+        "firstOutputMs": 561,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 51.930563303s",
+        "durationMs": 637,
+        "firstProgressMs": 637,
+        "firstOutputMs": 637,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 50.326749338s",
+        "durationMs": 597,
+        "firstProgressMs": 597,
+        "firstOutputMs": 597,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C4": [
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 48.746689875s",
+        "durationMs": 572,
+        "firstProgressMs": 572,
+        "firstOutputMs": 572,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 47.052714399s",
+        "durationMs": 680,
+        "firstProgressMs": 680,
+        "firstOutputMs": 680,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 45.444389002s",
+        "durationMs": 614,
+        "firstProgressMs": 614,
+        "firstOutputMs": 614,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C5": [
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 43.861083758s",
+        "durationMs": 570,
+        "firstProgressMs": 570,
+        "firstOutputMs": 570,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 42.296390288s",
+        "durationMs": 584,
+        "firstProgressMs": 584,
+        "firstOutputMs": 584,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 40.719828111s",
+        "durationMs": 549,
+        "firstProgressMs": 549,
+        "firstOutputMs": 549,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C6": [
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 39.151151385s",
+        "durationMs": 563,
+        "firstProgressMs": 563,
+        "firstOutputMs": 563,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 37.558257752s",
+        "durationMs": 587,
+        "firstProgressMs": 587,
+        "firstOutputMs": 587,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 36.013510415s",
+        "durationMs": 536,
+        "firstProgressMs": 536,
+        "firstOutputMs": 536,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C7": [
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 34.36961371s",
+        "durationMs": 640,
+        "firstProgressMs": 640,
+        "firstOutputMs": 640,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 32.783621209s",
+        "durationMs": 586,
+        "firstProgressMs": 586,
+        "firstOutputMs": 586,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 31.173769717s",
+        "durationMs": 604,
+        "firstProgressMs": 604,
+        "firstOutputMs": 604,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C8": [
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 29.525974111s",
+        "durationMs": 612,
+        "firstProgressMs": 612,
+        "firstOutputMs": 612,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 27.951444089s",
+        "durationMs": 579,
+        "firstProgressMs": 579,
+        "firstOutputMs": 579,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "QUOTA_EXCEEDED",
+        "error": "QUOTA_EXCEEDED: Google Gemini API quota exceeded or rate limit reached: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\nPlease retry in 26.279029741s",
+        "durationMs": 660,
+        "firstProgressMs": 660,
+        "firstOutputMs": 660,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ]
+  },
+  "openai": {
+    "C1": [
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 401,
+        "firstProgressMs": 401,
+        "firstOutputMs": 401,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 690,
+        "firstProgressMs": 690,
+        "firstOutputMs": 690,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 337,
+        "firstProgressMs": 337,
+        "firstOutputMs": 337,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C2": [
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 319,
+        "firstProgressMs": 319,
+        "firstOutputMs": 319,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 348,
+        "firstProgressMs": 348,
+        "firstOutputMs": 348,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 368,
+        "firstProgressMs": 368,
+        "firstOutputMs": 368,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C3": [
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 329,
+        "firstProgressMs": 329,
+        "firstOutputMs": 329,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 286,
+        "firstProgressMs": 286,
+        "firstOutputMs": 286,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 328,
+        "firstProgressMs": 328,
+        "firstOutputMs": 328,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C4": [
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 328,
+        "firstProgressMs": 328,
+        "firstOutputMs": 328,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 612,
+        "firstProgressMs": 612,
+        "firstOutputMs": 612,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 288,
+        "firstProgressMs": 288,
+        "firstOutputMs": 288,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C5": [
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 279,
+        "firstProgressMs": 279,
+        "firstOutputMs": 279,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 333,
+        "firstProgressMs": 333,
+        "firstOutputMs": 333,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 294,
+        "firstProgressMs": 294,
+        "firstOutputMs": 294,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C6": [
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 302,
+        "firstProgressMs": 302,
+        "firstOutputMs": 302,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 358,
+        "firstProgressMs": 358,
+        "firstOutputMs": 358,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 337,
+        "firstProgressMs": 337,
+        "firstOutputMs": 337,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C7": [
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 301,
+        "firstProgressMs": 301,
+        "firstOutputMs": 301,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 336,
+        "firstProgressMs": 336,
+        "firstOutputMs": 336,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 532,
+        "firstProgressMs": 532,
+        "firstOutputMs": 532,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ],
+    "C8": [
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 287,
+        "firstProgressMs": 287,
+        "firstOutputMs": 287,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 313,
+        "firstProgressMs": 313,
+        "firstOutputMs": 313,
+        "modelCalls": 0,
+        "toolCalls": 0
+      },
+      {
+        "status": "failed",
+        "errorCode": "PROVIDER_AUTH_FAILED",
+        "error": "PROVIDER_AUTH_FAILED: Validation failed: Incorrect API key provided: [REDACTED_KEY]. You can find your API key at https://platform.openai.com/account/api-keys. Please configure a valid OpenAI API key in Settings → Providers.",
+        "durationMs": 311,
+        "firstProgressMs": 311,
+        "firstOutputMs": 311,
+        "modelCalls": 0,
+        "toolCalls": 0
+      }
+    ]
+  }
+}
