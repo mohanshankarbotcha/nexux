@@ -4,6 +4,7 @@ import { globalStorage } from '../../storage/storage-engine.js';
 import { globalModelRouter } from '../../providers/model-router.js';
 import { OpenAIProvider } from '../../providers/openai-provider.js';
 import { GeminiProvider } from '../../providers/gemini-provider.js';
+import { globalPreflightCache } from '../../providers/preflight-cache.js';
 
 export function createProviderRouter(): Router {
   const router = Router();
@@ -66,12 +67,14 @@ export function createProviderRouter(): Router {
         ...(geminiApiKey !== undefined && { geminiApiKey: geminiApiKey.trim() }),
       });
 
-      // Update active router
+      // Update active router and invalidate preflight cache
       if (openaiApiKey !== undefined) {
         globalModelRouter.updateCredential('openai', openaiApiKey.trim());
+        globalPreflightCache.invalidate('openai');
       }
       if (geminiApiKey !== undefined) {
         globalModelRouter.updateCredential('gemini', geminiApiKey.trim());
+        globalPreflightCache.invalidate('gemini');
       }
 
       const creds = globalStorage.getCredentials();

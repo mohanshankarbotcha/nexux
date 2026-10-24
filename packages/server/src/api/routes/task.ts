@@ -5,12 +5,13 @@ import {
   ProviderError,
   Task,
   ValidationError,
+  ROUTE_BUDGETS,
   globalEventBus,
   logger,
   sanitizeErrorMessage,
 } from '@nexus/core';
 import { globalStorage } from '../../storage/storage-engine.js';
-import { globalModelRouter } from '../../providers/model-router.js';
+import { globalModelRouter, globalPreflightCache } from '../../providers/index.js';
 import { globalCoordinator } from '../../agent/coordinator.js';
 import { globalWorkspaceService } from '../../workspace/workspace-service.js';
 import { globalActiveTaskRegistry } from '../../tasks/active-task-registry.js';
@@ -121,8 +122,8 @@ export function createTaskRouter(): Router {
         model: route.model,
       });
 
-      // Preflight credential validation before launching task runner
-      const validation = await route.provider.validateCredentials();
+      // Preflight credential validation with in-memory caching (Prompt 06 Speed)
+      const validation = await globalPreflightCache.validateWithCache(route.provider);
       if (!validation.isValid) {
         preflightSpan.end({ error: validation.message });
         routeSpan.end({ error: validation.message });
@@ -167,10 +168,9 @@ export function createTaskRouter(): Router {
         return;
       }
 
-      // Preflight model availability check
-      if (typeof (route.provider as any).validateModel === 'function') {
-        const modelValidation = await (route.provider as any).validateModel(route.model);
-        if (!modelValidation.isValid) {
+      // Preflight model availability check with in-memory caching
+      const modelValidation = await globalPreflightCache.validateModelWithCache(route.provider, route.model);
+      if (!modelValidation.isValid) {
           preflightSpan.end({ error: modelValidation.message });
           routeSpan.end({ error: modelValidation.message });
           logger.warn(
@@ -216,7 +216,6 @@ export function createTaskRouter(): Router {
           });
           return;
         }
-      }
 
       preflightSpan.end();
       routeSpan.end();

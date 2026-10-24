@@ -5,6 +5,7 @@ import {
   AgentRole,
   Task,
   TaskStatus,
+  ROUTE_BUDGETS,
   globalEventBus,
   resolveSafePath,
   logger,
@@ -203,6 +204,7 @@ export class CoordinatorAgent extends BaseAgent {
         abortController: abortCtrl,
         provider: activeRoute.provider.id,
         model: activeRoute.model,
+        timeoutMs: ROUTE_BUDGETS.S4.timeoutMs,
       });
     }
 

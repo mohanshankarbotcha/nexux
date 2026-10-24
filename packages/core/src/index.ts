@@ -2,6 +2,7 @@ export * from './types/agent.js';
 export * from './types/provider.js';
 export * from './types/tool.js';
 export * from './types/route.js';
+export * from './types/budget.js';
 export * from './types/workflow.js';
 export * from './types/context.js';
 export * from './types/workspace.js';
