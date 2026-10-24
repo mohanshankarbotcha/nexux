@@ -21,6 +21,8 @@ import { ModelRouter, globalModelRouter } from '../providers/model-router.js';
 import { ToolRegistry, globalToolRegistry } from '../tools/tool-registry.js';
 import { globalActiveTaskRegistry } from '../tasks/active-task-registry.js';
 import { globalTracer } from '../tracing/tracer.js';
+import { globalRequestRouter } from './request-router.js';
+import { globalFastPaths, FastPathContext } from './fast-paths.js';
 
 export interface CoordinatorResult {
   taskId: string;
@@ -194,93 +196,47 @@ export class CoordinatorAgent extends BaseAgent {
       });
     }
 
-    // Fast-path: Conversational greetings and inquiries (taskType: 'chat')
-    if (this.isConversationalGreeting(prompt)) {
+    // Request Router Decision & Fast Paths (Prompt 03 S1 / S2)
+    const routeDecision = await globalRequestRouter.route(prompt, context.workspaceRoot, {
+      provider: activeRoute.provider.id,
+      model: activeRoute.model,
+    });
+
+    this.eventBus.emit({
+      id: `evt_${Date.now()}`,
+      type: 'route_chosen',
+      sessionId: context.sessionId,
+      taskId: context.taskId,
+      timestamp: Date.now(),
+      decision: routeDecision,
+    } as any);
+
+    const fastContext: FastPathContext = {
+      workspaceRoot: context.workspaceRoot,
+      sessionId: context.sessionId,
+      taskId: context.taskId,
+      provider: activeRoute.provider.id,
+      model: activeRoute.model,
+      abortSignal: context.abortSignal,
+    };
+
+    if (routeDecision.profile === 'S1') {
       task.taskType = 'chat';
       task.status = 'running';
       task.stage = 'chatting';
       this.storage.saveTask(task);
+      globalActiveTaskRegistry.updateStage(context.taskId, 'chatting', 'coordinator', routeDecision.reason);
 
-      globalActiveTaskRegistry.updateStage(context.taskId, 'chatting', 'coordinator', 'Responding to user query');
-
-      const greetingSpan = globalTracer.startSpan(context.taskId, 'Direct Greeting Response', 'model_request', {
+      const s1Span = globalTracer.startSpan(context.taskId, 'Direct S1 Response', 'model_request', {
         provider: activeRoute.provider.id,
         model: activeRoute.model,
       });
 
       try {
-        const directResponse = await activeRoute.provider.complete({
-          requestId: `req_${Date.now()}`,
-          model: activeRoute.model,
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-          systemInstruction:
-            'You are NEXUS.AI, an elite autonomous AI software engineering desktop application. Respond concisely, politely, and professionally to the user greeting or inquiry. State that you are ready to explore the codebase, plan features, write code, run terminal commands, and verify software in the current workspace.',
-          abortSignal: context.abortSignal,
-        });
-
-        greetingSpan.end({ tokenUsage: directResponse.usage });
-
-        const reqId = `req_${Date.now()}`;
-        const callDuration = Date.now() - startTime;
-
-        // Save usage record
-        this.storage.recordUsage({
-          requestId: reqId,
-          taskId: context.taskId,
-          sessionId: context.sessionId,
-          agent: this.role,
-          provider: activeRoute.provider.id,
-          model: activeRoute.model,
-          inputTokens: directResponse.usage.inputTokens,
-          outputTokens: directResponse.usage.outputTokens,
-          totalTokens: directResponse.usage.totalTokens,
-          isEstimated: Boolean(directResponse.usage.isEstimated),
-          estimatedCostUsd: 0,
-          timestamp: Date.now(),
-          durationMs: callDuration,
-          status: 'success',
-        });
-
-        const reply = directResponse.content;
-        const totalDurationMs = Date.now() - startTime;
-
-        task.status = 'completed';
-        task.stage = 'completed';
-        task.resultSummary = reply;
-        task.completedAt = Date.now();
-        task.totalTokens = directResponse.usage.totalTokens;
-        this.storage.saveTask(task);
-
+        const reply = await globalFastPaths.executeS1(task, fastContext, routeDecision);
+        s1Span.end();
         globalActiveTaskRegistry.complete(context.taskId, reply);
         this.emitAgentCompleted(reply, context);
-
-        this.eventBus.emit({
-          id: `evt_${Date.now()}`,
-          type: 'agent_message',
-          sessionId: context.sessionId,
-          taskId: context.taskId,
-          timestamp: Date.now(),
-          agentRole: 'coordinator',
-          content: reply,
-        });
-
-        this.eventBus.emit({
-          id: `evt_${Date.now()}`,
-          type: 'task_completed',
-          sessionId: context.sessionId,
-          taskId: context.taskId,
-          timestamp: Date.now(),
-          status: 'completed',
-          summary: reply,
-          totalDurationMs,
-          totalTokens: directResponse.usage.totalTokens,
-        });
-
         return {
           summary: reply,
           success: true,
@@ -290,12 +246,49 @@ export class CoordinatorAgent extends BaseAgent {
             summary: reply,
             changedFiles: [],
             stagesRun: ['coordinator'],
-            totalDurationMs,
-            totalTokens: directResponse.usage.totalTokens,
+            totalDurationMs: Date.now() - startTime,
+            totalTokens: 0,
           },
         };
-      } catch (chatErr: any) {
-        logger.error(`Conversational fast-path failed:`, chatErr);
+      } catch (err: any) {
+        s1Span.end({ error: err.message });
+        logger.error(`S1 Fast-path failed:`, err);
+      }
+    }
+
+    if (routeDecision.profile === 'S2') {
+      task.taskType = 'work';
+      task.status = 'running';
+      task.stage = 'inspecting';
+      this.storage.saveTask(task);
+      globalActiveTaskRegistry.updateStage(context.taskId, 'inspecting', 'coder', routeDecision.reason);
+
+      const s2Span = globalTracer.startSpan(context.taskId, 'S2 Read-Only Fast Path', 'tool', {
+        provider: activeRoute.provider.id,
+        model: activeRoute.model,
+      });
+
+      try {
+        const reply = await globalFastPaths.executeS2(task, fastContext, routeDecision);
+        s2Span.end();
+        globalActiveTaskRegistry.complete(context.taskId, reply);
+        this.emitAgentCompleted(reply, context);
+        return {
+          summary: reply,
+          success: true,
+          data: {
+            taskId: context.taskId,
+            status: 'completed',
+            summary: reply,
+            changedFiles: [],
+            stagesRun: ['coder'],
+            totalDurationMs: Date.now() - startTime,
+            totalTokens: 0,
+          },
+        };
+      } catch (err: any) {
+        s2Span.end({ error: err.message });
+        logger.error(`S2 Fast-path failed:`, err);
       }
     }
 
