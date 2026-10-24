@@ -23,6 +23,7 @@ import { globalActiveTaskRegistry } from '../tasks/active-task-registry.js';
 import { globalTracer } from '../tracing/tracer.js';
 import { globalRequestRouter } from './request-router.js';
 import { globalFastPaths, FastPathContext } from './fast-paths.js';
+import { globalEngineeringSupervisor } from './supervisor.js';
 
 export interface CoordinatorResult {
   taskId: string;
@@ -59,7 +60,15 @@ export class CoordinatorAgent extends BaseAgent {
     toolRegistry = globalToolRegistry,
     modelRouter = globalModelRouter
   ) {
-    super(modelRouter, toolRegistry, eventBus, storage);
+    const effectiveRouter =
+      modelRouter !== globalModelRouter
+        ? modelRouter
+        : (explorer as any)?.modelRouter || globalModelRouter;
+    const effectiveTools =
+      toolRegistry !== globalToolRegistry
+        ? toolRegistry
+        : (explorer as any)?.toolRegistry || globalToolRegistry;
+    super(effectiveRouter, effectiveTools, eventBus, storage);
     this.explorer = explorer;
     this.planner = planner;
     this.coder = coder;
@@ -196,7 +205,12 @@ export class CoordinatorAgent extends BaseAgent {
       });
     }
 
-    // Request Router Decision & Fast Paths (Prompt 03 S1 / S2)
+    try {
+      if (context.abortSignal?.aborted) {
+        throw new Error('Task cancelled');
+      }
+
+      // Request Router Decision & Fast Paths (Prompt 03 S1 / S2)
     const routeDecision = await globalRequestRouter.route(prompt, context.workspaceRoot, {
       provider: activeRoute.provider.id,
       model: activeRoute.model,
@@ -292,8 +306,124 @@ export class CoordinatorAgent extends BaseAgent {
       }
     }
 
-    try {
-      globalActiveTaskRegistry.updateStage(context.taskId, 'coordinating', 'coordinator', 'Analyzing task context');
+    if (routeDecision.profile === 'S5') {
+      task.taskType = 'chat';
+      task.status = 'completed';
+      task.stage = 'completed';
+      const question = routeDecision.clarification || 'Could you please clarify your request before proceeding?';
+      task.resultSummary = question;
+      this.storage.saveTask(task);
+      globalActiveTaskRegistry.complete(context.taskId, question);
+
+      this.eventBus.emit({
+        id: `evt_${Date.now()}`,
+        type: 'agent_message',
+        sessionId: context.sessionId,
+        taskId: context.taskId,
+        timestamp: Date.now(),
+        agentRole: 'coordinator',
+        content: question,
+        isStreaming: false,
+      });
+
+      this.emitAgentCompleted(question, context);
+      return {
+        summary: question,
+        success: true,
+        data: {
+          taskId: context.taskId,
+          status: 'completed',
+          summary: question,
+          changedFiles: [],
+          stagesRun: ['coordinator'],
+          totalDurationMs: Date.now() - startTime,
+        },
+      };
+    }
+
+    if (routeDecision.profile === 'S3' || routeDecision.profile === 'S4') {
+      task.taskType = 'work';
+      task.status = 'running';
+      this.storage.saveTask(task);
+
+      const workflowSpan = globalTracer.startSpan(
+        context.taskId,
+        `${routeDecision.profile} Engineering Workflow`,
+        'verify',
+        {
+          provider: activeRoute.provider.id,
+          model: activeRoute.model,
+          metadata: { profile: routeDecision.profile },
+        }
+      );
+
+      try {
+        const finalReport = await globalEngineeringSupervisor.execute(task, routeDecision.profile, {
+          workspaceRoot: context.workspaceRoot,
+          sessionId: context.sessionId,
+          taskId: context.taskId,
+          provider: activeRoute.provider.id,
+          model: activeRoute.model,
+          abortSignal: context.abortSignal,
+          modelRouter: this.modelRouter,
+          toolRegistry: this.toolRegistry,
+          storage: this.storage,
+          eventBus: this.eventBus,
+        });
+
+        workflowSpan.end();
+        globalActiveTaskRegistry.complete(context.taskId, finalReport.summary);
+        this.emitAgentCompleted(finalReport.summary, context);
+
+        const taskUsage = this.storage.getUsageRecords().filter((u) => u.taskId === context.taskId);
+        const totalTokens = taskUsage.reduce((sum, r) => sum + (r.totalTokens || 0), 0);
+        const totalCostUsd =
+          Math.round(taskUsage.reduce((sum, r) => sum + (r.estimatedCostUsd || 0), 0) * 1_000_000) / 1_000_000;
+
+        task.totalTokens = totalTokens;
+        task.totalCostUsd = totalCostUsd;
+        this.storage.saveTask(task);
+
+        let diff: string | undefined;
+        try {
+          const diffRes = await this.toolRegistry.execute('git_diff', {}, {
+            workspaceRoot: context.workspaceRoot,
+            sessionId: context.sessionId,
+            taskId: context.taskId,
+            agentRole: 'coordinator',
+          });
+          if (diffRes.success && (diffRes.data as any)?.diff) {
+            diff = (diffRes.data as any).diff;
+          }
+        } catch {}
+
+        return {
+          summary: finalReport.summary,
+          success: finalReport.status === 'completed',
+          data: {
+            taskId: context.taskId,
+            status: finalReport.status,
+            summary: finalReport.summary,
+            changedFiles: [
+              ...finalReport.changeSet.createdFiles,
+              ...finalReport.changeSet.modifiedFiles,
+            ],
+            diff,
+            stagesRun: routeDecision.profile === 'S4'
+              ? ['explorer', 'planner', 'coder', 'reviewer']
+              : ['planner', 'coder', 'reviewer'],
+            totalDurationMs: Date.now() - startTime,
+            totalTokens,
+            totalCostUsd,
+          },
+        };
+      } catch (err: any) {
+        workflowSpan.end({ error: err.message });
+        logger.error(`${routeDecision.profile} Engineering Supervisor failed:`, err);
+      }
+    }
+
+    globalActiveTaskRegistry.updateStage(context.taskId, 'coordinating', 'coordinator', 'Analyzing task context');
 
       // Build task context package
       const contextPackage: TaskContextPackage = await this.contextEngine.buildTaskContext(

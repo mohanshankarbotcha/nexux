@@ -52,8 +52,11 @@ class MockLoopProvider implements IModelProvider {
         risks: ['Ensure function signature handles negative numbers'],
       });
     } else if (request.systemInstruction?.includes('Coder Agent')) {
+      const hasEdited = request.messages.some((m) => m.name === 'edit_file');
       const hasRead = request.messages.some((m) => m.name === 'read_file');
-      if (!hasRead) {
+      if (hasEdited) {
+        content = 'Added multiply function to math.js successfully.';
+      } else if (!hasRead) {
         toolCalls = [
           {
             id: 'call_read_1',

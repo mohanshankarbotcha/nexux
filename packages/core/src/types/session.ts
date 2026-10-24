@@ -9,6 +9,7 @@ export type TaskStatus =
   | 'awaiting_approval'
   | 'completed'
   | 'failed'
+  | 'blocked'
   | 'cancelled'
   | 'timeout';
 

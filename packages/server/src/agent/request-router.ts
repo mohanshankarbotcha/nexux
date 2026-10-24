@@ -89,7 +89,7 @@ export class RequestRouter {
         lower
       );
     const isFileRead =
-      /(read|open|explain\s+the\s+dependencies|check|examine|summarize)\s+([a-zA-Z0-9_\-\.]+\.(json|ts|js|py|html|md|txt|yaml|yml|css))/i.test(
+      /(read|open|explain\s+the\s+dependencies|check|examine|summarize)\s+([a-zA-Z0-9_\-\.\/\\]+\.(json|ts|js|py|html|md|txt|yaml|yml|css))/i.test(
         lower
       );
     const isSearch =
@@ -97,7 +97,7 @@ export class RequestRouter {
 
     if (isFolderList || isFileRead || isSearch) {
       const targets: string[] = [];
-      const fileMatch = lower.match(/([a-zA-Z0-9_\-\.]+\.(json|ts|js|py|html|md|txt|yaml|yml|css))/);
+      const fileMatch = lower.match(/([a-zA-Z0-9_\-\.\/\\]+\.(json|ts|js|py|html|md|txt|yaml|yml|css))/);
       if (fileMatch) {
         targets.push(fileMatch[1]);
       } else {
