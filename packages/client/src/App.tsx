@@ -333,7 +333,13 @@ export const App: React.FC = () => {
         options?.provider,
         options?.model
       );
-      setActiveTaskId(res.task.id);
+      if (res.task) {
+        setActiveTaskId(res.task.id);
+        if (res.task.status === 'failed') {
+          setActiveStatus('failed');
+        }
+        await refreshTasks();
+      }
     } catch (err: any) {
       setActiveStatus('failed');
       await refreshTasks();

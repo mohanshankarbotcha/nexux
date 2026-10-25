@@ -404,7 +404,13 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                 <div className="text-[11px] text-slate-400 space-y-2 font-sans">
                   <div className="font-semibold text-slate-300">Actionable Guidance & Remedies:</div>
                   <ul className="list-disc list-inside space-y-0.5 pl-1">
-                    {activeTask.error?.includes('PROVIDER_AUTH_FAILED') ? (
+                    {activeTask.error?.includes('QUOTA_EXCEEDED') || activeTask.error?.includes('429') || activeTask.error?.toLowerCase().includes('quota') ? (
+                      <>
+                        <li><strong>Free Tier Quota Limit Reached (20 req/day):</strong> Google Gemini Free Tier allows up to 20 requests per day per project.</li>
+                        <li>To remove limits, enable billing on your Google Cloud project at <a href="https://ai.google.dev" target="_blank" rel="noreferrer" className="text-sky-400 underline">ai.google.dev</a>.</li>
+                        <li>Alternatively, configure a valid OpenAI API key in <strong>Settings → Providers</strong> or wait for your daily quota to reset.</li>
+                      </>
+                    ) : activeTask.error?.includes('PROVIDER_AUTH_FAILED') ? (
                       <>
                         <li>Verify your API credentials in <strong>Settings → Providers</strong>.</li>
                         <li>Switch to an alternative configured model (e.g., Google Gemini) and retry.</li>

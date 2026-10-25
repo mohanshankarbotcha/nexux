@@ -13,3 +13,4 @@ NEXUS_AI_DATA/
 *.tsbuildinfo
 release/
 .freebuff/
+.nexus/

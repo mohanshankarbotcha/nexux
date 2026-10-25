@@ -274,7 +274,7 @@ export class CoordinatorAgent extends BaseAgent {
         };
       } catch (err: any) {
         s1Span.end({ error: err.message });
-        logger.error(`S1 Fast-path failed:`, err);
+        logger.error('S1 Fast-path failed:', err);
       }
     }
 
@@ -311,7 +311,7 @@ export class CoordinatorAgent extends BaseAgent {
         };
       } catch (err: any) {
         s2Span.end({ error: err.message });
-        logger.error(`S2 Fast-path failed:`, err);
+        logger.error('S2 Fast-path failed:', err);
       }
     }
 

@@ -136,47 +136,7 @@ export class OpenAIProvider implements IModelProvider {
       };
     }
 
-    // Lightweight verification of generation capability & quota
-    try {
-      const probeRes = await this.fetchFn(`${this.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'user', content: 'ping' }],
-          max_tokens: 1,
-        }),
-      });
-
-      if (!probeRes.ok) {
-        const errData = (await probeRes.json().catch(() => ({}))) as any;
-        const errObj = errData?.error;
-        if (errObj?.code === 'credit_balance_exhausted' || errObj?.type === 'insufficient_quota') {
-          return {
-            provider: 'openai',
-            isValid: false,
-            code: 'QUOTA_EXCEEDED',
-            message: `OpenAI account credit balance is exhausted. Please add billing credits at https://platform.openai.com/settings/organization/billing to execute tasks with ${model}.`,
-            testedAt,
-          };
-        }
-        if (probeRes.status === 404 || errObj?.code === 'model_not_found') {
-          return {
-            provider: 'openai',
-            isValid: false,
-            code: 'MODEL_UNAVAILABLE',
-            message: `The model '${model}' is not accessible on your OpenAI account.`,
-            testedAt,
-          };
-        }
-      }
-    } catch {
-      // Ignore network timeout during probe; fallback to standard complete
-    }
-
+    // Model existence verified via cached metadata (GET /models)
     return {
       provider: 'openai',
       isValid: true,

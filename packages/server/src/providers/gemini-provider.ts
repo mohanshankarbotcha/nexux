@@ -139,35 +139,7 @@ export class GeminiProvider implements IModelProvider {
       };
     }
 
-    // Probe generating 1 token to catch quota limits early before running coordinator
-    try {
-      const probeRes = await this.fetchFn(
-        `${this.baseUrl}/models/${model}:generateContent?key=${this.apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: 'ping' }] }],
-            generationConfig: { maxOutputTokens: 1 },
-          }),
-        }
-      );
-
-      if (probeRes.status === 429) {
-        const errJson = (await probeRes.json().catch(() => ({}))) as any;
-        const msg = errJson?.error?.message || 'Quota exceeded';
-        return {
-          provider: 'gemini',
-          isValid: false,
-          code: 'QUOTA_EXCEEDED',
-          message: `Google Gemini API quota exceeded or rate limit reached: ${sanitizeErrorMessage(msg)}`,
-          testedAt,
-        };
-      }
-    } catch {
-      // Ignore probe network glitch; let execution proceed
-    }
-
+    // Model existence verified via cached metadata (GET /models)
     return {
       provider: 'gemini',
       isValid: true,

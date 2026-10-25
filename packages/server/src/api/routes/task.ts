@@ -159,7 +159,7 @@ export function createTaskRouter(): Router {
           error: failedTask.error || 'Validation failed',
         });
 
-        res.status(400).json({
+        res.status(200).json({
           success: false,
           errorCode: 'PROVIDER_AUTH_FAILED',
           error: failedTask.error,
@@ -208,7 +208,7 @@ export function createTaskRouter(): Router {
             error: failedTask.error || 'Model unavailable',
           });
 
-          res.status(400).json({
+          res.status(200).json({
             success: false,
             errorCode: errCode,
             error: failedTask.error,

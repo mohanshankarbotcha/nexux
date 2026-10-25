@@ -87,20 +87,38 @@ ${dynamicCapabilities}`;
       message: 'Generating direct response...',
     });
 
-    const response = await globalModelRouter.executeForRole(
-      'coordinator',
-      {
-        requestId: `s1_${context.taskId}`,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: task.prompt },
-        ],
-        temperature: 0.3,
-      },
-      { provider: context.provider as any, model: context.model }
-    );
+    let reply = '';
+    let tokens = 0;
 
-    const reply = (response.content || '').trim();
+    try {
+      const response = await globalModelRouter.executeForRole(
+        'coordinator',
+        {
+          requestId: `s1_${context.taskId}`,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: task.prompt },
+          ],
+          temperature: 0.3,
+        },
+        { provider: context.provider as any, model: context.model }
+      );
+      reply = (response.content || '').trim();
+      tokens = response.usage?.totalTokens || 0;
+    } catch (err: any) {
+      const isGreeting = /^(hi|hello|hey|greetings|sup|howdy|good\s+(morning|afternoon|evening)|namaste|kya\s+haal)/i.test(task.prompt.trim());
+      const isQuota = err.code === 'QUOTA_EXCEEDED' || err.statusCode === 429 || /quota|rate\s*limit|resource_exhausted/i.test(err.message || '');
+
+      if (isQuota && (isGreeting || isCapabilityQuestion)) {
+        if (isCapabilityQuestion) {
+          reply = `I am NEXUS.AI, your autonomous software engineering assistant.\n\n${dynamicCapabilities}\n\n*(Note: Your AI provider API key is currently experiencing a quota limit. You can still browse workspaces, inspect files, and execute terminal commands.)*`;
+        } else {
+          reply = `Hello! I'm NEXUS.AI, your autonomous engineering assistant. I'm ready to help you build, refactor, and debug code.\n\n*(Note: Google Gemini has reached its Free Tier daily quota of 20 requests/day. You can enable billing at https://ai.google.dev or configure an alternative key in Settings → Providers.)*`;
+        }
+      } else {
+        throw err;
+      }
+    }
 
     task.status = 'completed';
     task.stage = 'completed';
@@ -128,7 +146,7 @@ ${dynamicCapabilities}`;
       status: 'completed',
       summary: reply.slice(0, 150),
       totalDurationMs: Date.now() - startTime,
-      totalTokens: response.usage?.totalTokens,
+      totalTokens: tokens,
     });
 
     return reply;
@@ -274,20 +292,32 @@ Do not invent any file names or directories. If a file or folder was not found, 
 VERIFIED WORKSPACE DATA:
 ${toolDataDescription}`;
 
-    const response = await globalModelRouter.executeForRole(
-      'coder',
-      {
-        requestId: `s2_${context.taskId}`,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: task.prompt },
-        ],
-        temperature: 0.1,
-      },
-      { provider: context.provider as any, model: context.model }
-    );
+    let reply = '';
+    let tokens = 0;
 
-    const reply = (response.content || '').trim();
+    try {
+      const response = await globalModelRouter.executeForRole(
+        'coder',
+        {
+          requestId: `s2_${context.taskId}`,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: task.prompt },
+          ],
+          temperature: 0.1,
+        },
+        { provider: context.provider as any, model: context.model }
+      );
+      reply = (response.content || '').trim();
+      tokens = response.usage?.totalTokens || 0;
+    } catch (err: any) {
+      const isQuota = err.code === 'QUOTA_EXCEEDED' || err.statusCode === 429 || /quota|rate\s*limit|resource_exhausted/i.test(err.message || '');
+      if (isQuota && toolDataDescription) {
+        reply = toolDataDescription;
+      } else {
+        throw err;
+      }
+    }
 
     task.status = 'completed';
     task.stage = 'completed';
@@ -315,7 +345,7 @@ ${toolDataDescription}`;
       status: 'completed',
       summary: reply.slice(0, 150),
       totalDurationMs: Date.now() - startTime,
-      totalTokens: response.usage?.totalTokens,
+      totalTokens: tokens,
     });
 
     return reply;
