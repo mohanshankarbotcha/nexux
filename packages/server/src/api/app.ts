@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import { validateRequestToken } from '../security/auth-token.js';
+import { validateRequestToken, getOrCreateApiToken } from '../security/auth-token.js';
 import {
   NexusError,
   logger,
@@ -137,12 +137,34 @@ export function createNexusApp() {
   const targetDist = potentialDistPaths.find((p) => fs.existsSync(path.join(p, 'index.html'))) || null;
 
   if (targetDist) {
-    app.use(express.static(targetDist));
+    const indexPath = path.join(targetDist, 'index.html');
+    const sendInjectedHtml = (res: Response) => {
+      try {
+        let html = fs.readFileSync(indexPath, 'utf8');
+        const token = getOrCreateApiToken();
+        const injection = `<script>window.__NEXUS_API_TOKEN__ = ${JSON.stringify(token)};</script>`;
+        if (html.includes('<head>')) {
+          html = html.replace('<head>', `<head>${injection}`);
+        } else {
+          html = `${injection}${html}`;
+        }
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(html);
+      } catch {
+        res.sendFile(indexPath);
+      }
+    };
+
+    app.get(['/', '/index.html'], (req: Request, res: Response) => {
+      sendInjectedHtml(res);
+    });
+
+    app.use(express.static(targetDist, { index: false }));
     app.get('*', (req: Request, res: Response, next: NextFunction) => {
       if (req.path.startsWith(prefix)) {
         return next();
       }
-      res.sendFile(path.join(targetDist, 'index.html'));
+      sendInjectedHtml(res);
     });
   }
 
