@@ -1,0 +1,12 @@
+{
+  "endpoint": "/api/providers/status",
+  "method": "GET",
+  "headersSent": {},
+  "status": 401,
+  "body": {
+    "success": false,
+    "error": "Unauthorized: Missing or invalid API authentication token",
+    "errorCode": "AUTH_REQUIRED"
+  },
+  "passed": true
+}

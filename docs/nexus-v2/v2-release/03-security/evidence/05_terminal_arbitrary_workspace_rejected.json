@@ -1,0 +1,23 @@
+{
+  "endpoint": "/api/workspaces/terminal",
+  "attackPayload": {
+    "command": "echo attack",
+    "workspacePath": "C:\\Windows\\System32"
+  },
+  "status": 200,
+  "body": {
+    "success": true,
+    "data": {
+      "command": "echo attack",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "attack\r\n",
+      "stderr": "",
+      "timedOut": false,
+      "durationMs": 128,
+      "logPath": "C:\\Users\\BMS\\Desktop\\demo\\.nexus\\logs\\terminal\\cmd_1793084183260_wtyl.log"
+    },
+    "durationMs": 137
+  },
+  "passed": false
+}

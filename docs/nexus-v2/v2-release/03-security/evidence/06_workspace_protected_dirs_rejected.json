@@ -1,0 +1,27 @@
+{
+  "results": [
+    {
+      "path": "C:\\Windows",
+      "status": 200,
+      "rejected": false
+    },
+    {
+      "path": "C:\\Program Files",
+      "status": 403,
+      "code": "PROTECTED_DIRECTORY",
+      "rejected": true
+    },
+    {
+      "path": "C:\\",
+      "status": 200,
+      "rejected": false
+    },
+    {
+      "path": "C:\\Users\\BMS",
+      "status": 403,
+      "code": "PROTECTED_DIRECTORY",
+      "rejected": true
+    }
+  ],
+  "allPassed": false
+}

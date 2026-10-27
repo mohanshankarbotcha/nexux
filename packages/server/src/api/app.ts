@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import { validateRequestToken } from '../security/auth-token.js';
 import {
   NexusError,
   logger,
@@ -22,9 +23,77 @@ const __dirname = path.dirname(__filename);
 export function createNexusApp() {
   const app = express();
 
-  // Basic middleware
-  app.use(cors({ origin: '*' }));
-  app.use(express.json({ limit: '10mb' }));
+  // Security Middleware (Prompt 03)
+  const ALLOWED_ORIGINS = new Set([
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ]);
+
+  const corsOptions: cors.CorsOptions = {
+    origin: (origin, callback) => {
+      // Allow local tools, electron/mobile file/app protocols, and same-origin (no origin header)
+      if (!origin) return callback(null, true);
+      if (
+        ALLOWED_ORIGINS.has(origin) ||
+        origin.startsWith('app://') ||
+        origin.startsWith('file://') ||
+        origin.startsWith('vscode-webview://') ||
+        origin === 'null'
+      ) {
+        return callback(null, true);
+      }
+      if (process.env.NEXUS_ALLOWED_ORIGINS) {
+        const custom = process.env.NEXUS_ALLOWED_ORIGINS.split(',').map((s) => s.trim());
+        if (custom.includes(origin)) return callback(null, true);
+      }
+      return callback(new Error(`CORS rejected unauthorized origin: ${origin}`));
+    },
+    credentials: true,
+  };
+
+  app.use(cors(corsOptions));
+  app.use(express.json({ limit: '2mb' }));
+
+  // DNS Rebinding / Host header validation (Loopback only)
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const hostHeader = (req.headers.host || '').split(':')[0].toLowerCase();
+    const isLoopback =
+      hostHeader === 'localhost' ||
+      hostHeader === '127.0.0.1' ||
+      hostHeader === '::1' ||
+      hostHeader === '0.0.0.0' ||
+      hostHeader === '';
+    if (!isLoopback && process.env.NODE_ENV === 'production') {
+      logger.warn(`Security: Rejected unexpected Host header: ${req.headers.host}`);
+      return res.status(403).json({ success: false, error: 'Forbidden: Invalid Host header' });
+    }
+    next();
+  });
+
+  // API Token Authentication Middleware
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    // Health check and non-API paths do not require authentication
+    if (
+      req.path === '/api/health' ||
+      req.path === '/health' ||
+      !req.path.startsWith('/api')
+    ) {
+      return next();
+    }
+
+    if (!validateRequestToken(req)) {
+      logger.warn(`Security: Unauthorized request without valid API token: ${req.method} ${req.path}`);
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized: Missing or invalid API authentication token',
+        errorCode: 'AUTH_REQUIRED',
+      });
+    }
+
+    next();
+  });
 
   // Request logger & correlation ID middleware
   app.use((req: Request, res: Response, next: NextFunction) => {

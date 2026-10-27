@@ -1,0 +1,8 @@
+{
+  "origin": "https://malicious-website.com",
+  "endpoint": "/api/health",
+  "blocked": true,
+  "status": 500,
+  "errorMsg": "",
+  "expected": "Blocked or HTTP 500 error on disallowed CORS origin"
+}

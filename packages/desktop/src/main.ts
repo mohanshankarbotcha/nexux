@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +21,8 @@ if (!gotTheLock) {
 let mainWindow: BrowserWindow | null = null;
 let serverManager: ServerManager | null = null;
 let runningServer: RunningServerInfo | null = null;
+const desktopApiToken = crypto.randomBytes(32).toString('hex');
+process.env.NEXUS_API_TOKEN = desktopApiToken;
 
 async function createMainWindow(serverUrl: string): Promise<BrowserWindow> {
   const iconCandidates = [
@@ -44,11 +47,19 @@ async function createMainWindow(serverUrl: string): Promise<BrowserWindow> {
         : path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      sandbox: true,
     },
   });
 
   // Open external links in user's default browser
+    // Block unauthorized navigation (Prompt 03)
+  win.webContents.on('will-navigate', (event, url) => {
+    if (!url.startsWith(targetUrl) && !url.startsWith('http://127.0.0.1') && !url.startsWith('http://localhost')) {
+      event.preventDefault();
+      logger.warn(`Desktop Main: Blocked navigation to external target: ${url}`);
+    }
+  });
+
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
@@ -79,6 +90,7 @@ function registerIpcHandlers(): void {
       version: app.getVersion(),
       serverPort: runningServer?.port ?? 3000,
       dataDir: runningServer?.dataDir ?? resolveUserDataDir(),
+      apiToken: desktopApiToken,
     };
   });
 

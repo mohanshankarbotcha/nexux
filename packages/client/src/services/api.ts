@@ -13,11 +13,46 @@ import { ProviderStatusItem, ProviderValidationState } from '../types/index.js';
 const API_BASE = '/api';
 
 class ApiService {
+  private apiToken: string | null = null;
+
+  setApiToken(token: string) {
+    this.apiToken = token;
+    try {
+      sessionStorage.setItem('nexus_api_token', token);
+    } catch {}
+  }
+
+  getApiToken(): string | null {
+    if (this.apiToken) return this.apiToken;
+    try {
+      return (
+        sessionStorage.getItem('nexus_api_token') ||
+        (window as any).__NEXUS_API_TOKEN__ ||
+        null
+      );
+    } catch {
+      return null;
+    }
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
-    const headers = {
+    let token = this.getApiToken();
+
+    if (!token && typeof window !== 'undefined' && (window as any).nexusDesktop?.getSystemInfo) {
+      try {
+        const info = await (window as any).nexusDesktop.getSystemInfo();
+        if (info?.apiToken) {
+          this.setApiToken(info.apiToken);
+          token = info.apiToken;
+        }
+      } catch {}
+    }
+
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(token ? { 'X-Nexus-Token': token } : {}),
+      ...(options.headers as Record<string, string>),
     };
 
     const response = await fetch(url, { ...options, headers });

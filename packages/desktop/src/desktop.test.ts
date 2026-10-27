@@ -107,21 +107,26 @@ describe('Desktop Process Lifecycle & Server Integration', () => {
       preferredPort: 3500,
     });
 
-    // Save provider credentials
+    // Save provider credentials (authenticated with API token)
     const saveRes = await fetch(`${serverInfo.url}/api/providers/credentials`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Nexus-Token': serverInfo.apiToken,
+      },
       body: JSON.stringify({
         geminiApiKey: 'test-desktop-gemini-key',
       }),
     });
     assert.equal(saveRes.status, 200);
 
-    // Verify stored in testDataDir/credentials.json
-    const credsFile = path.join(testDataDir, 'credentials.json');
-    assert.ok(fs.existsSync(credsFile), 'Credentials file must be in user data directory');
-    const content = JSON.parse(fs.readFileSync(credsFile, 'utf-8'));
-    assert.equal(content.geminiApiKey, 'test-desktop-gemini-key');
+    // Verify stored encrypted in testDataDir/credentials.enc (Hardened V2 Vault)
+    const encFile = path.join(testDataDir, 'credentials.enc');
+    assert.ok(fs.existsSync(encFile), 'Encrypted credentials vault must be in user data directory');
+    const plaintextFile = path.join(testDataDir, 'credentials.json');
+    assert.equal(fs.existsSync(plaintextFile), false, 'Plaintext credentials file must not exist');
+    const envelope = JSON.parse(fs.readFileSync(encFile, 'utf-8'));
+    assert.equal(envelope.format, 'nexus_vault_v2_aes256gcm');
 
     await serverInfo.stop();
   });

@@ -96,17 +96,24 @@ export function createWorkspaceRouter(): Router {
     }
   });
 
-  // Execute terminal command in workspace
+  // Execute terminal command in workspace (Hardened: S3)
   router.post('/terminal', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { command, workspacePath, workingDir, timeoutMs } = req.body;
+      const { command, workingDir, timeoutMs } = req.body;
       if (!command || typeof command !== 'string') {
         throw new WorkspaceError('Command parameter is required');
       }
-      const targetWorkspace =
-        workspacePath ||
-        globalWorkspaceService.getCurrentWorkspace()?.path ||
-        process.cwd();
+
+      // Security requirement S3: Use only authorized server-side active workspace
+      const currentWorkspace = globalWorkspaceService.getCurrentWorkspace();
+      if (!currentWorkspace?.path) {
+        throw new WorkspaceError(
+          'No active workspace open. You must open an authorized workspace before running terminal commands.',
+          'NO_ACTIVE_WORKSPACE',
+          400
+        );
+      }
+      const targetWorkspace = currentWorkspace.path;
 
       const termTool = new TerminalTool();
       const result = await termTool.execute(

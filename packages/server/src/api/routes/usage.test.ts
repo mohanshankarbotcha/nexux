@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import { createNexusApp } from '../app.js';
 import { StorageEngine, globalStorage } from '../../storage/storage-engine.js';
 import { UsageRecord } from '@nexus/core';
+import { getOrCreateApiToken } from '../../security/auth-token.js';
 
 async function makeRequest(app: any, method: string, pathUrl: string) {
   const server = app.listen(0);
@@ -13,7 +14,7 @@ async function makeRequest(app: any, method: string, pathUrl: string) {
   const url = `http://localhost:${port}${pathUrl}`;
 
   try {
-    const res = await fetch(url, { method });
+    const res = await fetch(url, { method, headers: { 'X-Nexus-Token': getOrCreateApiToken() } });
     const json = await res.json();
     return { status: res.status, body: json };
   } finally {

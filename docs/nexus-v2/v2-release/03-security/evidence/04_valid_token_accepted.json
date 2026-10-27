@@ -1,0 +1,8 @@
+{
+  "endpoint": "/api/providers/status",
+  "method": "GET",
+  "tokenSent": "VALID_TOKEN",
+  "status": 200,
+  "bodySuccess": true,
+  "passed": true
+}

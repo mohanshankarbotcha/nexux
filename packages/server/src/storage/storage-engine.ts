@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { globalCredentialVault } from '../security/credential-vault.js';
 import {
   Session,
   Task,
@@ -374,9 +375,9 @@ export class StorageEngine {
     }
   }
 
-  // Credentials (secure local persistence)
+  // Credentials (encrypted local vault persistence)
   getCredentials(): ProviderCredentials {
-    return this.readJson<ProviderCredentials>(this.credentialsFile, {});
+    return globalCredentialVault.loadFromDisk(this.dataDir);
   }
 
   saveCredentials(creds: ProviderCredentials): void {
@@ -386,11 +387,15 @@ export class StorageEngine {
       ...(creds.openaiApiKey !== undefined && { openaiApiKey: creds.openaiApiKey }),
       ...(creds.geminiApiKey !== undefined && { geminiApiKey: creds.geminiApiKey }),
     };
-    this.writeJson(this.credentialsFile, updated);
+    globalCredentialVault.saveToDisk(this.dataDir, updated);
   }
 
   clearCredentials(): void {
-    this.writeJson(this.credentialsFile, {});
+    globalCredentialVault.saveToDisk(this.dataDir, {});
+  }
+
+  getVaultStatus() {
+    return globalCredentialVault.getVaultStatus(this.dataDir);
   }
 
   // Usage records

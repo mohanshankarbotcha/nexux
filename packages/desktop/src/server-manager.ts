@@ -3,7 +3,7 @@ import http from 'node:http';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
-import { createNexusApp, globalStorage } from '@nexus/server';
+import { createNexusApp, globalStorage, getOrCreateApiToken } from '@nexus/server';
 import { logger, DEFAULT_SERVER_CONFIG } from '@nexus/core';
 
 export interface ServerManagerOptions {
@@ -18,6 +18,7 @@ export interface RunningServerInfo {
   host: string;
   url: string;
   dataDir: string;
+  apiToken: string;
   stop: () => Promise<void>;
 }
 
@@ -156,6 +157,7 @@ export class ServerManager {
           host,
           url,
           dataDir,
+          apiToken: getOrCreateApiToken(),
           stop,
         });
       });

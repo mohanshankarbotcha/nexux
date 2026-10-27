@@ -15,6 +15,7 @@ import {
   sanitizeString,
 } from '@nexus/core';
 import { createNexusApp } from '../api/app.js';
+import { getOrCreateApiToken } from '../security/auth-token.js';
 import { withSafeRetry, isRetryableError } from '../providers/retry.js';
 import { TerminalTool } from '../tools/terminal.js';
 import { ReadFileTool } from '../tools/read-file.js';
@@ -35,6 +36,7 @@ async function makeReliabilityRequest(
       method,
       headers: {
         'Content-Type': 'application/json',
+        'X-Nexus-Token': headers['X-Nexus-Token'] || headers['x-nexus-token'] || getOrCreateApiToken(),
         ...headers,
       },
       body: body ? JSON.stringify(body) : undefined,

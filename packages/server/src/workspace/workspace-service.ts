@@ -10,6 +10,7 @@ import {
   WorkspaceTreeNode,
   resolveSafePath,
   getSafeRelativePath,
+  normalizeStandardPath,
   DEFAULT_TOOL_CONFIG,
   logger,
 } from '@nexus/core';
@@ -63,6 +64,20 @@ export class WorkspaceService {
     const stat = fs.statSync(resolved);
     if (!stat.isDirectory()) {
       throw new WorkspaceError(`Target path is not a directory: ${resolved}`);
+    }
+
+    // Security (Prompt 03): Refuse protected system folders and root drives
+    const norm = normalizeStandardPath(resolved);
+    const winDir = process.env.SystemRoot ? normalizeStandardPath(process.env.SystemRoot) : 'c:/windows';
+    const progFiles = process.env.ProgramFiles ? normalizeStandardPath(process.env.ProgramFiles) : 'c:/program files';
+    const progFilesX86 = process.env['ProgramFiles(x86)'] ? normalizeStandardPath(process.env['ProgramFiles(x86)']) : 'c:/program files (x86)';
+    const userProfile = process.env.USERPROFILE ? normalizeStandardPath(process.env.USERPROFILE) : '';
+
+    if (norm === 'c:/' || norm === '/' || norm.startsWith(winDir + '/') || norm === winDir || norm.startsWith(progFiles + '/') || norm === progFiles || norm.startsWith(progFilesX86 + '/') || norm === progFilesX86) {
+      throw new WorkspaceError(`Opening protected system or root directory is forbidden: ${resolved}`, 'PROTECTED_DIRECTORY', 403);
+    }
+    if (userProfile && (norm === userProfile || norm === userProfile + '/')) {
+      throw new WorkspaceError(`Opening user profile root is forbidden. Please open a project subfolder instead: ${resolved}`, 'PROTECTED_DIRECTORY', 403);
     }
 
     const workspace: WorkspaceInfo = {

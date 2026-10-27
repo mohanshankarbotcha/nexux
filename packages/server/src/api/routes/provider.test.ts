@@ -7,6 +7,7 @@ import { createNexusApp } from '../app.js';
 import { StorageEngine, globalStorage } from '../../storage/storage-engine.js';
 import { globalModelRouter } from '../../providers/model-router.js';
 import { maskKey } from '@nexus/core';
+import { getOrCreateApiToken } from '../../security/auth-token.js';
 
 // Helper to make mock requests against Express app
 async function makeRequest(app: any, method: string, pathUrl: string, body?: any) {
@@ -20,6 +21,7 @@ async function makeRequest(app: any, method: string, pathUrl: string, body?: any
       method,
       headers: {
         'Content-Type': 'application/json',
+        'X-Nexus-Token': getOrCreateApiToken(),
       },
       body: body ? JSON.stringify(body) : undefined,
     });

@@ -6,6 +6,7 @@ export interface SystemInfo {
   version: string;
   serverPort: number;
   dataDir: string;
+  apiToken?: string;
 }
 
 export interface NexusDesktopBridge {

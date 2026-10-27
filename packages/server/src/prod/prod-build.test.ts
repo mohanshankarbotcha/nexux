@@ -4,6 +4,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createNexusApp } from '../api/app.js';
+import { getOrCreateApiToken } from '../security/auth-token.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -95,7 +96,7 @@ test('Phase 17 Production Web Build Verification Suite', async (t) => {
       assert.equal(healthJson.status, 'ok');
 
       // Test 404 for missing API route returns JSON, NOT HTML
-      const api404Res = await fetch(origin + '/api/nonexistent-route-12345');
+      const api404Res = await fetch(origin + '/api/nonexistent-route-12345', { headers: { 'X-Nexus-Token': getOrCreateApiToken() } });
       assert.equal(api404Res.status, 404);
       assert.ok(api404Res.headers.get('content-type')?.includes('json'));
       const api404Json = await api404Res.json();

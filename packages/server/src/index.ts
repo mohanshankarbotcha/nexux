@@ -10,13 +10,18 @@ export * from './agent/index.js';
 export * from './workspace/workspace-service.js';
 export * from './context/index.js';
 export * from './storage/storage-engine.js';
+export * from './security/auth-token.js';
+export * from './security/credential-vault.js';
 export * from './tasks/active-task-registry.js';
 export * from './api/app.js';
 
-export function startNexusServer(port: number = DEFAULT_SERVER_CONFIG.defaultPort) {
+export function startNexusServer(
+  port: number = DEFAULT_SERVER_CONFIG.defaultPort,
+  host: string = process.env.NEXUS_HOST || '127.0.0.1'
+) {
   const app = createNexusApp();
-  const server = app.listen(port, () => {
-    logger.info(`NEXUS.AI Server listening on http://localhost:${port}`);
+  const server = app.listen(port, host, () => {
+    logger.info(`NEXUS.AI Server listening on http://${host}:${port}`);
   });
   return server;
 }
