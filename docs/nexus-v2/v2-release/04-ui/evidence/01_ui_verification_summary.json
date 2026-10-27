@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-10-27T07:15:51.295Z",
+  "verdict": "PASSED",
+  "totalChecks": 8,
+  "results": [
+    {
+      "id": "UI-01",
+      "description": "Client source files free of CDN links and forbidden sample data",
+      "passed": true,
+      "details": "Zero violations found across source tree"
+    },
+    {
+      "id": "UI-02",
+      "description": "Client built bundle (dist/) free of CDN links and forbidden sample data",
+      "passed": true,
+      "details": "Zero violations found in production bundle"
+    },
+    {
+      "id": "UI-03",
+      "description": "Tailwind configuration contains Technical Precision V2 color tokens",
+      "passed": true,
+      "details": "Canvas, Panel, Hairline, Primary, and Mint tokens configured"
+    },
+    {
+      "id": "UI-04",
+      "description": "CSS variable typography tokens default to Times New Roman and Courier offline system fonts",
+      "passed": true,
+      "details": "Configured --font-display and --font-mono with offline Windows system fallbacks"
+    },
+    {
+      "id": "UI-05",
+      "description": "Left Rail and TopBar adhere to 48px density grid specifications",
+      "passed": true,
+      "details": "Sidebar w-12 (48px) and TopBar h-12 (48px) verified"
+    },
+    {
+      "id": "UI-06",
+      "description": "Health endpoint returns operational status for TopBar indicator",
+      "passed": true,
+      "details": "Status: 200, version: 1.0.0"
+    },
+    {
+      "id": "UI-07",
+      "description": "Providers endpoint returns active provider status for Setup screen",
+      "passed": true,
+      "details": "Providers returned: gemini (NOT_CONFIGURED), openai (NOT_CONFIGURED)"
+    },
+    {
+      "id": "UI-08",
+      "description": "Usage summary endpoint provides real telemetry for Usage screen",
+      "passed": true,
+      "details": "Initial totalTokens: 0"
+    }
+  ],
+  "metrics": {
+    "clientSrcFilesScanned": 25,
+    "clientDistFilesScanned": 3,
+    "forbiddenStringsChecked": 14
+  }
+}

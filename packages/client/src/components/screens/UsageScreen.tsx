@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import {
-  BarChart3,
   Coins,
   Cpu,
-  Bot,
   Layers,
   Clock,
-  ArrowUpDown,
+  RotateCw,
   Search,
+  Filter,
 } from 'lucide-react';
 import { UsageRecord, UsageSummary } from '@nexus/core';
 
@@ -24,6 +23,17 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
 }) => {
   const [filterAgent, setFilterAgent] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    if (!onRefresh || isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const filteredRecords = records.filter((r) => {
     if (filterAgent !== 'all' && r.agent !== filterAgent) return false;
@@ -39,264 +49,163 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
     return true;
   });
 
+  const totalTokens = summary?.totalTokens ?? 0;
+  const totalCost = summary?.totalEstimatedCostUsd ?? 0;
+  const totalRequests = summary?.totalRequests ?? records.length;
+  const byModel = summary?.byModel ?? {};
+
   return (
-    <div className="h-full overflow-auto bg-[#070a12] p-8 select-text text-slate-200">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="h-full overflow-auto bg-[#121316] p-6 md:p-8 select-text text-[#F8F8F9]">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#2D313A]">
           <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-amber-400 font-mono text-xs uppercase tracking-wider">
-              <Coins className="w-4 h-4" />
-              <span>Token Economics & Observability</span>
+            <div className="flex items-center gap-2 text-[#A0A5B1] font-mono text-xs uppercase tracking-wider">
+              <span>Telemetry & Economics</span>
+              <span className="text-[#2D313A]">/</span>
+              <span className="text-[#0FF0CB]">Real Ledger</span>
             </div>
-            <h1 className="text-2xl font-bold text-white font-mono">Usage & Cost Intelligence</h1>
-            <p className="text-xs text-slate-400">
-              Accurate token telemetry and centralized cost estimation calculated per model pricing.
+            <h1 className="text-2xl font-bold font-serif tracking-tight text-[#F8F8F9]">
+              Project Telemetry & Token Accounting
+            </h1>
+            <p className="text-xs text-[#A0A5B1] font-serif max-w-2xl">
+              Strict usage accounting and pricing telemetry aggregated across autonomous agent executions.
             </p>
           </div>
 
-          {onRefresh && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={onRefresh}
-              className="px-3 py-1.5 rounded bg-nexus-850 hover:bg-nexus-800 border border-nexus-border text-xs font-mono text-slate-300 transition-colors"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="px-3 py-1.5 rounded bg-[#16181D] hover:bg-[#1A1D23] border border-[#2D313A] text-xs font-mono text-[#F8F8F9] transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
-              Refresh Telemetry
+              <RotateCw className={`w-3.5 h-3.5 text-[#0FF0CB] ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Sync Ledger</span>
             </button>
-          )}
+          </div>
         </div>
 
-        {(!summary || summary.totalRequests === 0) && records.length === 0 ? (
-          <div className="py-20 text-center space-y-3 select-none">
-            <div className="w-12 h-12 rounded-xl bg-nexus-900 border border-nexus-border mx-auto flex items-center justify-center text-amber-400">
-              <Coins className="w-6 h-6" />
-            </div>
-            <h2 className="text-base font-bold text-slate-100 font-mono">No usage yet</h2>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Usage data and token telemetry will appear after your first AI request.
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Global KPIs */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              <div className="p-3.5 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-1">
-                <div className="text-[11px] text-slate-400 font-mono">Total Requests</div>
-                <div className="text-xl font-bold text-white font-mono">
-                  {(summary?.totalRequests || 0).toLocaleString()}
+        {/* Global Key Usage Metrics KPI Cards */}
+        <section aria-label="Key Usage Metrics">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Card 1: Total Tokens */}
+            <div className="p-4 rounded-lg bg-[#16181D] border border-[#2D313A] flex flex-col justify-between space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-serif text-[#A0A5B1]">Total Consumed Tokens</span>
+                <Coins className="w-4 h-4 text-[#FFAB00]" />
+              </div>
+              <div>
+                <div className="font-mono text-2xl font-semibold text-[#F8F8F9] tracking-tight">
+                  {totalTokens.toLocaleString()}
+                </div>
+                <div className="text-[11px] font-mono text-[#6B7280] mt-0.5">
+                  Input: {(summary?.totalInputTokens ?? 0).toLocaleString()} · Output: {(summary?.totalOutputTokens ?? 0).toLocaleString()}
                 </div>
               </div>
+            </div>
 
-          <div className="p-3.5 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-1">
-            <div className="text-[11px] text-slate-400 font-mono">Input Tokens</div>
-            <div className="text-xl font-bold text-sky-400 font-mono">
-              {(summary?.totalInputTokens || 0).toLocaleString()}
+            {/* Card 2: Estimated Cost */}
+            <div className="p-4 rounded-lg bg-[#16181D] border border-[#2D313A] flex flex-col justify-between space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-serif text-[#A0A5B1]">Estimated Total Cost</span>
+                <span className="text-xs font-mono text-[#0FF0CB]">USD</span>
+              </div>
+              <div>
+                <div className="font-mono text-2xl font-semibold text-[#0FF0CB] tracking-tight">
+                  ${totalCost.toFixed(4)}
+                </div>
+                <div className="text-[11px] font-mono text-[#6B7280] mt-0.5">
+                  Official provider pricing schedule
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Model Requests */}
+            <div className="p-4 rounded-lg bg-[#16181D] border border-[#2D313A] flex flex-col justify-between space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-serif text-[#A0A5B1]">Total AI Invocations</span>
+                <Cpu className="w-4 h-4 text-[#106EBE]" />
+              </div>
+              <div>
+                <div className="font-mono text-2xl font-semibold text-[#F8F8F9] tracking-tight">
+                  {totalRequests.toLocaleString()}
+                </div>
+                <div className="text-[11px] font-mono text-[#6B7280] mt-0.5">
+                  LLM prompt turns completed
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4: Models Active */}
+            <div className="p-4 rounded-lg bg-[#16181D] border border-[#2D313A] flex flex-col justify-between space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-serif text-[#A0A5B1]">Models Engaged</span>
+                <Layers className="w-4 h-4 text-[#31EC56]" />
+              </div>
+              <div>
+                <div className="font-mono text-2xl font-semibold text-[#F8F8F9] tracking-tight">
+                  {Object.keys(byModel).length}
+                </div>
+                <div className="text-[11px] font-mono text-[#6B7280] mt-0.5">
+                  Distinct models in ledger
+                </div>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div className="p-3.5 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-1">
-            <div className="text-[11px] text-slate-400 font-mono">Output Tokens</div>
-            <div className="text-xl font-bold text-indigo-400 font-mono">
-              {(summary?.totalOutputTokens || 0).toLocaleString()}
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-1">
-            <div className="text-[11px] text-slate-400 font-mono">Total Tokens</div>
-            <div className="text-xl font-bold text-amber-400 font-mono">
-              {(summary?.totalTokens || 0).toLocaleString()}
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-1 col-span-2 md:col-span-1">
-            <div className="text-[11px] text-slate-400 font-mono">Estimated Cost (USD)</div>
-            <div className="text-xl font-bold text-emerald-400 font-mono">
-              ${(summary?.totalEstimatedCostUsd || 0).toFixed(4)}
-            </div>
-            <div className="text-[10px] text-slate-500 font-mono">Estimated via pricing table</div>
-          </div>
-        </div>
-
-        {/* Aggregations: By Provider, By Model, By Agent */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* By Provider */}
-          <div className="p-4 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-semibold text-slate-300 font-mono uppercase">
-              <Cpu className="w-3.5 h-3.5 text-sky-400" />
-              <span>By Provider</span>
-            </div>
-
-            <div className="space-y-2">
-              {summary && Object.keys(summary.byProvider).length > 0 ? (
-                Object.entries(summary.byProvider).map(([provider, data]) => (
-                  <div
-                    key={provider}
-                    className="p-2 rounded bg-nexus-950/60 border border-nexus-border/60 text-xs font-mono space-y-1"
-                  >
-                    <div className="flex items-center justify-between font-semibold text-slate-200">
-                      <span className="capitalize">{provider}</span>
-                      <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{data.requests} calls ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
-                      <span>{data.totalTokens.toLocaleString()} tokens</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-xs text-slate-500 italic">No provider calls recorded yet.</div>
-              )}
-            </div>
-          </div>
-
-          {/* By Model */}
-          <div className="p-4 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-semibold text-slate-300 font-mono uppercase">
-              <Layers className="w-3.5 h-3.5 text-indigo-400" />
-              <span>By Model</span>
-            </div>
-
-            <div className="space-y-2 max-h-48 overflow-auto">
-              {summary && Object.keys(summary.byModel).length > 0 ? (
-                Object.entries(summary.byModel).map(([model, data]) => (
-                  <div
-                    key={model}
-                    className="p-2 rounded bg-nexus-950/60 border border-nexus-border/60 text-xs font-mono space-y-1"
-                  >
-                    <div className="flex items-center justify-between font-semibold text-slate-200">
-                      <span className="truncate max-w-[140px]">{model}</span>
-                      <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{data.requests} calls ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
-                      <span>{data.totalTokens.toLocaleString()} tokens</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-xs text-slate-500 italic">No model calls recorded yet.</div>
-              )}
-            </div>
-          </div>
-
-          {/* By Agent Role */}
-          <div className="p-4 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-semibold text-slate-300 font-mono uppercase">
-              <Bot className="w-3.5 h-3.5 text-amber-400" />
-              <span>By Agent Role</span>
-            </div>
-
-            <div className="space-y-2 max-h-48 overflow-auto">
-              {summary && Object.keys(summary.byAgent).length > 0 ? (
-                Object.entries(summary.byAgent).map(([agent, data]) => (
-                  <div
-                    key={agent}
-                    className="p-2 rounded bg-nexus-950/60 border border-nexus-border/60 text-xs font-mono space-y-1"
-                  >
-                    <div className="flex items-center justify-between font-semibold text-slate-200">
-                      <span className="capitalize">{agent}</span>
-                      <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{data.requests} calls ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
-                      <span>{data.totalTokens.toLocaleString()} tokens</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-xs text-slate-500 italic">No agent calls recorded yet.</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Aggregations: By Task & By Session */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* By Task */}
-          <div className="p-4 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-semibold text-slate-300 font-mono uppercase">
-              <Clock className="w-3.5 h-3.5 text-sky-400" />
-              <span>By Coding Task</span>
-            </div>
-
-            <div className="space-y-2 max-h-48 overflow-auto">
-              {summary && summary.byTask && Object.keys(summary.byTask).length > 0 ? (
-                Object.entries(summary.byTask).map(([task, data]) => (
-                  <div
-                    key={task}
-                    className="p-2 rounded bg-nexus-950/60 border border-nexus-border/60 text-xs font-mono space-y-1"
-                  >
-                    <div className="flex items-center justify-between font-semibold text-slate-200">
-                      <span className="truncate max-w-[200px]">{task}</span>
-                      <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{data.requests} requests ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
-                      <span>{data.totalTokens.toLocaleString()} tokens</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-xs text-slate-500 italic">No task telemetry recorded yet.</div>
-              )}
-            </div>
-          </div>
-
-          {/* By Session */}
-          <div className="p-4 rounded-xl bg-nexus-900/60 border border-nexus-border space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-semibold text-slate-300 font-mono uppercase">
-              <Cpu className="w-3.5 h-3.5 text-purple-400" />
-              <span>By Session</span>
-            </div>
-
-            <div className="space-y-2 max-h-48 overflow-auto">
-              {summary && summary.bySession && Object.keys(summary.bySession).length > 0 ? (
-                Object.entries(summary.bySession).map(([sess, data]) => (
-                  <div
-                    key={sess}
-                    className="p-2 rounded bg-nexus-950/60 border border-nexus-border/60 text-xs font-mono space-y-1"
-                  >
-                    <div className="flex items-center justify-between font-semibold text-slate-200">
-                      <span className="truncate max-w-[200px]">{sess}</span>
-                      <span className="text-emerald-400">${data.estimatedCostUsd.toFixed(4)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{data.requests} requests ({data.inputTokens.toLocaleString()} in / {data.outputTokens.toLocaleString()} out)</span>
-                      <span>{data.totalTokens.toLocaleString()} tokens</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-xs text-slate-500 italic">No session telemetry recorded yet.</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Requests Table */}
-        <div className="space-y-3">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300 font-mono">
-              Recent Model Telemetry Requests ({filteredRecords.length})
+        {/* Model Breakdown Grid */}
+        {Object.keys(byModel).length > 0 && (
+          <section className="space-y-3">
+            <h2 className="text-xs font-semibold font-serif text-[#F8F8F9] uppercase tracking-wider">
+              Token Consumption by Model
             </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {Object.entries(byModel).map(([modelName, stats]) => (
+                <div key={modelName} className="p-3.5 rounded-lg bg-[#16181D] border border-[#2D313A] space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-[#F8F8F9]">{modelName}</span>
+                    <span className="font-mono text-[10px] text-[#0FF0CB]">${stats.estimatedCostUsd?.toFixed(4) || '0.0000'}</span>
+                  </div>
+                  <div className="text-[11px] font-mono text-[#A0A5B1]">
+                    {stats.tokens?.toLocaleString()} tokens ({stats.requests} calls)
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-            <div className="flex items-center space-x-2">
+        {/* Usage Records Ledger Table */}
+        <section className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xs font-semibold font-serif text-[#F8F8F9] uppercase tracking-wider">
+                Execution Usage Ledger
+              </h2>
+              <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#1A1D23] text-[#A0A5B1] border border-[#2D313A]">
+                {filteredRecords.length} records
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
               <div className="relative">
-                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" />
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-[#6B7280]" />
                 <input
                   type="text"
-                  placeholder="Filter requests..."
+                  placeholder="Filter records..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="bg-nexus-950 border border-nexus-border focus:border-sky-500 text-slate-200 pl-8 pr-3 py-1 rounded text-xs font-mono focus:outline-none"
+                  className="bg-[#0D0E11] border border-[#2D313A] rounded text-xs font-mono pl-8 pr-3 py-1 text-[#F8F8F9] focus:outline-none focus:border-[#106EBE] w-48"
                 />
               </div>
 
               <select
                 value={filterAgent}
                 onChange={(e) => setFilterAgent(e.target.value)}
-                className="bg-nexus-950 border border-nexus-border text-slate-300 px-2 py-1 rounded text-xs font-mono focus:outline-none"
+                className="bg-[#0D0E11] border border-[#2D313A] rounded text-xs font-mono px-2 py-1 text-[#F8F8F9] focus:outline-none focus:border-[#106EBE]"
               >
-                <option value="all">All Agents</option>
+                <option value="all">All Roles</option>
                 <option value="coordinator">Coordinator</option>
                 <option value="explorer">Explorer</option>
                 <option value="planner">Planner</option>
@@ -307,59 +216,63 @@ export const UsageScreen: React.FC<UsageScreenProps> = ({
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-nexus-border bg-nexus-900/40">
-            <table className="w-full text-left text-xs font-mono">
-              <thead className="bg-nexus-900/80 border-b border-nexus-border text-slate-400 select-none">
-                <tr>
-                  <th className="py-2.5 px-3">Timestamp</th>
-                  <th className="py-2.5 px-3">Agent</th>
-                  <th className="py-2.5 px-3">Provider</th>
-                  <th className="py-2.5 px-3">Model</th>
-                  <th className="py-2.5 px-3 text-right">In / Out</th>
-                  <th className="py-2.5 px-3 text-right">Total Tokens</th>
-                  <th className="py-2.5 px-3 text-right">Duration</th>
-                  <th className="py-2.5 px-3 text-right">Cost (Est.)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-nexus-border/60">
-                {filteredRecords.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-8 text-center text-slate-500 italic">
-                      No matching telemetry records found.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredRecords.map((r, idx) => (
-                    <tr key={r.requestId || idx} className="hover:bg-nexus-850/40 transition-colors">
-                      <td className="py-2 px-3 text-slate-400">
-                        {new Date(r.timestamp).toLocaleTimeString()}
-                      </td>
-                      <td className="py-2 px-3">
-                        <span className="px-1.5 py-0.5 rounded bg-nexus-800 text-sky-300 uppercase text-[10px]">
-                          {r.agent}
-                        </span>
-                      </td>
-                      <td className="py-2 px-3 capitalize text-slate-300">{r.provider}</td>
-                      <td className="py-2 px-3 text-slate-300 truncate max-w-[140px]">{r.model}</td>
-                      <td className="py-2 px-3 text-right text-slate-400">
-                        {r.inputTokens} / {r.outputTokens}
-                      </td>
-                      <td className="py-2 px-3 text-right font-semibold text-amber-300">
-                        {r.totalTokens.toLocaleString()}
-                      </td>
-                      <td className="py-2 px-3 text-right text-slate-400">{r.durationMs}ms</td>
-                      <td className="py-2 px-3 text-right font-semibold text-emerald-400">
-                        ${r.estimatedCostUsd.toFixed(5)}
-                      </td>
+          {filteredRecords.length === 0 ? (
+            <div className="p-8 rounded-lg bg-[#16181D] border border-[#2D313A] text-center space-y-2">
+              <Clock className="w-6 h-6 text-[#6B7280] mx-auto" />
+              <div className="text-xs font-serif text-[#A0A5B1]">No usage records found in ledger</div>
+              <div className="text-[11px] text-[#6B7280] font-serif">
+                Run an autonomous coding task in Chat or Workspace to populate telemetry.
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg bg-[#16181D] border border-[#2D313A] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-mono text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-[#1A1D23] border-b border-[#2D313A] text-[#A0A5B1] text-[10px] uppercase tracking-wider">
+                      <th className="py-2.5 px-3">Time</th>
+                      <th className="py-2.5 px-3">Task ID</th>
+                      <th className="py-2.5 px-3">Agent</th>
+                      <th className="py-2.5 px-3">Model</th>
+                      <th className="py-2.5 px-3 text-right">Input</th>
+                      <th className="py-2.5 px-3 text-right">Output</th>
+                      <th className="py-2.5 px-3 text-right">Cost ($)</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        </>
-        )}
+                  </thead>
+                  <tbody className="divide-y divide-[#2D313A]/50">
+                    {filteredRecords.slice(0, 50).map((r, i) => (
+                      <tr key={i} className="hover:bg-[#1A1D23]/60 transition-colors">
+                        <td className="py-2 px-3 text-[#6B7280] whitespace-nowrap text-[11px]">
+                          {new Date(r.timestamp).toLocaleTimeString()}
+                        </td>
+                        <td className="py-2 px-3 text-[#A0A5B1] truncate max-w-[120px] text-[11px]">
+                          {r.taskId || 'standalone'}
+                        </td>
+                        <td className="py-2 px-3">
+                          <span className="agent-chip bg-[#1A1D23] border border-[#2D313A] text-[#A0A5B1]">
+                            {r.agent}
+                          </span>
+                        </td>
+                        <td className="py-2 px-3 text-[#F8F8F9] text-[11px]">
+                          {r.model}
+                        </td>
+                        <td className="py-2 px-3 text-right text-[#A0A5B1] text-[11px]">
+                          {r.inputTokens.toLocaleString()}
+                        </td>
+                        <td className="py-2 px-3 text-right text-[#A0A5B1] text-[11px]">
+                          {r.outputTokens.toLocaleString()}
+                        </td>
+                        <td className="py-2 px-3 text-right text-[#0FF0CB] font-semibold text-[11px]">
+                          ${r.estimatedCostUsd?.toFixed(4) || '0.0000'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

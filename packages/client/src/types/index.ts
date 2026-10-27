@@ -6,13 +6,24 @@ import {
   ProviderCredentials,
   ProviderId,
   Task,
+  TaskStatus,
   UsageRecord,
   UsageSummary,
   WorkspaceInfo,
   WorkspaceTreeNode,
 } from '@nexus/core';
 
-export type ScreenType = 'chat' | 'terminal' | 'workspace' | 'usage' | 'welcome' | 'dashboard' | 'providers' | 'settings';
+export type { TaskStatus };
+
+export type ScreenType =
+  | 'chat'
+  | 'terminal'
+  | 'workspace'
+  | 'usage'
+  | 'welcome'
+  | 'dashboard'
+  | 'providers'
+  | 'settings';
 
 export interface OpenTab {
   id: string;
@@ -74,6 +85,7 @@ export interface NexusDesktopBridge {
     version: string;
     serverPort: number;
     dataDir: string;
+    apiToken?: string;
   }>;
   openDirectoryPicker: () => Promise<string | null>;
   openExternal: (url: string) => Promise<void>;
@@ -87,4 +99,3 @@ declare global {
     nexusDesktop?: NexusDesktopBridge;
   }
 }
-

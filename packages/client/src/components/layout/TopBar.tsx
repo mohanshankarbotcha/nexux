@@ -1,18 +1,5 @@
 import React from 'react';
-import {
-  Folder,
-  Circle,
-  Cpu,
-  Search,
-  Settings,
-  Sparkles,
-  StopCircle,
-  Terminal,
-  Activity,
-  CheckCircle2,
-  AlertCircle,
-  Menu,
-} from 'lucide-react';
+import { Search } from 'lucide-react';
 import { AgentRole, AgentStatus, WorkspaceInfo } from '@nexus/core';
 import { ProviderStatusItem, ScreenType } from '../../types/index.js';
 
@@ -30,162 +17,88 @@ interface TopBarProps {
   onOpenSettings: () => void;
   onOpenProviders: () => void;
   providers: ProviderStatusItem[];
-  onToggleSidebar: () => void;
+  onToggleSidebar?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
-  currentScreen,
   activeWorkspace,
   onOpenWorkspaceModal,
   isConnected,
-  activeTaskId,
-  activeRole,
-  activeStatus,
-  activeModel,
-  onCancelActiveTask,
   onOpenCommandPalette,
-  onOpenSettings,
   onOpenProviders,
   providers,
-  onToggleSidebar,
 }) => {
   const providerList = Array.isArray(providers) ? providers : [];
-  const configuredProviders = providerList.filter((p) => p.isConfigured);
-  const primaryProvider = configuredProviders[0] || providerList[0];
-  const isAgentWorking = activeStatus === 'thinking' || activeStatus === 'executing_tool';
+  const anyConfigured = providerList.some((p) => p.isConfigured);
 
-  const screenNames: Record<ScreenType, string> = {
-    chat: 'CHAT',
-    terminal: 'TERMINAL',
-    workspace: 'WORKSPACE',
-    usage: 'USAGE',
-    welcome: 'WELCOME',
-    dashboard: 'DASHBOARD',
-    providers: 'PROVIDERS',
-    settings: 'SETTINGS',
-  };
+  // Compute operational status truthfully
+  let statusText = 'Operational';
+  let dotColor = 'bg-[#31EC56]';
+  let textColor = 'text-[#31EC56]';
+
+  if (!isConnected) {
+    statusText = 'Disconnected';
+    dotColor = 'bg-[#E7473C]';
+    textColor = 'text-[#E7473C]';
+  } else if (!anyConfigured) {
+    statusText = 'Setup Required';
+    dotColor = 'bg-[#FFAB00]';
+    textColor = 'text-[#FFAB00]';
+  }
+
+  const workspaceName = activeWorkspace?.name || 'No Project Open';
 
   return (
-    <header className="h-11 bg-nexus-950 border-b border-nexus-border flex items-center justify-between px-3 font-sans select-none z-10">
-      {/* Left: Mode Title & Workspace Breadcrumb */}
-      <div className="flex items-center space-x-3 truncate">
-        <button
-          onClick={onToggleSidebar}
-          className="text-slate-400 hover:text-slate-200 p-1 rounded hover:bg-nexus-850 transition-colors"
-          title="Toggle Sidebar (Ctrl+B)"
-        >
-          <Menu className="w-4 h-4" />
-        </button>
-
-        <div className="flex items-center space-x-2 text-xs font-mono">
-          <span className="font-bold text-slate-100 tracking-wider">
-            {screenNames[currentScreen] || 'WORKSPACE'}
+    <header className="h-12 flex-shrink-0 bg-[#111215] border-b border-[#2D313A] z-30 flex items-center justify-between px-4 select-none">
+      {/* Left: Brand & Active Project Context */}
+      <div className="flex items-center gap-4 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="font-serif font-bold text-[#F8F8F9] text-base tracking-tight">
+            NEXUS<span className="text-[#106EBE]">.AI</span>
           </span>
-          <span className="text-slate-600">/</span>
-          <button
-            onClick={onOpenWorkspaceModal}
-            title={activeWorkspace?.path || 'Click to open workspace'}
-            className="flex items-center space-x-1 text-slate-400 hover:text-sky-400 transition-colors truncate max-w-xs"
-          >
-            <Folder className="w-3.5 h-3.5 flex-shrink-0 text-sky-400" />
-            <span className="truncate">{activeWorkspace ? activeWorkspace.name : 'Open Project...'}</span>
-          </button>
         </div>
+
+        <div className="h-4 w-[1px] bg-[#2D313A]" />
+
+        <button
+          onClick={onOpenWorkspaceModal}
+          title={activeWorkspace ? `Active Workspace: ${activeWorkspace.path}` : 'Click to open workspace'}
+          className="flex items-center gap-1.5 font-mono text-[11px] text-[#A0A5B1] hover:text-[#F8F8F9] transition-colors truncate max-w-xs cursor-pointer"
+        >
+          <span className="text-[#6B7280]">workspace</span>
+          <span className="text-[#2D313A]">/</span>
+          <span className="text-[#F8F8F9] truncate font-semibold">{workspaceName}</span>
+        </button>
       </div>
 
-      {/* Center: Live Task Status Indicator */}
-      <div className="flex items-center space-x-2">
-        {isAgentWorking ? (
-          <div className="flex items-center space-x-2 px-2.5 py-1 rounded-full bg-nexus-900 border border-sky-500/40 text-[11px] font-mono text-sky-400 animate-pulse">
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
-            <span className="capitalize">{activeRole}</span>
-            <span className="text-slate-500">·</span>
-            <span className="text-slate-300">
-              {activeStatus === 'thinking' ? 'Reasoning...' : 'Executing Tool...'}
-            </span>
-            <button
-              onClick={onCancelActiveTask}
-              title="Stop task execution"
-              className="text-rose-400 hover:text-rose-300 ml-1 p-0.5"
-            >
-              <StopCircle className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        ) : activeTaskId ? (
-          activeStatus === 'failed' ? (
-            <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-rose-950/40 border border-rose-500/30 text-[11px] font-mono text-rose-300">
-              <AlertCircle className="w-3 h-3 text-rose-400" />
-              <span>Task Failed</span>
-            </div>
-          ) : activeStatus === 'completed' ? (
-            <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-500/30 text-[11px] font-mono text-emerald-300">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              <span>Task Completed</span>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-nexus-900 border border-nexus-border text-[11px] font-mono text-slate-400">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              <span>Task Loaded</span>
-            </div>
-          )
-        ) : null}
-      </div>
-
-      {/* Right: Actions, Provider Status, Palette */}
-      <div className="flex items-center space-x-2 text-xs font-mono">
-        {/* Command Palette Trigger */}
+      {/* Center: Command Palette Trigger */}
+      <div className="flex items-center justify-center flex-1 max-w-md px-4">
         <button
           onClick={onOpenCommandPalette}
-          className="flex items-center space-x-2 px-2.5 py-1 rounded-lg bg-nexus-900 hover:bg-nexus-850 border border-nexus-border text-slate-400 hover:text-slate-200 transition-colors"
-          title="Command Palette (Ctrl+K)"
+          className="w-full flex items-center justify-between px-3 py-1.5 rounded bg-[#16181D] border border-[#2D313A] text-[#A0A5B1] text-xs hover:border-[#383D48] transition-colors cursor-pointer group"
+          title="Open Command Palette (Ctrl+K)"
         >
-          <Search className="w-3.5 h-3.5 text-slate-500" />
-          <span className="hidden md:inline text-[11px]">Command Palette</span>
-          <kbd className="text-[10px] px-1 py-0.2 rounded bg-nexus-950 border border-nexus-border text-slate-400">
-            Ctrl+K
-          </kbd>
+          <div className="flex items-center gap-2 truncate">
+            <Search className="w-3.5 h-3.5 text-[#6B7280] group-hover:text-[#A0A5B1]" />
+            <span className="font-serif text-[12px] truncate">Search files, symbols, commands...</span>
+          </div>
+          <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#1A1D23] border border-[#2D313A] text-[10px] font-mono text-[#A0A5B1]">
+            <span>Ctrl</span>
+            <span>+</span>
+            <span>K</span>
+          </div>
         </button>
+      </div>
 
-        {/* Provider Indicator */}
+      {/* Right: Real Operational Health Status */}
+      <div className="flex items-center gap-3 shrink-0">
         <button
           onClick={onOpenProviders}
-          className="flex items-center space-x-1.5 px-2 py-1 rounded-lg bg-nexus-900/60 hover:bg-nexus-850 border border-nexus-border text-slate-300 transition-colors"
-          title="AI Provider Settings"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#16181D] border border-[#2D313A] hover:border-[#383D48] transition-colors cursor-pointer"
+          title="Click to view Provider & Gateway Status"
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-          <span className="hidden sm:inline text-[11px]">
-            {activeModel ||
-              (primaryProvider?.isConfigured
-                ? primaryProvider.defaultModel || primaryProvider.name
-                : 'Setup AI Keys')}
-          </span>
-          <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              configuredProviders.length > 0 ? 'bg-emerald-400' : 'bg-amber-400'
-            }`}
-          />
-        </button>
-
-        {/* Server Connection Status */}
-        <div
-          className="flex items-center space-x-1 px-2 py-1 rounded bg-nexus-900/40 text-[11px] text-slate-400"
-          title={isConnected ? 'Backend Server Connected' : 'Server Disconnected'}
-        >
-          <Circle
-            className={`w-2 h-2 ${
-              isConnected ? 'text-emerald-400 fill-emerald-400' : 'text-rose-500 fill-rose-500'
-            }`}
-          />
-          <span className="hidden lg:inline">{isConnected ? 'Online' : 'Offline'}</span>
-        </div>
-
-        {/* Settings Button */}
-        <button
-          onClick={onOpenSettings}
-          className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-nexus-850 transition-colors"
-          title="Open Settings"
-        >
-          <Settings className="w-4 h-4" />
+          <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+          <span className={`font-mono text-[11px] ${textColor}`}>{statusText}</span>
         </button>
       </div>
     </header>
