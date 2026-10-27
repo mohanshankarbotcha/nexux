@@ -1,0 +1,29 @@
+
+> nexus-ai-workspace@1.0.0 build
+> npm run build --workspace=packages/core && npm run build --workspace=packages/server && npm run build --workspace=packages/client && npm run build --workspace=packages/desktop
+
+
+> @nexus/core@1.0.0 build
+> tsc -b
+
+
+> @nexus/server@1.0.0 build
+> tsc -b
+
+
+> @nexus/client@1.0.0 build
+> tsc && vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 1607 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.85 kB │ gzip:  0.51 kB
+dist/assets/index-DAvpezcv.css   34.45 kB │ gzip:  6.61 kB
+dist/assets/index-CXRy_pyH.js   311.25 kB │ gzip: 80.13 kB │ map: 772.48 kB
+✓ built in 1m 2s
+
+> @nexus/desktop@1.0.0 build
+> tsc -b && node -e "const fs=require('fs'); if(fs.existsSync('src/preload.cjs')) fs.copyFileSync('src/preload.cjs','dist/preload.cjs')"
+

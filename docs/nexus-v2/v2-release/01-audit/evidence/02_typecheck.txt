@@ -1,0 +1,16 @@
+
+> nexus-ai-workspace@1.0.0 typecheck
+> npm run typecheck --workspaces --if-present
+
+
+> @nexus/core@1.0.0 typecheck
+> tsc --noEmit
+
+
+> @nexus/server@1.0.0 typecheck
+> tsc --noEmit
+
+
+> @nexus/desktop@1.0.0 typecheck
+> tsc --noEmit
+

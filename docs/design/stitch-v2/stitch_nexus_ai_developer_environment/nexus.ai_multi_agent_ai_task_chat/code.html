@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&amp;family=Comfortaa:wght@400;500;700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;background-color:#111215;color:#e3e2e6;}body{overscroll-behavior:none;font-family:"Times New Roman",Times,serif;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-tertiary-container":"#a0fffe","surface-container-highest":"#343538","primary-fixed":"#d3e4ff","surface-dim":"#121316","outline-variant":"#23252b","secondary-fixed-dim":"#00dfbd","tertiary":"#00dddd","on-primary-fixed-variant":"#004881","on-tertiary-fixed-variant":"#004f4f","primary-fixed-dim":"#a2c9ff","error-container":"#93000a","on-secondary-fixed":"#00201a","surface-variant":"#1f2127","on-secondary-fixed-variant":"#005143","primary":"#a2c9ff","secondary":"#a5ffe7","on-secondary-container":"#006655","on-primary-fixed":"#001c38","on-surface":"#e3e2e6","inverse-on-surface":"#2f3034","surface-bright":"#38393c","on-tertiary-fixed":"#002020","on-error":"#690005","inverse-primary":"#0060a9","on-primary":"#00315c","tertiary-fixed-dim":"#00dddd","on-error-container":"#ffdad6","surface-container-low":"#16171c","on-tertiary":"#003737","inverse-surface":"#e3e2e6","on-secondary":"#00382d","secondary-container":"#00ecc7","background":"#111215","surface-container-lowest":"#0b0c0e","primary-container":"#106ebe","outline":"#8b919d","surface-tint":"#a2c9ff","on-background":"#e3e2e6","tertiary-container":"#007979","surface-container":"#1a1c22","surface":"#111215","error":"#ffb4ab","secondary-fixed":"#35fed8","tertiary-fixed":"#00fbfb","on-primary-container":"#e7efff","surface-container-high":"#22242c","on-surface-variant":"#c1c7d3"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"0.5rem","space-sm":"0.5rem","space-xl":"1.5rem","margin":"0.75rem","space-xs":"0.25rem","space-md":"0.75rem","space-lg":"1rem"},"fontFamily":{"label-md":["Comfortaa"],"label-sm":["Comfortaa"],"body-lg":["Courier Prime"],"headline-md":["\"Times New Roman\"","Times","serif"],"headline-lg":["\"Times New Roman\"","Times","serif"],"body-sm":["Courier Prime"],"headline-xl":["\"Times New Roman\"","Times","serif"],"code-block":["Courier Prime"],"body-md":["Courier Prime"],"serif":["\"Times New Roman\"","Times","serif"]},"fontSize":{"label-md":["0.75rem",{"lineHeight":"1rem","letterSpacing":"0.02em","fontWeight":"500"}],"label-sm":["0.6875rem",{"lineHeight":"0.875rem","letterSpacing":"0.04em","fontWeight":"500"}],"body-lg":["0.875rem",{"lineHeight":"1.375rem","letterSpacing":"-0.01em","fontWeight":"400"}],"headline-md":["1rem",{"lineHeight":"1.5rem","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-lg":["1.25rem",{"lineHeight":"1.75rem","letterSpacing":"-0.015em","fontWeight":"500"}],"body-sm":["0.75rem",{"lineHeight":"1.125rem","letterSpacing":"0em","fontWeight":"400"}],"headline-xl":["1.75rem",{"lineHeight":"2.25rem","letterSpacing":"-0.025em","fontWeight":"600"}],"code-block":["0.8125rem",{"lineHeight":"1.35rem","letterSpacing":"0em","fontWeight":"400"}],"body-md":["0.8125rem",{"lineHeight":"1.25rem","letterSpacing":"0em","fontWeight":"400"}]}}}}</script></head><body class="bg-background text-on-surface antialiased select-none"><header class="fixed top-0 left-0 right-0 h-12 bg-[#111215] border-b border-[#23252b] z-50 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><span class="font-headline-md text-headline-md tracking-tight font-serif text-on-surface text-[15px]">NEXUS.AI</span></div><div class="h-4 w-[1px] bg-outline-variant"></div><div class="flex items-center gap-space-xs font-code-block text-[11px] text-on-surface-variant"><span class="text-outline">nexus</span><span class="text-outline-variant">/</span><span class="text-on-surface">feat/agent-mesh</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm px-space-md py-1 rounded bg-[#16171c] border border-[#23252b] text-on-surface-variant text-[12px] cursor-pointer hover:border-outline/40 transition-colors"><span class="font-headline-md text-[12px]">Search files, symbols, commands...</span><div class="flex items-center gap-0.5 px-1 py-0.2 rounded bg-surface-container border border-outline-variant text-[10px] font-code-block text-outline"><span class="text-[9px]">⌘</span><span>K</span></div></div><div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#16171c] border border-[#23252b]"><span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span><span class="font-code-block text-[11px] text-secondary-fixed">Operational</span></div></div></header><aside class="fixed left-0 top-12 bottom-0 w-14 bg-[#111215] border-r border-[#23252b] z-40 flex flex-col justify-between items-center py-space-sm"><nav class="w-full flex flex-col items-center gap-space-xs" data-active-classes="bg-surface-container text-on-surface border-l-2 border-primary"><a aria-current="page" class="w-10 h-10 rounded flex flex-col items-center justify-center transition-colors font-headline-md bg-surface-container text-on-surface border-l-2 border-primary" data-path="chat" href="#" title="Chat"><svg class="w-[18px] h-[18px] stroke-current stroke-[1.5] fill-none mb-0.5" viewbox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="leading-none">Chat</span></a><a class="w-10 h-10 rounded flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-headline-md text-[11px]" data-path="workspace" href="#" title="Workspace"><svg class="w-[18px] h-[18px] stroke-current stroke-[1.5] fill-none mb-0.5" viewbox="0 0 24 24"><polyline points="16 18 22 12 16 6" stroke-linecap="round" stroke-linejoin="round"></polyline><polyline points="8 6 2 12 8 18" stroke-linecap="round" stroke-linejoin="round"></polyline></svg><span class="leading-none">Code</span></a><a class="w-10 h-10 rounded flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-headline-md text-[11px]" data-path="usage" href="#" title="Telemetry"><svg class="w-[18px] h-[18px] stroke-current stroke-[1.5] fill-none mb-0.5" viewbox="0 0 24 24"><path d="M3 3v18h18" stroke-linecap="round" stroke-linejoin="round"></path><path d="m19 9-5 5-4-4-3 3" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="leading-none">Stats</span></a><a class="w-10 h-10 rounded flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-headline-md text-[11px]" data-path="settings" href="#" title="Agents &amp; Settings"><svg class="w-[18px] h-[18px] stroke-current stroke-[1.5] fill-none mb-0.5" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span class="leading-none">Setup</span></a></nav><div class="w-full flex flex-col items-center gap-space-sm pt-space-xs border-t border-[#23252b]"><div class="w-7 h-7 rounded-full bg-[#1e2026] border border-[#23252b] flex items-center justify-center font-code-block text-[11px] text-on-surface" title="User Session">NX</div></div></aside><div class="pl-14 pt-12 min-h-screen bg-[#111215]"><main class="w-full"><div class="flex flex-col w-full h-[calc(100vh-3rem)] overflow-hidden">
+<!-- Task Header: Level 1 Primary Visual Anchor -->
+<section class="w-full bg-surface-container-lowest px-space-lg py-space-md flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-md min-w-0">
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" id="toggle-left-dock" title="Toggle Thread Tree">
+<svg class="w-4 h-4 stroke-current stroke-[1.5] fill-none" viewbox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="3"></rect><path d="M9 3v18"></path></svg>
+</button>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-sm">
+<span class="font-code-block text-body-sm text-outline">NEX-4091</span>
+<span class="w-1 h-1 rounded-full bg-surface-container-highest"></span>
+<span class="font-headline-lg text-headline-lg font-serif text-on-surface truncate">feat(core): Resolve memory leak in stream processing</span>
+</div>
+<div class="flex items-center gap-space-md font-code-block text-body-sm text-outline">
+<span>branch: feat/agent-mesh</span>
+<span class="text-surface-container-highest">/</span>
+<span>head: 8f42c0d</span>
+<span class="text-surface-container-highest">/</span>
+<span class="text-secondary-fixed">sync.Pool optimization</span>
+</div>
+</div>
+</div>
+<!-- Level 3: Discreet Header Telemetry & Right Dock Trigger -->
+<div class="flex items-center gap-space-lg shrink-0">
+<div class="flex items-center gap-space-md font-code-block text-body-sm text-outline">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+          Mesh: Active
+        </span>
+<span class="text-surface-container-highest">|</span>
+<span>Tokens: 14,280 / $0.021</span>
+<span class="text-surface-container-highest">|</span>
+<span>Elapsed: 42.4s</span>
+</div>
+<button class="flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" id="toggle-right-dock">
+<svg class="w-3.5 h-3.5 stroke-current stroke-[1.5] fill-none" viewbox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="3"></rect><path d="M15 3v18"></path></svg>
+<span class="font-label-sm text-label-sm">Diff &amp; Staging (2)</span>
+</button>
+</div>
+</section>
+<!-- Main Work Surface: Multi-pane Layout -->
+<div class="flex flex-1 w-full overflow-hidden bg-background">
+<!-- Level 2: Secondary Left Thread/Agent Drawer (Collapsible) -->
+<aside class="w-64 bg-surface-container-lowest flex flex-col shrink-0 transition-all duration-200" id="left-dock">
+<div class="px-space-md py-space-sm flex items-center justify-between text-outline">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Active Threads</span>
+<button class="p-0.5 rounded hover:bg-surface-container text-outline hover:text-on-surface transition-colors" title="New Session">
+<svg class="w-3.5 h-3.5 stroke-current stroke-[1.5] fill-none" viewbox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto px-space-xs py-space-xs space-y-0.5 font-code-block text-body-sm">
+<div class="px-space-sm py-1.5 rounded bg-surface-container text-on-surface flex items-center justify-between cursor-pointer">
+<div class="flex items-center gap-2 truncate">
+<span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+<span class="truncate">feat: Stream pool leak</span>
+</div>
+<span class="text-outline text-label-sm">Active</span>
+</div>
+<div class="px-space-sm py-1.5 rounded text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors flex items-center justify-between cursor-pointer">
+<div class="flex items-center gap-2 truncate">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant shrink-0"></span>
+<span class="truncate">fix: AST cycle in router</span>
+</div>
+<span class="text-outline text-label-sm">18m</span>
+</div>
+<div class="px-space-sm py-1.5 rounded text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors flex items-center justify-between cursor-pointer">
+<div class="flex items-center gap-2 truncate">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant shrink-0"></span>
+<span class="truncate">test: Agent state rehydrate</span>
+</div>
+<span class="text-outline text-label-sm">2h</span>
+</div>
+<div class="px-space-sm py-1.5 rounded text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors flex items-center justify-between cursor-pointer">
+<div class="flex items-center gap-2 truncate">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant shrink-0"></span>
+<span class="truncate">refactor: IPC message buffers</span>
+</div>
+<span class="text-outline text-label-sm">Yesterday</span>
+</div>
+</div>
+<!-- Agent Pool Summary in Drawer -->
+<div class="p-space-md bg-surface-container-low m-space-xs rounded font-code-block text-body-sm space-y-1.5">
+<div class="flex justify-between items-center text-outline">
+<span class="font-label-sm text-label-sm uppercase">Active Swarm</span>
+<span class="text-secondary-fixed">6 Nodes</span>
+</div>
+<div class="text-on-surface-variant text-[11px] leading-relaxed">
+          4 idling / 1 computing / 1 review gate
+        </div>
+</div>
+</aside>
+<!-- Center Core: Conversational Timeline & Composer -->
+<main class="flex-1 flex flex-col min-w-0 bg-background overflow-hidden relative">
+<!-- Conversation History & Agent Progressive Timeline -->
+<div class="flex-1 overflow-y-auto px-space-xl py-space-lg space-y-space-xl max-w-4xl mx-auto w-full">
+<!-- User Prompt Block -->
+<article class="flex flex-col gap-space-xs">
+<div class="flex items-baseline justify-between">
+<span class="font-headline-md text-headline-md font-serif text-on-surface font-semibold">User</span>
+<time class="font-code-block text-body-sm text-outline">Today at 14:28:12</time>
+</div>
+<div class="bg-surface-container-low p-space-lg rounded-lg text-on-surface font-serif text-headline-md leading-relaxed shadow-sm">
+            Investigate the streaming allocation spike under load test scenario #4. Profile shows heap retention expanding indefinitely in <code class="font-code-block text-body-md text-primary bg-surface-container px-1 py-0.5 rounded">stream_collector.go</code>. Propose zero-copy fix and verify race safety before writing tests.
+          </div>
+</article>
+<!-- Progressive Disclosure Multi-Agent Execution Timeline -->
+<section class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md font-serif text-on-surface">Execution Sequence</span>
+<span class="font-code-block text-body-sm text-outline">mesh-pipeline-v4</span>
+</div>
+<span class="font-code-block text-body-sm text-secondary-fixed">5/6 Stages Complete</span>
+</div>
+<!-- Timeline Container (Hairline connection) -->
+<div class="relative pl-6 space-y-3 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[1px] before:bg-surface-container-highest">
+<!-- 1. Coordinator: Compact Completed -->
+<div class="relative flex items-center justify-between group">
+<span class="absolute -left-6 top-1.5 w-4 h-4 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] text-on-surface-variant font-code-block">✓</span>
+<div class="flex items-center gap-space-md">
+<span class="font-serif text-headline-md text-on-surface font-medium">Coordinator</span>
+<span class="text-outline font-serif text-headline-md">—</span>
+<span class="text-on-surface-variant font-serif text-headline-md">Analyzed task &amp; routed to Explorer</span>
+</div>
+<span class="font-code-block text-body-sm text-outline">180ms</span>
+</div>
+<!-- 2. Explorer: Expandable Detail Summary -->
+<div class="relative group">
+<span class="absolute -left-6 top-1.5 w-4 h-4 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] text-on-surface-variant font-code-block">✓</span>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-md cursor-pointer" onclick="document.getElementById('explorer-details').classList.toggle('hidden')">
+<span class="font-serif text-headline-md text-on-surface font-medium">Explorer</span>
+<span class="text-outline font-serif text-headline-md">—</span>
+<span class="text-on-surface-variant font-serif text-headline-md">Scanned 14 files, isolated stream_collector.go:142</span>
+<svg class="w-3.5 h-3.5 text-outline group-hover:text-on-surface transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+</div>
+<span class="font-code-block text-body-sm text-outline">1.2s</span>
+</div>
+<!-- Collapsed details -->
+<div class="hidden mt-1 p-space-sm bg-surface-container-lowest rounded font-code-block text-body-sm text-outline space-y-1" id="explorer-details">
+<div>• Target: <span class="text-on-surface">internal/collector/stream_collector.go</span></div>
+<div>• Cause: Channel buffer escapes heap during backpressure event loop</div>
+<div>• Allocation cost: ~2.4MB per 10k messages uncollected</div>
+</div>
+</div>
+</div>
+<!-- 3. Planner: Click-to-Expand Summary -->
+<div class="relative group">
+<span class="absolute -left-6 top-1.5 w-4 h-4 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] text-on-surface-variant font-code-block">✓</span>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between cursor-pointer" onclick="document.getElementById('planner-details').classList.toggle('hidden')">
+<div class="flex items-center gap-space-md">
+<span class="font-serif text-headline-md text-on-surface font-medium">Planner</span>
+<span class="text-outline font-serif text-headline-md">—</span>
+<span class="text-on-surface-variant font-serif text-headline-md">Formulated 3-step zero-copy sync.Pool remediation</span>
+<svg class="w-3.5 h-3.5 text-outline group-hover:text-on-surface transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+</div>
+<span class="font-code-block text-body-sm text-outline">840ms</span>
+</div>
+<div class="hidden mt-1 p-space-sm bg-surface-container-lowest rounded font-serif text-headline-md text-on-surface-variant space-y-1.5" id="planner-details">
+<p>1. Introduce atomic <code class="font-code-block text-body-sm text-on-surface">ByteBufferPool</code> in <code class="font-code-block text-body-sm text-primary">internal/buffer/pool.go</code>.</p>
+<p>2. Swap heap slice allocations in <code class="font-code-block text-body-sm text-on-surface">DrainBatch()</code> with pooled references.</p>
+<p>3. Enforce deferential release lifecycle to eliminate race hazard.</p>
+</div>
+</div>
+</div>
+<!-- 4. Coder: Inline Restrained Diff Snippet with Expand Action -->
+<div class="relative group">
+<span class="absolute -left-6 top-1.5 w-4 h-4 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] text-on-surface-variant font-code-block">✓</span>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<span class="font-serif text-headline-md text-on-surface font-medium">Coder</span>
+<span class="text-outline font-serif text-headline-md">—</span>
+<span class="text-on-surface-variant font-serif text-headline-md">Modified internal/buffer/pool.go (+38, -12)</span>
+</div>
+<span class="font-code-block text-body-sm text-outline">3.4s</span>
+</div>
+<!-- Clean inline restrained diff view -->
+<div class="rounded-lg bg-surface-container-lowest overflow-hidden shadow-sm">
+<div class="px-space-md py-1.5 bg-surface-container-low flex items-center justify-between">
+<span class="font-code-block text-body-sm text-on-surface">internal/buffer/pool.go</span>
+<button class="font-code-block text-body-sm text-primary hover:underline">Expand full diff</button>
+</div>
+<pre class="p-space-md font-code-block text-code-block leading-relaxed overflow-x-auto"><span class="text-outline">@@ -28,8 +28,14 @@ func (p *StreamPipe) Acquire() *Buffer {</span>
+<span class="text-error bg-error-container/20 block">-    buf := make([]byte, DefaultChunkSize)</span>
+<span class="text-error bg-error-container/20 block">-    return &amp;Buffer{raw: buf, cap: DefaultChunkSize}</span>
+<span class="text-secondary-fixed bg-secondary-container/10 block">+    item := p.pool.Get()</span>
+<span class="text-secondary-fixed bg-secondary-container/10 block">+    if item == nil {</span>
+<span class="text-secondary-fixed bg-secondary-container/10 block">+        return &amp;Buffer{raw: make([]byte, DefaultChunkSize), pooled: true}</span>
+<span class="text-secondary-fixed bg-secondary-container/10 block">+    }</span>
+<span class="text-secondary-fixed bg-secondary-container/10 block">+    buf := item.(*Buffer)</span>
+<span class="text-secondary-fixed bg-secondary-container/10 block">+    buf.Reset()</span>
+<span class="text-secondary-fixed bg-secondary-container/10 block">+    return buf</span>
+<span class="text-outline"> }</span></pre>
+</div>
+</div>
+</div>
+<!-- 5. Debugger: Subtle Active Pulse Dot -->
+<div class="relative flex items-center justify-between">
+<span class="absolute -left-6 top-2 w-4 h-4 flex items-center justify-center">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed animate-ping opacity-75"></span>
+<span class="absolute w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+</span>
+<div class="flex items-center gap-space-md">
+<span class="font-serif text-headline-md text-on-surface font-medium">Debugger</span>
+<span class="text-outline font-serif text-headline-md">—</span>
+<span class="text-on-surface font-serif text-headline-md">Running race detector suite (<code class="font-code-block text-body-sm text-outline">go test -race -count=5 ./internal/...</code>)</span>
+</div>
+<span class="font-code-block text-body-sm text-secondary-fixed">Running...</span>
+</div>
+<!-- 6. Reviewer: Queued Minimal -->
+<div class="relative flex items-center justify-between opacity-50">
+<span class="absolute -left-6 top-1.5 w-4 h-4 rounded-full bg-surface-container flex items-center justify-center text-[10px] text-outline font-code-block">○</span>
+<div class="flex items-center gap-space-md">
+<span class="font-serif text-headline-md text-outline font-medium">Reviewer</span>
+<span class="text-outline font-serif text-headline-md">—</span>
+<span class="text-outline font-serif text-headline-md">Queued for automated review</span>
+</div>
+<span class="font-code-block text-body-sm text-outline">Pending</span>
+</div>
+</div>
+</section>
+<!-- Conversational Follow-up Guidance -->
+<div class="p-space-lg rounded-lg bg-surface-container-lowest text-on-surface-variant font-serif text-headline-md space-y-2">
+<p>
+            Memory retention has dropped from <span class="font-code-block text-body-sm text-error">~420MB</span> to <span class="font-code-block text-body-sm text-secondary-fixed">14.2MB</span> under 50k sustained payload benchmark. Once the race suite verifies synchronization barriers, ready to prepare commit payload.
+          </p>
+</div>
+</div>
+<!-- Level 1 Primary: Bottom Roomy Elegant Composer -->
+<footer class="w-full max-w-4xl mx-auto px-space-xl pb-space-lg pt-space-xs shrink-0">
+<div class="rounded-xl bg-surface-container-lowest p-space-md shadow-md flex flex-col gap-space-sm focus-within:ring-1 focus-within:ring-primary/40 transition-all">
+<textarea class="w-full bg-transparent resize-none outline-none font-serif text-headline-md text-on-surface placeholder:text-outline placeholder:font-serif leading-relaxed" id="composer-input" placeholder="Direct the swarm, add constraints, or command follow-up test runs..." rows="3"></textarea>
+<div class="flex items-center justify-between pt-space-xs">
+<!-- Composer Context Pills -->
+<div class="flex items-center gap-space-xs">
+<button class="px-2.5 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+                Autonomous
+              </button>
+<button class="px-2.5 py-1 rounded bg-surface-container text-outline hover:text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
+                Gemini 2.5 Pro
+                <svg class="w-3 h-3 ml-0.5 text-outline" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Attach file or context">
+<svg class="w-4 h-4 stroke-current stroke-[1.5] fill-none" viewbox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+</button>
+</div>
+<!-- Action Dispatch -->
+<div class="flex items-center gap-space-sm">
+<span class="font-code-block text-body-sm text-outline hidden sm:inline">⌘ + Return to dispatch</span>
+<button class="px-space-lg py-1.5 rounded bg-primary-container hover:bg-inverse-primary text-on-primary-container font-serif text-headline-md font-medium transition-colors shadow-sm flex items-center gap-1.5">
+<span>Dispatch</span>
+<svg class="w-3.5 h-3.5 stroke-current stroke-[2] fill-none" viewbox="0 0 24 24"><line x1="22" x2="11" y1="2" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+</button>
+</div>
+</div>
+</div>
+</footer>
+</main>
+<!-- Level 2: Secondary Right Context Drawer (Collapsible) -->
+<aside class="w-80 bg-surface-container-lowest flex flex-col shrink-0 transition-all duration-200" id="right-dock">
+<div class="px-space-md py-space-sm flex items-center justify-between text-outline">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Modified Files</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface font-code-block text-body-sm">2</span>
+</div>
+<button class="p-0.5 rounded hover:bg-surface-container text-outline hover:text-on-surface transition-colors" id="close-right-dock" title="Close Panel">
+<svg class="w-4 h-4 stroke-current stroke-[1.5] fill-none" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+</div>
+<!-- File List -->
+<div class="flex-1 overflow-y-auto px-space-xs py-space-xs space-y-1 font-code-block text-body-sm">
+<div class="p-space-sm rounded bg-surface-container text-on-surface flex flex-col gap-1 cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-medium text-on-surface truncate">pool.go</span>
+<span class="text-secondary-fixed text-label-sm">+38 -12</span>
+</div>
+<span class="text-outline text-label-sm truncate">internal/buffer/pool.go</span>
+</div>
+<div class="p-space-sm rounded text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors flex flex-col gap-1 cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-medium text-on-surface truncate">stream_collector.go</span>
+<span class="text-secondary-fixed text-label-sm">+4 -8</span>
+</div>
+<span class="text-outline text-label-sm truncate">internal/collector/stream_collector.go</span>
+</div>
+<!-- Telemetry snapshot card -->
+<div class="mt-space-lg p-space-md rounded bg-surface-container-low space-y-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Benchmark Delta</span>
+<div class="flex justify-between items-center font-code-block text-body-sm">
+<span class="text-outline">B/op</span>
+<span class="text-secondary-fixed">840 -&gt; 0 B/op (-100%)</span>
+</div>
+<div class="flex justify-between items-center font-code-block text-body-sm">
+<span class="text-outline">allocs/op</span>
+<span class="text-secondary-fixed">12 -&gt; 0 allocs</span>
+</div>
+<div class="flex justify-between items-center font-code-block text-body-sm">
+<span class="text-outline">Throughput</span>
+<span class="text-on-surface">+31.4% ops/sec</span>
+</div>
+</div>
+</div>
+<!-- Actions Drawer Footer -->
+<div class="p-space-md bg-surface-container-low space-y-space-xs shrink-0">
+<button class="w-full py-1.5 rounded bg-surface-container-highest hover:bg-surface-bright text-on-surface font-serif text-headline-md font-medium transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+          Commit &amp; Merge
+        </button>
+<button class="w-full py-1.5 rounded bg-transparent hover:bg-surface-container text-outline hover:text-on-surface font-serif text-headline-md transition-colors flex items-center justify-center">
+          Discard Changes
+        </button>
+</div>
+</aside>
+</div>
+<script>
+    // Panel collapse micro-interactions
+    const leftDock = document.getElementById('left-dock');
+    const rightDock = document.getElementById('right-dock');
+    const toggleLeft = document.getElementById('toggle-left-dock');
+    const toggleRight = document.getElementById('toggle-right-dock');
+    const closeRight = document.getElementById('close-right-dock');
+
+    toggleLeft?.addEventListener('click', () => {
+      leftDock.classList.toggle('hidden');
+    });
+
+    toggleRight?.addEventListener('click', () => {
+      rightDock.classList.toggle('hidden');
+    });
+
+    closeRight?.addEventListener('click', () => {
+      rightDock.classList.add('hidden');
+    });
+  </script>
+</div></main></div></body></html>

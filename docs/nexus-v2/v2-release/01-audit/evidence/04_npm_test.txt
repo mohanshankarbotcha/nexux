@@ -1,0 +1,1680 @@
+
+> nexus-ai-workspace@1.0.0 test
+> npm run test --workspaces --if-present
+
+
+> @nexus/core@1.0.0 test
+> node --test dist/**/*.test.js
+
+TAP version 13
+# Subtest: Security / Path Guard - validates safe workspace paths and blocks traversal
+ok 1 - Security / Path Guard - validates safe workspace paths and blocks traversal
+  ---
+  duration_ms: 6.5315
+  type: 'test'
+  ...
+# Subtest: Security / Path Guard - computes safe relative path
+ok 2 - Security / Path Guard - computes safe relative path
+  ---
+  duration_ms: 1.365
+  type: 'test'
+  ...
+# Subtest: Security / Sanitizer - redacts API keys and secrets
+ok 3 - Security / Sanitizer - redacts API keys and secrets
+  ---
+  duration_ms: 1.4713
+  type: 'test'
+  ...
+# Subtest: Config / Pricing - calculates cost correctly
+ok 4 - Config / Pricing - calculates cost correctly
+  ---
+  duration_ms: 0.3002
+  type: 'test'
+  ...
+# Subtest: Errors / NexusError - standard error serialization
+ok 5 - Errors / NexusError - standard error serialization
+  ---
+  duration_ms: 1.7599
+  type: 'test'
+  ...
+# Subtest: Events / EventBus - emits events and formats SSE correctly
+ok 6 - Events / EventBus - emits events and formats SSE correctly
+  ---
+  duration_ms: 0.7296
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 807.4551
+
+> @nexus/server@1.0.0 test
+> node --test dist/**/*.test.js
+
+TAP version 13
+# [2026-10-27T06:18:33.784Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_2604 
+# [2026-10-27T06:18:33.797Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:33.799Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:33.894Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_agent_test_1793081913890_kgbe\\.nexus_data 
+# [2026-10-27T06:18:33.896Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:33.913Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_simple { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:33.926Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "read src/index.ts..." 
+# [2026-10-27T06:18:33.977Z] [ERROR] [Nexus]: S2 Fast-path failed: {
+#   code: 'PROVIDER_NOT_CONFIGURED',
+#   statusCode: 401,
+#   details: undefined,
+#   timestamp: 1793081913976,
+#   isOperational: true,
+#   userReadableMessage: 'AI Provider (gemini) error: Gemini API key is missing',
+#   recoveryAction: 'Check your provider configuration and API key status in Provider Setup.',
+#   correlationId: undefined,
+#   isRetryable: false,
+#   name: 'ProviderError',
+#   provider: 'gemini'
+# }
+# [2026-10-27T06:18:34.144Z] [INFO] [Nexus]: Coordinator: task complexity assessed {
+#   taskId: 'task_simple',
+#   complexity: {
+#     needsExploration: false,
+#     needsPlanning: false,
+#     needsVerification: false
+#   }
+# }
+# [2026-10-27T06:18:35.327Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_agent_test_1793081915324_qnxa\\.nexus_data 
+# [2026-10-27T06:18:35.331Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:35.341Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_complex { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:35.352Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:35.372Z] [INFO] [Nexus]: EngineeringSupervisor: starting S4 workflow for task: task_complex 
+# Subtest: Orchestrator - simple task skips deep planning and completes quickly
+ok 1 - Orchestrator - simple task skips deep planning and completes quickly
+  ---
+  duration_ms: 1432.059
+  type: 'test'
+  ...
+# [2026-10-27T06:18:36.718Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_agent_test_1793081916712_3lqw\\.nexus_data 
+# [2026-10-27T06:18:36.721Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:36.730Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_cancel { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:36.753Z] [INFO] [Nexus]: ActiveTaskRegistry: Cancelling active task task_cancel. Reason: Task cancelled 
+# Subtest: Orchestrator - complex task executes full multi-agent lifecycle and creates file
+ok 2 - Orchestrator - complex task executes full multi-agent lifecycle and creates file
+  ---
+  duration_ms: 1387.3266
+  type: 'test'
+  ...
+# Subtest: Orchestrator - handles cancellation cleanly
+ok 3 - Orchestrator - handles cancellation cleanly
+  ---
+  duration_ms: 102.8942
+  type: 'test'
+  ...
+# [2026-10-27T06:18:33.972Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_7992 
+# [2026-10-27T06:18:33.984Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:33.985Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:38.853Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_loop_1793081914019_jrdi\\.nexus_data 
+# [2026-10-27T06:18:38.856Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:38.875Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_loop_1 { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:38.902Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:38.917Z] [INFO] [Nexus]: EngineeringSupervisor: starting S4 workflow for task: task_loop_1 
+# [2026-10-27T06:18:39.160Z] [INFO] [Nexus]: Checkpoint created for 'math.js' (Task: task_loop_1) { hash: 'aaf7cf274e' }
+# Subtest: End-to-End Coding Loop - modifies file, executes verification, and reviews diff
+ok 4 - End-to-End Coding Loop - modifies file, executes verification, and reviews diff
+  ---
+  duration_ms: 6857.0322
+  type: 'test'
+  ...
+# [2026-10-27T06:18:33.774Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_8252 
+# [2026-10-27T06:18:33.784Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:33.786Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:33.826Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "hiii..." 
+# [2026-10-27T06:18:33.832Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "hello there..." 
+# [2026-10-27T06:18:33.833Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "hey nexus..." 
+# [2026-10-27T06:18:33.834Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "good morning assistant..." 
+# [2026-10-27T06:18:33.834Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "greetings..." 
+# [2026-10-27T06:18:33.834Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "sup bro..." 
+# [2026-10-27T06:18:33.836Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "howdy partner..." 
+# [2026-10-27T06:18:33.837Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "What can you do?..." 
+# [2026-10-27T06:18:33.838Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "what are your capabilities?..." 
+# [2026-10-27T06:18:33.839Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "who are you..." 
+# [2026-10-27T06:18:33.840Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "tell me about python..." 
+# [2026-10-27T06:18:33.840Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "What is the difference between Python and JavaScri..." 
+# [2026-10-27T06:18:33.841Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "explain typescript types vs interfaces..." 
+# [2026-10-27T06:18:33.841Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "how does docker work..." 
+# [2026-10-27T06:18:33.841Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "tell me about react hooks..." 
+# [2026-10-27T06:18:33.841Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "explain machine learning basics..." 
+# [2026-10-27T06:18:33.842Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "kya haal hai bhai..." 
+# [2026-10-27T06:18:33.842Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "bhai sun ek sawaal hai..." 
+# [2026-10-27T06:18:33.842Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "namaste dosto..." 
+# [2026-10-27T06:18:33.842Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "kaun ho tum batao..." 
+# [2026-10-27T06:18:33.842Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "aap kaun ho ji..." 
+# [2026-10-27T06:18:33.842Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "hi hello..." 
+# [2026-10-27T06:18:33.842Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "hey tell me about rust memory model..." 
+# [2026-10-27T06:18:33.843Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "hello what is the difference between c++ and rust..." 
+# [2026-10-27T06:18:33.843Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "good evening nexus..." 
+# [2026-10-27T06:18:33.844Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "Go to the demo folder and tell me what files are i..." 
+# [2026-10-27T06:18:33.845Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "Tell me what is inside the src directory..." 
+# [2026-10-27T06:18:33.845Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "what files are inside the docs folder..." 
+# [2026-10-27T06:18:33.845Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "show files in components..." 
+# [2026-10-27T06:18:33.846Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "list files in public..." 
+# [2026-10-27T06:18:33.846Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "demo folder me kya kya files hain batao..." 
+# [2026-10-27T06:18:33.846Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "src folder me kya kya files hain dekh ke batao..." 
+# [2026-10-27T06:18:33.846Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "Read package.json and explain the dependencies..." 
+# [2026-10-27T06:18:33.846Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "open tsconfig.json and explain compiler options..." 
+# [2026-10-27T06:18:33.846Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "read README.md and summarize project overview..." 
+# [2026-10-27T06:18:33.847Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "check index.html..." 
+# [2026-10-27T06:18:33.847Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "examine config.yaml file..." 
+# [2026-10-27T06:18:33.847Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "Find all files containing the word authentication..." 
+# [2026-10-27T06:18:33.847Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "search for apiKey across codebase..." 
+# [2026-10-27T06:18:33.848Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "grep for handleRequest in src..." 
+# [2026-10-27T06:18:33.848Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "where is token validated..." 
+# [2026-10-27T06:18:33.849Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "find all files containing useState..." 
+# [2026-10-27T06:18:33.849Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "tell me what is inside utils folder..." 
+# [2026-10-27T06:18:33.850Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "what files are inside lib..." 
+# [2026-10-27T06:18:33.850Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "show files in tests directory..." 
+# [2026-10-27T06:18:33.850Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "List the files in C:/Windows..." 
+# [2026-10-27T06:18:33.851Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "check files in C:/Windows/System32..." 
+# [2026-10-27T06:18:33.851Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "list files in /etc/passwd..." 
+# [2026-10-27T06:18:33.851Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "read server.ts..." 
+# [2026-10-27T06:18:33.853Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "open style.css..." 
+# [2026-10-27T06:18:33.853Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "read package-lock.json..." 
+# [2026-10-27T06:18:33.853Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "what files are inside config folder..." 
+# [2026-10-27T06:18:33.854Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "show files in scripts dir..." 
+# [2026-10-27T06:18:33.854Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "grep for error_code in packages..." 
+# [2026-10-27T06:18:33.854Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "find all files containing JWT_SECRET..." 
+# [2026-10-27T06:18:33.854Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "Delete everything in this folder..." 
+# [2026-10-27T06:18:33.854Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "delete all files in the project..." 
+# [2026-10-27T06:18:33.855Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "rm -rf *..." 
+# [2026-10-27T06:18:33.855Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "wipe workspace completely..." 
+# [2026-10-27T06:18:33.855Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "format c:..." 
+# [2026-10-27T06:18:33.855Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "drop database production..." 
+# [2026-10-27T06:18:33.855Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "delete everything now..." 
+# [2026-10-27T06:18:33.855Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "destroy project files..." 
+# [2026-10-27T06:18:33.855Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "wipe all repository content..." 
+# [2026-10-27T06:18:33.855Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "delete all source code..." 
+# [2026-10-27T06:18:33.856Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "Make it better..." 
+# [2026-10-27T06:18:33.856Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "improve this..." 
+# [2026-10-27T06:18:33.856Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "fix it..." 
+# [2026-10-27T06:18:33.856Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "optimize it..." 
+# [2026-10-27T06:18:33.856Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "update it please..." 
+# [2026-10-27T06:18:33.856Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "refactor it..." 
+# [2026-10-27T06:18:33.857Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "make it faster..." 
+# [2026-10-27T06:18:33.860Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.860Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "improve code quality..." 
+# [2026-10-27T06:18:33.860Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "make it better now..." 
+# [2026-10-27T06:18:33.861Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "Create a Python calculator..." 
+# [2026-10-27T06:18:33.861Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "build me a simple HTML page of containing of files..." 
+# [2026-10-27T06:18:33.861Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "create a react todo list app..." 
+# [2026-10-27T06:18:33.861Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.862Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.863Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "write a new python scraper for stock prices..." 
+# [2026-10-27T06:18:33.864Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.865Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.866Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.866Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.866Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "create a python script to parse csv reports..." 
+# [2026-10-27T06:18:33.867Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "build me a simple dashboard in react..." 
+# [2026-10-27T06:18:33.867Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.868Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "create a unit test suite for payment processor..." 
+# [2026-10-27T06:18:33.869Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.869Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.870Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "create a landing page for our saas product..." 
+# [2026-10-27T06:18:33.870Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.870Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.871Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.871Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.872Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.872Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "create a python calculator with add sub mul div fu..." 
+# [2026-10-27T06:18:33.872Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.873Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.873Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "hiii can you help me..." 
+# [2026-10-27T06:18:33.873Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "heyy there what can you do..." 
+# [2026-10-27T06:18:33.873Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "batao bhai python vs javascript difference..." 
+# [2026-10-27T06:18:33.873Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "namaste ji what is machine learning..." 
+# [2026-10-27T06:18:33.874Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "go to demo folder and show files..." 
+# [2026-10-27T06:18:33.874Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "tell me what is inside src dir please..." 
+# [2026-10-27T06:18:33.874Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "read package.json file quickly..." 
+# [2026-10-27T06:18:33.874Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "check tsconfig.json file..." 
+# [2026-10-27T06:18:33.874Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "find all files containing db_password..." 
+# [2026-10-27T06:18:33.874Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "grep for port in src..." 
+# [2026-10-27T06:18:33.874Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "build me a html page with contact form..." 
+# [2026-10-27T06:18:33.875Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "create python calculator app..." 
+# [2026-10-27T06:18:33.875Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.875Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "delete all files please..." 
+# [2026-10-27T06:18:33.875Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "make it better for me..." 
+# [2026-10-27T06:18:33.875Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "improve this code please..." 
+# [2026-10-27T06:18:33.875Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "what files are inside test folder..." 
+# [2026-10-27T06:18:33.876Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "read index.ts and explain functions..." 
+# [2026-10-27T06:18:33.876Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "show files in build directory..." 
+# [2026-10-27T06:18:33.876Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "demo folder me kya kya files hain batana..." 
+# [2026-10-27T06:18:33.876Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "src me kya kya files hain..." 
+# [2026-10-27T06:18:33.876Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S4) for prompt: "create a python web scraper for news..." 
+# [2026-10-27T06:18:33.876Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:33.877Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "wipe everything in workspace..." 
+# [2026-10-27T06:18:33.877Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "fix it now..." 
+# [Router Eval] Dataset size: 125, Correct: 124, Accuracy: 99.2%
+# [Router Eval] Confusion Matrix: {
+#   "conversation": {
+#     "conversation": 29,
+#     "workspace_read": 0,
+#     "engineering": 0,
+#     "clarify_or_authorize": 0
+#   },
+#   "workspace_read": {
+#     "conversation": 0,
+#     "workspace_read": 41,
+#     "engineering": 0,
+#     "clarify_or_authorize": 0
+#   },
+#   "engineering": {
+#     "conversation": 0,
+#     "workspace_read": 0,
+#     "engineering": 30,
+#     "clarify_or_authorize": 0
+#   },
+#   "clarify_or_authorize": {
+#     "conversation": 0,
+#     "workspace_read": 0,
+#     "engineering": 1,
+#     "clarify_or_authorize": 24
+#   }
+# }
+# [2026-10-27T06:18:33.884Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "What can you do?..." 
+# [2026-10-27T06:18:33.885Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "Make it better..." 
+# [2026-10-27T06:18:33.969Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S2) for prompt: "List the files in C:/Windows..." 
+# [2026-10-27T06:18:33.984Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "Delete everything in this folder..." 
+# Subtest: Request Router & Fast Paths Suite (Prompt 03)
+    # Subtest: 125-Prompt Labelled Dataset Router Evaluation
+    ok 1 - 125-Prompt Labelled Dataset Router Evaluation
+      ---
+      duration_ms: 61.5433
+      type: 'test'
+      ...
+    # Subtest: Fast Path S1 - Direct Answer handling for capabilities & clarification
+    ok 2 - Fast Path S1 - Direct Answer handling for capabilities & clarification
+      ---
+      duration_ms: 84.5371
+      type: 'test'
+      ...
+    # Subtest: Fast Path S2 - Outside Workspace refusal
+    ok 3 - Fast Path S2 - Outside Workspace refusal
+      ---
+      duration_ms: 14.2959
+      type: 'test'
+      ...
+    # Subtest: Destructive prompt requires high-risk authorization
+    ok 4 - Destructive prompt requires high-risk authorization
+      ---
+      duration_ms: 0.9416
+      type: 'test'
+      ...
+    1..4
+ok 5 - Request Router & Fast Paths Suite (Prompt 03)
+  ---
+  duration_ms: 175.0883
+  type: 'test'
+  ...
+# [2026-10-27T06:18:34.023Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_21360 
+# [2026-10-27T06:18:34.038Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:34.038Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# Subtest: Engineering Supervisor & Workflow Test Suite (Prompt 04)
+    # Subtest: 1. AntiLoopDetector: detects 3 identical consecutive tool calls
+    ok 1 - 1. AntiLoopDetector: detects 3 identical consecutive tool calls
+      ---
+      duration_ms: 5.8829
+      type: 'test'
+      ...
+    # Subtest: 2. AntiLoopDetector: detects identical failure twice consecutively
+    ok 2 - 2. AntiLoopDetector: detects identical failure twice consecutively
+      ---
+      duration_ms: 1.4453
+      type: 'test'
+      ...
+    # Subtest: 3. parseGeneratedFiles: extracts explicit <<<FILE>>> format and markdown blocks
+    ok 3 - 3. parseGeneratedFiles: extracts explicit <<<FILE>>> format and markdown blocks
+      ---
+      duration_ms: 3.2091
+      type: 'test'
+      ...
+    # Subtest: 4. Verbatim Calculator Application: files created, build & tests pass 7+5=12, 7-5=2, 7*5=35, 20/4=5, divide-by-zero
+    ok 4 - 4. Verbatim Calculator Application: files created, build & tests pass 7+5=12, 7-5=2, 7*5=35, 20/4=5, divide-by-zero
+      ---
+      duration_ms: 5926.3499
+      type: 'test'
+      ...
+# [2026-10-27T06:18:41.378Z] [INFO] [Nexus]: Checkpoint created for 'compute.py' (Task: task_bug) { hash: '9d4f12fe8c' }
+# [2026-10-27T06:18:43.245Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "delete everything in this folder..." 
+# [2026-10-27T06:18:43.249Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "make it better..." 
+    # Subtest: 5. Fixture bug & Targeted Debugger fix: failing test repaired, passes verification
+    ok 5 - 5. Fixture bug & Targeted Debugger fix: failing test repaired, passes verification
+      ---
+      duration_ms: 3048.1579
+      type: 'test'
+      ...
+    # Subtest: 6. HTML Page of Workspace Files: generates HTML listing only real workspace files
+    ok 6 - 6. HTML Page of Workspace Files: generates HTML listing only real workspace files
+      ---
+      duration_ms: 161.2028
+      type: 'test'
+      ...
+    # Subtest: 7. ClaimChecker rejects claim for non-existent file
+    ok 7 - 7. ClaimChecker rejects claim for non-existent file
+      ---
+      duration_ms: 14.3457
+      type: 'test'
+      ...
+    # Subtest: 8. Destructive command requires authorization (S5)
+    ok 8 - 8. Destructive command requires authorization (S5)
+      ---
+      duration_ms: 5.127
+      type: 'test'
+      ...
+    # Subtest: 9. Ambiguous prompt requires clarification (S5)
+    ok 9 - 9. Ambiguous prompt requires clarification (S5)
+      ---
+      duration_ms: 3.4837
+      type: 'test'
+      ...
+    1..9
+ok 6 - Engineering Supervisor & Workflow Test Suite (Prompt 04)
+  ---
+  duration_ms: 9254.7624
+  type: 'test'
+  ...
+# [2026-10-27T06:18:48.166Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_11568 
+# [2026-10-27T06:18:48.177Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:48.177Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# Subtest: Phase 3 / Provider Suite
+    # Subtest: Masking - maskKey safely masks secrets without full disclosure
+    ok 1 - Masking - maskKey safely masks secrets without full disclosure
+      ---
+      duration_ms: 3.5128
+      type: 'test'
+      ...
+    # Subtest: Onboarding - status returns correctly when no provider is configured
+    ok 2 - Onboarding - status returns correctly when no provider is configured
+      ---
+      duration_ms: 643.3008
+      type: 'test'
+      ...
+# [2026-10-27T06:18:50.341Z] [ERROR] [Nexus] [req_1793081930333_cn6wh]: Request Error [POST /api/tasks]: Cannot execute task: No AI model provider is configured. Please configure an OpenAI or Google Gemini API key in Settings → Providers. {
+#   code: 'PROVIDER_NOT_CONFIGURED',
+#   statusCode: 400,
+#   recoveryAction: 'Check your provider configuration and API key status in Provider Setup.'
+# }
+    # Subtest: Safety - blocks AI task execution when no provider is configured
+    ok 3 - Safety - blocks AI task execution when no provider is configured
+      ---
+      duration_ms: 1483.8171
+      type: 'test'
+      ...
+# [2026-10-27T06:18:50.429Z] [INFO] [Nexus]: ProviderPreflightCache: Invalidated cache for provider 'openai' 
+# [2026-10-27T06:18:50.429Z] [INFO] [Nexus]: ProviderPreflightCache: Invalidated cache for provider 'gemini' 
+    # Subtest: Onboarding - configuring OpenAI only
+    ok 4 - Onboarding - configuring OpenAI only
+      ---
+      duration_ms: 107.4492
+      type: 'test'
+      ...
+# [2026-10-27T06:18:50.528Z] [INFO] [Nexus]: ProviderPreflightCache: Invalidated cache for provider 'openai' 
+# [2026-10-27T06:18:50.528Z] [INFO] [Nexus]: ProviderPreflightCache: Invalidated cache for provider 'gemini' 
+    # Subtest: Onboarding - configuring Gemini only
+    ok 5 - Onboarding - configuring Gemini only
+      ---
+      duration_ms: 98.7435
+      type: 'test'
+      ...
+# [2026-10-27T06:18:50.615Z] [INFO] [Nexus]: ProviderPreflightCache: Invalidated cache for provider 'openai' 
+# [2026-10-27T06:18:50.616Z] [INFO] [Nexus]: ProviderPreflightCache: Invalidated cache for provider 'gemini' 
+    # Subtest: Onboarding - configuring both providers
+    ok 6 - Onboarding - configuring both providers
+      ---
+      duration_ms: 80.1988
+      type: 'test'
+      ...
+    # Subtest: Validation - validate rejects invalid credentials
+    ok 7 - Validation - validate rejects invalid credentials
+      ---
+      duration_ms: 465.5174
+      type: 'test'
+      ...
+    1..7
+ok 7 - Phase 3 / Provider Suite
+  ---
+  duration_ms: 2908.6361
+  type: 'test'
+  ...
+# [2026-10-27T06:18:48.170Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_8124 
+# [2026-10-27T06:18:48.185Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:48.186Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:48.223Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_usage_test_1793081928221 
+# Subtest: Phase 10 / Usage Intelligence Suite
+    # Subtest: Aggregates telemetry correctly across provider, model, agent, task, and session
+    ok 1 - Aggregates telemetry correctly across provider, model, agent, task, and session
+      ---
+      duration_ms: 675.2131
+      type: 'test'
+      ...
+    1..1
+ok 8 - Phase 10 / Usage Intelligence Suite
+  ---
+  duration_ms: 696.573
+  type: 'test'
+  ...
+# [2026-10-27T06:18:33.921Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_20252 
+# Subtest: Context V2 - Project Profile discovery and persistence in .nexus/project.json
+ok 9 - Context V2 - Project Profile discovery and persistence in .nexus/project.json
+  ---
+  duration_ms: 92.196
+  type: 'test'
+  ...
+# [2026-10-27T06:18:34.359Z] [INFO] [Nexus]: ConversationManager: Compacted 1 older turns for session session_compaction_1. Tokens reduced. 
+# [2026-10-27T06:18:34.360Z] [INFO] [Nexus]: ConversationManager: Compacted 1 older turns for session session_compaction_1. Tokens reduced. 
+# [2026-10-27T06:18:34.361Z] [INFO] [Nexus]: ConversationManager: Compacted 1 older turns for session session_compaction_1. Tokens reduced. 
+# Subtest: Context V2 - Working Set tracking, largest file detection, and external edit stale detection
+ok 10 - Context V2 - Working Set tracking, largest file detection, and external edit stale detection
+  ---
+  duration_ms: 165.7211
+  type: 'test'
+  ...
+# Subtest: Context V2 - Reference Resolver: resolves "the biggest one", "the error", "tests again", "the changes"
+ok 11 - Context V2 - Reference Resolver: resolves "the biggest one", "the error", "tests again", "the changes"
+  ---
+  duration_ms: 125.4001
+  type: 'test'
+  ...
+# Subtest: Context V2 - Conversation Manager: token budgeting and compaction keeping verbatim corrections
+ok 12 - Context V2 - Conversation Manager: token budgeting and compaction keeping verbatim corrections
+  ---
+  duration_ms: 5.0869
+  type: 'test'
+  ...
+# Subtest: Context V2 - ContextPackBuilder: formats layered prompt and isolates workspaces
+ok 13 - Context V2 - ContextPackBuilder: formats layered prompt and isolates workspaces
+  ---
+  duration_ms: 111.6557
+  type: 'test'
+  ...
+# [2026-10-27T06:18:34.905Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_7664 
+# [2026-10-27T06:18:34.975Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ctx_test_1793081914959_a1oi\\.nexus_data 
+# [2026-10-27T06:18:35.380Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ctx_test_1793081915356_tr03\\.nexus_data 
+# [2026-10-27T06:18:35.794Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ctx_test_1793081915773_ykky\\.nexus_data 
+# Subtest: ContextEngine - extracts domain keywords and strips stop words
+ok 14 - ContextEngine - extracts domain keywords and strips stop words
+  ---
+  duration_ms: 7.471
+  type: 'test'
+  ...
+# Subtest: ContextEngine - selects relevant files and excludes irrelevant files
+ok 15 - ContextEngine - selects relevant files and excludes irrelevant files
+  ---
+  duration_ms: 396.774
+  type: 'test'
+  ...
+# Subtest: ContextEngine - prioritizes explicitly mentioned files
+ok 16 - ContextEngine - prioritizes explicitly mentioned files
+  ---
+  duration_ms: 416.73
+  type: 'test'
+  ...
+# Subtest: ContextEngine - enforces byte and token budget caps
+ok 17 - ContextEngine - enforces byte and token budget caps
+  ---
+  duration_ms: 439.6989
+  type: 'test'
+  ...
+# [2026-10-27T06:18:48.163Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_7440 
+# [2026-10-27T06:18:48.176Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:48.177Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:48.220Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:48.255Z] [ERROR] [Nexus]: Tool [read_file] failed: Simulated tool failure {
+#   callId: 'call_1793081928255_whajf',
+#   evidenceId: 'ev_1793081928255_thnem',
+#   err: {}
+# }
+# [2026-10-27T06:18:48.263Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_1793081928261 
+# Subtest: Boundary / ModelRouter - registers provider and routes by agent role
+ok 18 - Boundary / ModelRouter - registers provider and routes by agent role
+  ---
+  duration_ms: 6.8249
+  type: 'test'
+  ...
+# Subtest: Boundary / ToolRegistry - registers tool and safely executes with error trapping
+ok 19 - Boundary / ToolRegistry - registers tool and safely executes with error trapping
+  ---
+  duration_ms: 26.6362
+  type: 'test'
+  ...
+# Subtest: Boundary / StorageEngine - isolates and persists local data safely
+ok 20 - Boundary / StorageEngine - isolates and persists local data safely
+  ---
+  duration_ms: 38.1406
+  type: 'test'
+  ...
+# Subtest: Boundary / Express App - initializes and mounts health and API routes
+ok 21 - Boundary / Express App - initializes and mounts health and API routes
+  ---
+  duration_ms: 17.8158
+  type: 'test'
+  ...
+# [2026-10-27T06:18:37.274Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_300 
+# [2026-10-27T06:18:37.287Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:37.288Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:37.338Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:37.647Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:37.723Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:37.742Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task perf_read_task { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:37.762Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "explain src/index.ts..." 
+# [2026-10-27T06:18:37.825Z] [ERROR] [Nexus]: S1 Fast-path failed: {
+#   code: 'PROVIDER_NOT_CONFIGURED',
+#   statusCode: 401,
+#   details: undefined,
+#   timestamp: 1793081917824,
+#   isOperational: true,
+#   userReadableMessage: 'AI Provider (gemini) error: Gemini API key is missing',
+#   recoveryAction: 'Check your provider configuration and API key status in Provider Setup.',
+#   correlationId: undefined,
+#   isRetryable: false,
+#   name: 'ProviderError',
+#   provider: 'gemini'
+# }
+# [2026-10-27T06:18:37.943Z] [INFO] [Nexus]: Coordinator: task complexity assessed {
+#   taskId: 'perf_read_task',
+#   complexity: {
+#     needsExploration: false,
+#     needsPlanning: false,
+#     needsVerification: false
+#   }
+# }
+# Subtest: Phase 15 Performance and Token Efficiency Benchmark Suite
+    # Subtest: Measure 1: System and Component Startup Time
+    ok 1 - Measure 1: System and Component Startup Time
+      ---
+      duration_ms: 8.1028
+      type: 'test'
+      ...
+    # Subtest: Measure 2: FileCache Read Deduplication and Latency Optimization
+    ok 2 - Measure 2: FileCache Read Deduplication and Latency Optimization
+      ---
+      duration_ms: 32.8741
+      type: 'test'
+      ...
+    # Subtest: Measure 3: Context Selection Latency and Cache Hit Efficiency
+    ok 3 - Measure 3: Context Selection Latency and Cache Hit Efficiency
+      ---
+      duration_ms: 262.3494
+      type: 'test'
+      ...
+    # Subtest: Measure 4: Redundant Read-Only Tool Call Caching in Agent
+    ok 4 - Measure 4: Redundant Read-Only Tool Call Caching in Agent
+      ---
+      duration_ms: 61.2596
+      type: 'test'
+      ...
+    # Subtest: Measure 5: Unnecessary Stage Skipping and Token Savings
+    ok 5 - Measure 5: Unnecessary Stage Skipping and Token Savings
+      ---
+      duration_ms: 1146.5817
+      type: 'test'
+      ...
+    1..5
+ok 22 - Phase 15 Performance and Token Efficiency Benchmark Suite
+  ---
+  duration_ms: 1564.5802
+  type: 'test'
+  ...
+# [2026-10-27T06:18:48.165Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_5856 
+# [2026-10-27T06:18:48.177Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:48.177Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# Subtest: Phase 17 Production Web Build Verification Suite
+    # Subtest: Task 1 & 2: Client distribution artifacts exist
+    ok 1 - Task 1 & 2: Client distribution artifacts exist
+      ---
+      duration_ms: 13.524
+      type: 'test'
+      ...
+    # Subtest: Task 3: Asset bundle files exist and are non-empty
+    ok 2 - Task 3: Asset bundle files exist and are non-empty
+      ---
+      duration_ms: 6.2375
+      type: 'test'
+      ...
+    # Subtest: Task 6: Client bundles contain zero secrets or hardcoded API keys
+    ok 3 - Task 6: Client bundles contain zero secrets or hardcoded API keys
+      ---
+      duration_ms: 70.3503
+      type: 'test'
+      ...
+    # Subtest: Task 7 & 11: Production Express server serves HTML and static assets
+    ok 4 - Task 7 & 11: Production Express server serves HTML and static assets
+      ---
+      duration_ms: 773.1822
+      type: 'test'
+      ...
+    1..4
+ok 23 - Phase 17 Production Web Build Verification Suite
+  ---
+  duration_ms: 870.5376
+  type: 'test'
+  ...
+# [2026-10-27T06:18:39.474Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_5716 
+# [2026-10-27T06:18:39.489Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:39.489Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:39.719Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:39.720Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# Subtest: OpenAIProvider - validateCredentials with valid key
+ok 24 - OpenAIProvider - validateCredentials with valid key
+  ---
+  duration_ms: 153.1972
+  type: 'test'
+  ...
+# Subtest: OpenAIProvider - validateCredentials with invalid key
+ok 25 - OpenAIProvider - validateCredentials with invalid key
+  ---
+  duration_ms: 3.7177
+  type: 'test'
+  ...
+# Subtest: OpenAIProvider - complete() executes request and returns usage and tool calls
+ok 26 - OpenAIProvider - complete() executes request and returns usage and tool calls
+  ---
+  duration_ms: 9.5209
+  type: 'test'
+  ...
+# Subtest: OpenAIProvider - stream() streams deltas and accumulates response
+ok 27 - OpenAIProvider - stream() streams deltas and accumulates response
+  ---
+  duration_ms: 13.3886
+  type: 'test'
+  ...
+# Subtest: GeminiProvider - validateCredentials with valid key
+ok 28 - GeminiProvider - validateCredentials with valid key
+  ---
+  duration_ms: 3.7328
+  type: 'test'
+  ...
+# Subtest: GeminiProvider - complete() executes request and returns function calls
+ok 29 - GeminiProvider - complete() executes request and returns function calls
+  ---
+  duration_ms: 4.1517
+  type: 'test'
+  ...
+# Subtest: GeminiProvider - stream() streams text parts and handles usage
+ok 30 - GeminiProvider - stream() streams text parts and handles usage
+  ---
+  duration_ms: 6.054
+  type: 'test'
+  ...
+# Subtest: ModelRouter - routes different agent roles to configured providers and models
+ok 31 - ModelRouter - routes different agent roles to configured providers and models
+  ---
+  duration_ms: 8.0682
+  type: 'test'
+  ...
+# [2026-10-27T06:18:40.857Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_18896 
+# [2026-10-27T06:18:40.871Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:40.872Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:40.913Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_hard_1 { provider: 'gemini', model: 'gemini-2.5-pro' }
+# [2026-10-27T06:18:40.941Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_hard_cancel { provider: undefined, model: undefined }
+# [2026-10-27T06:18:40.942Z] [INFO] [Nexus]: ActiveTaskRegistry: Cancelling active task task_hard_cancel. Reason: User requested stop 
+# [2026-10-27T06:18:40.966Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:40.980Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_calc_1793081920967 { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:41.016Z] [INFO] [Nexus]: EngineeringSupervisor: starting S4 workflow for task: task_calc_1793081920967 
+# [2026-10-27T06:18:40.998Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:41.761Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:41.761Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:41.770Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_openai_1793081921762 { provider: 'openai', model: 'gpt-4o' }
+# [2026-10-27T06:18:41.779Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: OpenAI API key is missing 
+# [2026-10-27T06:18:41.795Z] [INFO] [Nexus]: EngineeringSupervisor: starting S4 workflow for task: task_openai_1793081921762 
+# [2026-10-27T06:18:42.492Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:42.504Z] [INFO] [Nexus]: CoderAgent: Found 1 file(s) in markdown text, writing to disk 
+# Subtest: Execution Hardening — ActiveTaskRegistry Lifecycle, Heartbeats, and State Tracking
+ok 32 - Execution Hardening — ActiveTaskRegistry Lifecycle, Heartbeats, and State Tracking
+  ---
+  duration_ms: 21.3971
+  type: 'test'
+  ...
+# Subtest: Execution Hardening — Mid-Execution Task Cancellation
+ok 33 - Execution Hardening — Mid-Execution Task Cancellation
+  ---
+  duration_ms: 29.9847
+  type: 'test'
+  ...
+# Subtest: Execution Hardening — Autonomous Build and Physical Disk Verification ("Calculator App")
+ok 34 - Execution Hardening — Autonomous Build and Physical Disk Verification ("Calculator App")
+  ---
+  duration_ms: 796.5419
+  type: 'test'
+  ...
+# Subtest: Execution Hardening — Model Selector Override Propagation
+ok 35 - Execution Hardening — Model Selector Override Propagation
+  ---
+  duration_ms: 729.8657
+  type: 'test'
+  ...
+# Subtest: Execution Hardening — Coder Markdown Fallback Parser
+ok 36 - Execution Hardening — Coder Markdown Fallback Parser
+  ---
+  duration_ms: 51.7989
+  type: 'test'
+  ...
+# [2026-10-27T06:18:41.742Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_20180 
+# [2026-10-27T06:18:41.753Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:41.754Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:44.482Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:44.507Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task qa_task_a_1793081924491 { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:44.527Z] [INFO] [Nexus]: RequestRouter: fast-path pre-signal decision (S1) for prompt: "Task A: read and explain repository structure and ..." 
+# [2026-10-27T06:18:44.562Z] [ERROR] [Nexus]: S1 Fast-path failed: {
+#   code: 'PROVIDER_NOT_CONFIGURED',
+#   statusCode: 401,
+#   details: undefined,
+#   timestamp: 1793081924561,
+#   isOperational: true,
+#   userReadableMessage: 'AI Provider (gemini) error: Gemini API key is missing',
+#   recoveryAction: 'Check your provider configuration and API key status in Provider Setup.',
+#   correlationId: undefined,
+#   isRetryable: false,
+#   name: 'ProviderError',
+#   provider: 'gemini'
+# }
+# [2026-10-27T06:18:44.821Z] [INFO] [Nexus]: Coordinator: task complexity assessed {
+#   taskId: 'qa_task_a_1793081924491',
+#   complexity: {
+#     needsExploration: true,
+#     needsPlanning: false,
+#     needsVerification: true
+#   }
+# }
+# [2026-10-27T06:18:45.634Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task qa_task_b_1793081925627 { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:45.640Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:45.651Z] [INFO] [Nexus]: EngineeringSupervisor: starting S4 workflow for task: qa_task_b_1793081925627 
+# [2026-10-27T06:18:45.751Z] [INFO] [Nexus]: Checkpoint created for 'src/calculator.js' (Task: qa_task_b_1793081925627) { hash: '0c7542219f' }
+# [2026-10-27T06:18:46.095Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task qa_task_c_1793081926090 { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:46.098Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:46.103Z] [INFO] [Nexus]: EngineeringSupervisor: starting S4 workflow for task: qa_task_c_1793081926090 
+# [2026-10-27T06:18:46.180Z] [INFO] [Nexus]: Checkpoint created for 'src/calculator.js' (Task: qa_task_c_1793081926090) { hash: '60cc1e25a9' }
+# [2026-10-27T06:18:46.611Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task qa_task_d_1793081926606 { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:46.615Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:46.621Z] [INFO] [Nexus]: EngineeringSupervisor: starting S4 workflow for task: qa_task_d_1793081926606 
+# [2026-10-27T06:18:46.742Z] [INFO] [Nexus]: Checkpoint created for 'src/utils.js' (Task: qa_task_d_1793081926606) { hash: '0a00ac6b60' }
+# [2026-10-27T06:18:46.823Z] [INFO] [Nexus]: Checkpoint created for 'src/calculator.js' (Task: qa_task_d_1793081926606) { hash: '035bc19d29' }
+# [2026-10-27T06:18:47.180Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task qa_task_e_1793081927174 { provider: 'gemini', model: 'gemini-2.5-flash' }
+# [2026-10-27T06:18:47.181Z] [WARN] [Nexus]: RequestRouter LLM classification failed, using safe fallback: Gemini API key is missing 
+# [2026-10-27T06:18:47.186Z] [INFO] [Nexus]: EngineeringSupervisor: starting S4 workflow for task: qa_task_e_1793081927174 
+# Subtest: Phase 14 Quality Gate / Realistic Coding Benchmark Tasks
+    # Subtest: Task A: read and explain repository structure
+    ok 1 - Task A: read and explain repository structure
+      ---
+      duration_ms: 1134.3333
+      type: 'test'
+      ...
+    # Subtest: Task B: add a small feature (divide operation with zero guard)
+    ok 2 - Task B: add a small feature (divide operation with zero guard)
+      ---
+      duration_ms: 462.5627
+      type: 'test'
+      ...
+    # Subtest: Task C: fix a deliberate bug in multiply function
+    ok 3 - Task C: fix a deliberate bug in multiply function
+      ---
+      duration_ms: 515.2058
+      type: 'test'
+      ...
+    # Subtest: Task D: modify multiple files across workspace
+    ok 4 - Task D: modify multiple files across workspace
+      ---
+      duration_ms: 567.4061
+      type: 'test'
+      ...
+# [2026-10-27T06:18:47.601Z] [INFO] [Nexus]: Checkpoint created for 'src/calculator.js' (Task: qa_task_e_1793081927174) { hash: 'e1b3f27a12' }
+    # Subtest: Task E: run tests and repair a failure via terminal tool
+    ok 5 - Task E: run tests and repair a failure via terminal tool
+      ---
+      duration_ms: 2175.1639
+      type: 'test'
+      ...
+    # Subtest: Verifies token usage and pricing calculation correctness
+    ok 6 - Verifies token usage and pricing calculation correctness
+      ---
+      duration_ms: 0.9465
+      type: 'test'
+      ...
+    1..6
+ok 37 - Phase 14 Quality Gate / Realistic Coding Benchmark Tasks
+  ---
+  duration_ms: 7713.9738
+  type: 'test'
+  ...
+# [2026-10-27T06:18:43.471Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_12644 
+# [2026-10-27T06:18:43.519Z] [INFO] [Nexus]: ProviderPreflightCache: Invalidated cache for provider 'gemini' 
+# [2026-10-27T06:18:43.529Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_reg_test_1793081923526\\.nexus_data 
+# [2026-10-27T06:18:43.539Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_timeout_test { provider: undefined, model: undefined }
+# Subtest: Prompt 06 Speed - Preflight cache eliminates redundant 800ms+ network calls (< 1ms)
+ok 38 - Prompt 06 Speed - Preflight cache eliminates redundant 800ms+ network calls (< 1ms)
+  ---
+  duration_ms: 8.4714
+  type: 'test'
+  ...
+# Subtest: Prompt 06 Budgets - Route budgets are configured with strict thresholds
+ok 39 - Prompt 06 Budgets - Route budgets are configured with strict thresholds
+  ---
+  duration_ms: 0.7346
+  type: 'test'
+  ...
+# [2026-10-27T06:18:43.644Z] [WARN] [Nexus]: ActiveTaskRegistry: Task task_timeout_test exceeded max duration of 100ms, aborting 
+# [2026-10-27T06:18:43.712Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_cancel_test_1793081923708\\.nexus_data 
+# [2026-10-27T06:18:43.719Z] [INFO] [Nexus]: ActiveTaskRegistry: Registered active task task_cancel_test { provider: undefined, model: undefined }
+# [2026-10-27T06:18:43.720Z] [INFO] [Nexus]: ActiveTaskRegistry: Cancelling active task task_cancel_test. Reason: User clicked stop 
+# [2026-10-27T06:18:43.772Z] [WARN] [Nexus]: StorageEngine: Recovering interrupted task 'task_interrupted_1' from prior session with code SERVER_RESTART 
+# Subtest: Prompt 06 Recovery - ActiveTaskRegistry enforces timeout and cleans up active registry
+ok 40 - Prompt 06 Recovery - ActiveTaskRegistry enforces timeout and cleans up active registry
+  ---
+  duration_ms: 180.7395
+  type: 'test'
+  ...
+# Subtest: Prompt 06 Recovery - Clean cancellation and unregistration
+ok 41 - Prompt 06 Recovery - Clean cancellation and unregistration
+  ---
+  duration_ms: 39.8835
+  type: 'test'
+  ...
+# Subtest: Prompt 06 Recovery - Server restart recovers running tasks with SERVER_RESTART code
+ok 42 - Prompt 06 Recovery - Server restart recovers running tasks with SERVER_RESTART code
+  ---
+  duration_ms: 56.2413
+  type: 'test'
+  ...
+# [2026-10-27T06:18:48.170Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_9264 
+# [2026-10-27T06:18:48.186Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:48.186Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:48.232Z] [WARN] [Nexus]: withSafeRetry: [openai] transient error encountered, retrying in 142ms (attempt 1/2): Rate limit exceeded 
+# Subtest: Reliability / Structured Internal Errors & User-Readable Messages
+ok 43 - Reliability / Structured Internal Errors & User-Readable Messages
+  ---
+  duration_ms: 7.0001
+  type: 'test'
+  ...
+# [2026-10-27T06:18:48.399Z] [WARN] [Nexus]: withSafeRetry: [gemini] transient error encountered, retrying in 149ms (attempt 1/2): Network connection failed: Connection reset by peer 
+# Subtest: Reliability / Safe Retry Logic
+    # Subtest: retries transient rate limit and succeeds on subsequent attempt
+    ok 1 - retries transient rate limit and succeeds on subsequent attempt
+      ---
+      duration_ms: 166.9487
+      type: 'test'
+      ...
+# [2026-10-27T06:18:48.588Z] [ERROR] [Nexus]: Tool [read_file] failed: Access denied: path traversal attempt outside workspace boundary: "../../boot.ini" {
+#   callId: 'call_1793081928583_nasa7',
+#   evidenceId: 'ev_1793081928583_35a7v',
+#   err: {
+#     code: 'PATH_TRAVERSAL_DETECTED',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081928587,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Access denied: path traversal attempt outside workspace boundary: "../../boot.ini"',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'PathTraversalError'
+#   }
+# }
+# [2026-10-27T06:18:48.621Z] [ERROR] [Nexus]: Tool [read_file] failed: File not found: does_not_exist.txt {
+#   callId: 'call_1793081928596_qw2hv',
+#   evidenceId: 'ev_1793081928596_wwu7r',
+#   err: {
+#     code: 'WORKSPACE_ERROR',
+#     statusCode: 404,
+#     details: undefined,
+#     timestamp: 1793081928620,
+#     isOperational: true,
+#     userReadableMessage: 'Workspace error: File not found: does_not_exist.txt',
+#     recoveryAction: 'Ensure the workspace directory exists, is accessible, and has valid permissions.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'WorkspaceError'
+#   }
+# }
+    # Subtest: retries transient network error and succeeds
+    ok 2 - retries transient network error and succeeds
+      ---
+      duration_ms: 173.2252
+      type: 'test'
+      ...
+    # Subtest: fails fast without retry on auth error
+    ok 3 - fails fast without retry on auth error
+      ---
+      duration_ms: 3.9882
+      type: 'test'
+      ...
+    # Subtest: cancels immediately if AbortSignal is aborted
+    ok 4 - cancels immediately if AbortSignal is aborted
+      ---
+      duration_ms: 2.0135
+      type: 'test'
+      ...
+    1..4
+ok 44 - Reliability / Safe Retry Logic
+  ---
+  duration_ms: 352.5653
+  type: 'test'
+  ...
+# Subtest: Reliability / Tool Error Trapping and Boundary Guards
+    # Subtest: traps path traversal attempt and returns structured failure
+    ok 1 - traps path traversal attempt and returns structured failure
+      ---
+      duration_ms: 12.1633
+      type: 'test'
+      ...
+    # Subtest: traps non-existent file gracefully without crashing
+    ok 2 - traps non-existent file gracefully without crashing
+      ---
+      duration_ms: 32.0934
+      type: 'test'
+      ...
+    # Subtest: terminal traps non-zero exit commands gracefully
+    ok 3 - terminal traps non-zero exit commands gracefully
+      ---
+      duration_ms: 657.2665
+      type: 'test'
+      ...
+    1..3
+ok 45 - Reliability / Tool Error Trapping and Boundary Guards
+  ---
+  duration_ms: 706.1125
+  type: 'test'
+  ...
+# [2026-10-27T06:18:50.332Z] [ERROR] [Nexus] [corr_task_err]: Request Error [POST /api/tasks]: Task prompt is required {
+#   code: 'VALIDATION_ERROR',
+#   statusCode: 400,
+#   recoveryAction: 'Please check your input values and try again.'
+# }
+# Subtest: Reliability / API Correlation IDs and Error Observability
+ok 46 - Reliability / API Correlation IDs and Error Observability
+  ---
+  duration_ms: 1054.5391
+  type: 'test'
+  ...
+# [2026-10-27T06:18:44.396Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_11604 
+# [2026-10-27T06:18:44.546Z] [ERROR] [Nexus]: Tool [read_file] failed: Access denied: path traversal attempt outside workspace boundary: "Symlink target points outside workspace boundary: 'external_link/secret.txt'" {
+#   callId: 'call_1793081924524_tt7vn',
+#   evidenceId: 'ev_1793081924524_9vion',
+#   err: {
+#     code: 'PATH_TRAVERSAL_DETECTED',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081924534,
+#     isOperational: true,
+#     userReadableMessage: `Security violation: Access denied: path traversal attempt outside workspace boundary: "Symlink target points outside workspace boundary: 'external_link/secret.txt'"`,
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'PathTraversalError'
+#   }
+# }
+# [2026-10-27T06:18:44.582Z] [ERROR] [Nexus]: Tool [terminal] failed: Security policy violation: Remote Git push operations are restricted to prevent unauthorized remote changes. {
+#   callId: 'call_1793081924580_9b9da',
+#   evidenceId: 'ev_1793081924580_kloib',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081924582,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Security policy violation: Remote Git push operations are restricted to prevent unauthorized remote changes.',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+# [2026-10-27T06:18:44.592Z] [ERROR] [Nexus]: Tool [terminal] failed: Security policy violation: Remote Git push operations are restricted to prevent unauthorized remote changes. {
+#   callId: 'call_1793081924591_xc8xo',
+#   evidenceId: 'ev_1793081924591_mwy20',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081924592,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Security policy violation: Remote Git push operations are restricted to prevent unauthorized remote changes.',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+# [2026-10-27T06:18:44.603Z] [ERROR] [Nexus]: Tool [terminal] failed: Security policy violation: Destructive filesystem deletion of system root is strictly prohibited. {
+#   callId: 'call_1793081924601_josdl',
+#   evidenceId: 'ev_1793081924601_p90gn',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081924602,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Security policy violation: Destructive filesystem deletion of system root is strictly prohibited.',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+# [2026-10-27T06:18:44.609Z] [ERROR] [Nexus]: Tool [terminal] failed: Security policy violation: Destructive drive wiping is strictly prohibited. {
+#   callId: 'call_1793081924607_b587z',
+#   evidenceId: 'ev_1793081924607_ch5g2',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081924608,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Security policy violation: Destructive drive wiping is strictly prohibited.',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+# [2026-10-27T06:18:44.614Z] [ERROR] [Nexus]: Tool [terminal] failed: Security policy violation: System power and restart commands are strictly prohibited. {
+#   callId: 'call_1793081924612_vhot3',
+#   evidenceId: 'ev_1793081924612_o4yft',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081924613,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Security policy violation: System power and restart commands are strictly prohibited.',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+# Subtest: Security Suite / Path Traversal & Boundary Protection
+    # Subtest: rejects parent traversal escapes via ../
+    ok 1 - rejects parent traversal escapes via ../
+      ---
+      duration_ms: 34.5231
+      type: 'test'
+      ...
+    # Subtest: rejects null byte injection in paths
+    ok 2 - rejects null byte injection in paths
+      ---
+      duration_ms: 22.1751
+      type: 'test'
+      ...
+    # Subtest: rejects symlink / junction traversal pointing outside workspace
+    ok 3 - rejects symlink / junction traversal pointing outside workspace
+      ---
+      duration_ms: 55.1295
+      type: 'test'
+      ...
+    1..3
+ok 47 - Security Suite / Path Traversal & Boundary Protection
+  ---
+  duration_ms: 119.4914
+  type: 'test'
+  ...
+# Subtest: Security Suite / Terminal Execution & Dangerous Commands
+    # Subtest: rejects remote git push operations
+    ok 1 - rejects remote git push operations
+      ---
+      duration_ms: 18.5171
+      type: 'test'
+      ...
+    # Subtest: rejects destructive wipe and reboot commands
+    ok 2 - rejects destructive wipe and reboot commands
+      ---
+      duration_ms: 19.6862
+      type: 'test'
+      ...
+# [2026-10-27T06:18:44.855Z] [ERROR] [Nexus]: Tool [delete_file] failed: Refusing to delete the workspace root directory {
+#   callId: 'call_1793081924853_a0a0b',
+#   evidenceId: 'ev_1793081924853_5hkm5',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081924854,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Refusing to delete the workspace root directory',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+# [2026-10-27T06:18:44.864Z] [ERROR] [Nexus]: Tool [delete_file] failed: Refusing to delete .git directory or files {
+#   callId: 'call_1793081924863_ckpdd',
+#   evidenceId: 'ev_1793081924863_0vcrq',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081924864,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Refusing to delete .git directory or files',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+# [2026-10-27T06:18:44.872Z] [ERROR] [Nexus]: Tool [delete_file] failed: Refusing to delete .git directory or files {
+#   callId: 'call_1793081924871_budsn',
+#   evidenceId: 'ev_1793081924871_6gkfg',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081924871,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Refusing to delete .git directory or files',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+    # Subtest: sanitizes environment variables to prevent API key leakage
+    ok 3 - sanitizes environment variables to prevent API key leakage
+      ---
+      duration_ms: 202.8378
+      type: 'test'
+      ...
+    1..3
+ok 48 - Security Suite / Terminal Execution & Dangerous Commands
+  ---
+  duration_ms: 279.9906
+  type: 'test'
+  ...
+# Subtest: Security Suite / File System Protection & Git Guard
+    # Subtest: blocks deletion of workspace root
+    ok 1 - blocks deletion of workspace root
+      ---
+      duration_ms: 9.1752
+      type: 'test'
+      ...
+    # Subtest: blocks deletion of .git folder and its files
+    ok 2 - blocks deletion of .git folder and its files
+      ---
+      duration_ms: 14.1957
+      type: 'test'
+      ...
+    1..2
+ok 49 - Security Suite / File System Protection & Git Guard
+  ---
+  duration_ms: 51.2288
+  type: 'test'
+  ...
+# Subtest: Security Suite / Secret Redaction & Sanitization
+ok 50 - Security Suite / Secret Redaction & Sanitization
+  ---
+  duration_ms: 1.5751
+  type: 'test'
+  ...
+# [2026-10-27T06:18:45.300Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_20328 
+# [2026-10-27T06:18:45.479Z] [WARN] [Nexus]: StorageEngine: Recovering interrupted task 'task_interrupted_1793081925468' from prior session with code SERVER_RESTART 
+# Subtest: Storage Suite / Session Lifecycle & Workspace Association
+    # Subtest: creates and retrieves sessions for workspaces
+    ok 1 - creates and retrieves sessions for workspaces
+      ---
+      duration_ms: 15.3169
+      type: 'test'
+      ...
+    # Subtest: deletes a session and its associated tasks
+    ok 2 - deletes a session and its associated tasks
+      ---
+      duration_ms: 45.8629
+      type: 'test'
+      ...
+    1..2
+ok 51 - Storage Suite / Session Lifecycle & Workspace Association
+  ---
+  duration_ms: 73.4874
+  type: 'test'
+  ...
+# Subtest: Storage Suite / Task State, Timestamps, and Provider Metadata
+ok 52 - Storage Suite / Task State, Timestamps, and Provider Metadata
+  ---
+  duration_ms: 31.8784
+  type: 'test'
+  ...
+# Subtest: Storage Suite / Event Stream Persistence and Secret Redaction
+ok 53 - Storage Suite / Event Stream Persistence and Secret Redaction
+  ---
+  duration_ms: 21.3643
+  type: 'test'
+  ...
+# Subtest: Storage Suite / Interrupted Task State Recovery on Startup
+ok 54 - Storage Suite / Interrupted Task State Recovery on Startup
+  ---
+  duration_ms: 30.0678
+  type: 'test'
+  ...
+# [2026-10-27T06:18:46.040Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_20468 
+# [2026-10-27T06:18:46.206Z] [ERROR] [Nexus]: Tool [list_files] failed: Tool [list_files] failed: Directory not found: 'nonexistent_folder' {
+#   callId: 'call_1793081926200_7sc7u',
+#   evidenceId: 'ev_1793081926200_inr6u',
+#   err: {
+#     code: 'TOOL_EXECUTION_FAILED',
+#     statusCode: 400,
+#     details: undefined,
+#     timestamp: 1793081926206,
+#     isOperational: true,
+#     userReadableMessage: "Tool execution failed: Directory not found: 'nonexistent_folder'",
+#     recoveryAction: "Verify input parameters for tool 'list_files'.",
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'ToolExecutionError',
+#     toolName: 'list_files'
+#   }
+# }
+# [2026-10-27T06:18:46.243Z] [ERROR] [Nexus]: Tool [write_file] failed: Access denied: '.env' is a protected path. Credential, environment, or secret key files are protected from agent modification (Rule R5). {
+#   callId: 'call_1793081926240_265ql',
+#   evidenceId: 'ev_1793081926240_3dm6o',
+#   err: {
+#     code: 'PROTECTED_PATH_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081926243,
+#     isOperational: true,
+#     userReadableMessage: "Security violation: Access denied: '.env' is a protected path. Credential, environment, or secret key files are protected from agent modification (Rule R5).",
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'ProtectedPathError'
+#   }
+# }
+# [2026-10-27T06:18:46.284Z] [ERROR] [Nexus]: Tool [edit_file] failed: Tool [edit_file] failed: targetContent matches 2 locations in 'safe_edit.txt'. Include more surrounding lines to create a unique match, or specify 'replaceAll: true'. {
+#   callId: 'call_1793081926270_nz79e',
+#   evidenceId: 'ev_1793081926270_nmumh',
+#   err: {
+#     code: 'TOOL_EXECUTION_FAILED',
+#     statusCode: 400,
+#     details: undefined,
+#     timestamp: 1793081926283,
+#     isOperational: true,
+#     userReadableMessage: "Tool execution failed: targetContent matches 2 locations in 'safe_edit.txt'. Include more surrounding lines to create a unique match, or specify 'replaceAll: true'.",
+#     recoveryAction: "Verify input parameters for tool 'edit_file'.",
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'ToolExecutionError',
+#     toolName: 'edit_file'
+#   }
+# }
+# [2026-10-27T06:18:46.296Z] [ERROR] [Nexus]: Tool [edit_file] failed: Tool [edit_file] failed: targetContent was not found in 'safe_edit.txt'. Please verify exact characters, indentation, and spacing. {
+#   callId: 'call_1793081926289_i615i',
+#   evidenceId: 'ev_1793081926289_69ret',
+#   err: {
+#     code: 'TOOL_EXECUTION_FAILED',
+#     statusCode: 400,
+#     details: undefined,
+#     timestamp: 1793081926296,
+#     isOperational: true,
+#     userReadableMessage: "Tool execution failed: targetContent was not found in 'safe_edit.txt'. Please verify exact characters, indentation, and spacing.",
+#     recoveryAction: "Verify input parameters for tool 'edit_file'.",
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'ToolExecutionError',
+#     toolName: 'edit_file'
+#   }
+# }
+# [2026-10-27T06:18:46.307Z] [ERROR] [Nexus]: Tool [edit_file] failed: Tool [edit_file] failed: STALE_FILE_PRECONDITION: File 'safe_edit.txt' has changed since last read (expected sha256 'bad_hash_1234567890abcdef', current 'cb20a828c20613c35a76ce5e26828eb54551da361f4f099362dbd4a3c62f5eaa'). Read the file again before editing. {
+#   callId: 'call_1793081926300_f8eld',
+#   evidenceId: 'ev_1793081926300_815uz',
+#   err: {
+#     code: 'TOOL_EXECUTION_FAILED',
+#     statusCode: 400,
+#     details: undefined,
+#     timestamp: 1793081926306,
+#     isOperational: true,
+#     userReadableMessage: "Tool execution failed: STALE_FILE_PRECONDITION: File 'safe_edit.txt' has changed since last read (expected sha256 'bad_hash_1234567890abcdef', current 'cb20a828c20613c35a76ce5e26828eb54551da361f4f099362dbd4a3c62f5eaa'). Read the file again before editing.",
+#     recoveryAction: "Verify input parameters for tool 'edit_file'.",
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'ToolExecutionError',
+#     toolName: 'edit_file'
+#   }
+# }
+# [2026-10-27T06:18:46.350Z] [INFO] [Nexus]: Checkpoint created for 'safe_edit.txt' (Task: task_test_v2) { hash: 'cb20a828c2' }
+# [2026-10-27T06:18:46.367Z] [INFO] [Nexus]: Restored 'safe_edit.txt' from checkpoint (Task: task_test_v2) 
+# Subtest: Tools & Evidence V2 Suite (Prompt 02 R1-R11)
+    # Subtest: R1 Registry - tool metadata and risk classification
+    ok 1 - R1 Registry - tool metadata and risk classification
+      ---
+      duration_ms: 2.3173
+      type: 'test'
+      ...
+    # Subtest: R3 Directory Listing - structured entries, ignore patterns, pagination
+    ok 2 - R3 Directory Listing - structured entries, ignore patterns, pagination
+      ---
+      duration_ms: 133.9767
+      type: 'test'
+      ...
+    # Subtest: R4 Path Resolution - exact, case-insensitive, colloquial phrases, outside escape
+    ok 3 - R4 Path Resolution - exact, case-insensitive, colloquial phrases, outside escape
+      ---
+      duration_ms: 20.5015
+      type: 'test'
+      ...
+    # Subtest: R5 Protected Paths - deny list prevents access to secrets and AppData
+    ok 4 - R5 Protected Paths - deny list prevents access to secrets and AppData
+      ---
+      duration_ms: 16.7225
+      type: 'test'
+      ...
+    # Subtest: R6 Safe Edits - exact match, ambiguous match failure, stale hash, checkpoints
+    ok 5 - R6 Safe Edits - exact match, ambiguous match failure, stale hash, checkpoints
+      ---
+      duration_ms: 120.0451
+      type: 'test'
+      ...
+# [2026-10-27T06:18:47.633Z] [WARN] [Nexus]: Command timed out after 500ms: ping -n 4 127.0.0.1 
+# [2026-10-27T06:18:48.098Z] [ERROR] [Nexus]: Tool [terminal] failed: Security policy violation: Remote Git push operations are restricted to prevent unauthorized remote changes. {
+#   callId: 'call_1793081928097_7pcgi',
+#   evidenceId: 'ev_1793081928097_akbtw',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081928097,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Security policy violation: Remote Git push operations are restricted to prevent unauthorized remote changes.',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+# [2026-10-27T06:18:48.136Z] [INFO] [Nexus]: Checkpoint created for 'created_file.py' (Task: task_test_v2) { hash: '498c767f57' }
+    # Subtest: R7 Terminal - execution, exit code, timeout override, environment scrub
+    ok 6 - R7 Terminal - execution, exit code, timeout override, environment scrub
+      ---
+      duration_ms: 1731.2787
+      type: 'test'
+      ...
+    # Subtest: R8 Diagnostics Parser - TypeScript, ESLint, Python, npm, Node
+    ok 7 - R8 Diagnostics Parser - TypeScript, ESLint, Python, npm, Node
+      ---
+      duration_ms: 5.3623
+      type: 'test'
+      ...
+    # Subtest: R9 & R10 Evidence Ledger and Claim Checker
+    ok 8 - R9 & R10 Evidence Ledger and Claim Checker
+      ---
+      duration_ms: 37.4095
+      type: 'test'
+      ...
+    # Subtest: R11 Parallel Read Runner - concurrent execution with limits
+    ok 9 - R11 Parallel Read Runner - concurrent execution with limits
+      ---
+      duration_ms: 591.5349
+      type: 'test'
+      ...
+    1..9
+ok 55 - Tools & Evidence V2 Suite (Prompt 02 R1-R11)
+  ---
+  duration_ms: 2724.9404
+  type: 'test'
+  ...
+# [2026-10-27T06:18:49.696Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_20100 
+# [2026-10-27T06:18:49.909Z] [ERROR] [Nexus]: Tool [read_file] failed: Access denied: path traversal attempt outside workspace boundary: "../escape.txt" {
+#   callId: 'call_1793081929908_5tmtl',
+#   evidenceId: 'ev_1793081929908_ygpys',
+#   err: {
+#     code: 'PATH_TRAVERSAL_DETECTED',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081929909,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Access denied: path traversal attempt outside workspace boundary: "../escape.txt"',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'PathTraversalError'
+#   }
+# }
+# [2026-10-27T06:18:49.978Z] [ERROR] [Nexus]: Tool [write_file] failed: Tool [write_file] failed: File already exists at 'src/config/app.json'. Pass 'overwrite: true' to replace its content. {
+#   callId: 'call_1793081929967_a8kqc',
+#   evidenceId: 'ev_1793081929967_djj87',
+#   err: {
+#     code: 'TOOL_EXECUTION_FAILED',
+#     statusCode: 400,
+#     details: undefined,
+#     timestamp: 1793081929978,
+#     isOperational: true,
+#     userReadableMessage: "Tool execution failed: File already exists at 'src/config/app.json'. Pass 'overwrite: true' to replace its content.",
+#     recoveryAction: "Verify input parameters for tool 'write_file'.",
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'ToolExecutionError',
+#     toolName: 'write_file'
+#   }
+# }
+# [2026-10-27T06:18:50.005Z] [INFO] [Nexus]: Checkpoint created for 'src/config/app.json' (Task: test_task) { hash: 'a2634cab87' }
+# [2026-10-27T06:18:50.085Z] [INFO] [Nexus]: Checkpoint created for 'sample.txt' (Task: test_task) { hash: 'ec1f9796b8' }
+# [2026-10-27T06:18:50.118Z] [ERROR] [Nexus]: Tool [edit_file] failed: Tool [edit_file] failed: targetContent was not found in 'sample.txt'. Please verify exact characters, indentation, and spacing. {
+#   callId: 'call_1793081930103_2s7gn',
+#   evidenceId: 'ev_1793081930103_82sab',
+#   err: {
+#     code: 'TOOL_EXECUTION_FAILED',
+#     statusCode: 400,
+#     details: undefined,
+#     timestamp: 1793081930118,
+#     isOperational: true,
+#     userReadableMessage: "Tool execution failed: targetContent was not found in 'sample.txt'. Please verify exact characters, indentation, and spacing.",
+#     recoveryAction: "Verify input parameters for tool 'edit_file'.",
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'ToolExecutionError',
+#     toolName: 'edit_file'
+#   }
+# }
+# [2026-10-27T06:18:50.167Z] [ERROR] [Nexus]: Tool [delete_file] failed: Refusing to delete the workspace root directory {
+#   callId: 'call_1793081930166_c072i',
+#   evidenceId: 'ev_1793081930166_c0yb3',
+#   err: {
+#     code: 'SECURITY_VIOLATION',
+#     statusCode: 403,
+#     details: undefined,
+#     timestamp: 1793081930167,
+#     isOperational: true,
+#     userReadableMessage: 'Security violation: Refusing to delete the workspace root directory',
+#     recoveryAction: 'Verify operation adheres to workspace access boundaries and execution safety policies.',
+#     correlationId: undefined,
+#     isRetryable: false,
+#     name: 'SecurityViolationError'
+#   }
+# }
+# Subtest: Tools / Registry - all 9 tools registered with parameter definitions
+ok 56 - Tools / Registry - all 9 tools registered with parameter definitions
+  ---
+  duration_ms: 6.3199
+  type: 'test'
+  ...
+# Subtest: Tools / read_file - reads file and enforces boundaries
+ok 57 - Tools / read_file - reads file and enforces boundaries
+  ---
+  duration_ms: 186.6973
+  type: 'test'
+  ...
+# Subtest: Tools / write_file - creates new file and guards existing file overwrite
+ok 58 - Tools / write_file - creates new file and guards existing file overwrite
+  ---
+  duration_ms: 111.229
+  type: 'test'
+  ...
+# Subtest: Tools / edit_file - precise target replacement
+ok 59 - Tools / edit_file - precise target replacement
+  ---
+  duration_ms: 92.2414
+  type: 'test'
+  ...
+# Subtest: Tools / delete_file - deletes file and blocks deleting root
+ok 60 - Tools / delete_file - deletes file and blocks deleting root
+  ---
+  duration_ms: 35.1658
+  type: 'test'
+  ...
+# Subtest: Tools / list_files & search_files - lists and searches within workspace
+ok 61 - Tools / list_files & search_files - lists and searches within workspace
+  ---
+  duration_ms: 44.0876
+  type: 'test'
+  ...
+# [2026-10-27T06:18:51.363Z] [WARN] [Nexus]: Command timed out after 500ms: ping -n 5 127.0.0.1 
+# Subtest: Tools / terminal - executes command, captures exit status and enforces timeout/output limits
+ok 62 - Tools / terminal - executes command, captures exit status and enforces timeout/output limits
+  ---
+  duration_ms: 1481.1539
+  type: 'test'
+  ...
+# Subtest: Tools / git_status & git_diff - inspects git status and diff
+ok 63 - Tools / git_status & git_diff - inspects git status and diff
+  ---
+  duration_ms: 364.7413
+  type: 'test'
+  ...
+# [2026-10-27T06:18:49.736Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_21028 
+# [2026-10-27T06:18:49.811Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ws_test_1793081929782_a9br\\.nexus_test_data 
+# [2026-10-27T06:18:49.930Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ws_test_1793081929892_58fu\\.nexus_test_data 
+# [2026-10-27T06:18:49.993Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ws_test_1793081929954_uda8\\.nexus_test_data 
+# [2026-10-27T06:18:50.169Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ws_test_1793081930152_obqi\\.nexus_test_data 
+# [2026-10-27T06:18:50.235Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ws_test_1793081930206_myks\\.nexus_test_data 
+# [2026-10-27T06:18:50.306Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ws_test_1793081930282_qu5v\\.nexus_test_data 
+# [2026-10-27T06:18:50.356Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ws_test_1793081930336_u3ur\\.nexus_test_data 
+# [2026-10-27T06:18:50.405Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_ws_test_1793081930384_upay\\.nexus_test_data 
+# Subtest: WorkspaceService - openWorkspace registers valid directory
+ok 64 - WorkspaceService - openWorkspace registers valid directory
+  ---
+  duration_ms: 109.1252
+  type: 'test'
+  ...
+# Subtest: WorkspaceService - openWorkspace rejects non-existent directory
+ok 65 - WorkspaceService - openWorkspace rejects non-existent directory
+  ---
+  duration_ms: 61.6383
+  type: 'test'
+  ...
+# Subtest: WorkspaceService - getFileTree generates correct tree and ignores node_modules
+ok 66 - WorkspaceService - getFileTree generates correct tree and ignores node_modules
+  ---
+  duration_ms: 197.7613
+  type: 'test'
+  ...
+# Subtest: WorkspaceService - getFileMetadata returns complete file information
+ok 67 - WorkspaceService - getFileMetadata returns complete file information
+  ---
+  duration_ms: 54.2261
+  type: 'test'
+  ...
+# Subtest: WorkspaceService - readFileContent reads normal and nested text files
+ok 68 - WorkspaceService - readFileContent reads normal and nested text files
+  ---
+  duration_ms: 73.8659
+  type: 'test'
+  ...
+# Subtest: WorkspaceService - security: blocks traversal and unauthorized paths
+ok 69 - WorkspaceService - security: blocks traversal and unauthorized paths
+  ---
+  duration_ms: 55.0646
+  type: 'test'
+  ...
+# Subtest: WorkspaceService - handles missing and binary files gracefully
+ok 70 - WorkspaceService - handles missing and binary files gracefully
+  ---
+  duration_ms: 48.2168
+  type: 'test'
+  ...
+# Subtest: WorkspaceService - searchFiles locates matches accurately across workspace
+ok 71 - WorkspaceService - searchFiles locates matches accurately across workspace
+  ---
+  duration_ms: 189.9684
+  type: 'test'
+  ...
+1..71
+# tests 133
+# suites 0
+# pass 133
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 19105.6807
+
+> @nexus/desktop@1.0.0 test
+> node --test dist/**/*.test.js
+
+TAP version 13
+# [2026-10-27T06:18:53.235Z] [INFO] [Nexus]: StorageEngine: Initialized data directory at C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus_test_data_18916 
+# [2026-10-27T06:18:53.242Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' 
+# [2026-10-27T06:18:53.242Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' 
+# [2026-10-27T06:18:53.334Z] [INFO] [Nexus]: Desktop ServerManager: Embedded server running on http://127.0.0.1:3200 (DataDir: C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus-desktop-test-1793081933249) 
+# Subtest: Desktop Process Lifecycle & Server Integration
+    # Subtest: resolves user data directory conforming to platform conventions
+    ok 1 - resolves user data directory conforming to platform conventions
+      ---
+      duration_ms: 3.4453
+      type: 'test'
+      ...
+    # Subtest: detects port availability and finds available free loopback port
+    ok 2 - detects port availability and finds available free loopback port
+      ---
+      duration_ms: 52.9162
+      type: 'test'
+      ...
+# [2026-10-27T06:18:53.392Z] [INFO] [Nexus]: Desktop ServerManager: Server on http://127.0.0.1:3200 stopped cleanly 
+    # Subtest: starts embedded server and responds to HTTP health check
+    ok 3 - starts embedded server and responds to HTTP health check
+      ---
+      duration_ms: 76.3046
+      type: 'test'
+      ...
+# [2026-10-27T06:18:53.403Z] [INFO] [Nexus]: Desktop ServerManager: Embedded server running on http://127.0.0.1:3301 (DataDir: C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus-desktop-test-1793081933249) 
+# [2026-10-27T06:18:53.421Z] [INFO] [Nexus]: Desktop ServerManager: Server on http://127.0.0.1:3301 stopped cleanly 
+    # Subtest: handles port conflict gracefully by binding to next available port
+# [2026-10-27T06:18:53.430Z] [INFO] [Nexus]: Desktop ServerManager: Embedded server running on http://127.0.0.1:3450 (DataDir: C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus-desktop-test-1793081933249) 
+    ok 4 - handles port conflict gracefully by binding to next available port
+      ---
+      duration_ms: 29.2475
+      type: 'test'
+      ...
+# [2026-10-27T06:18:53.441Z] [INFO] [Nexus]: Desktop ServerManager: Server on http://127.0.0.1:3450 stopped cleanly 
+# [2026-10-27T06:18:53.450Z] [INFO] [Nexus]: Desktop ServerManager: Embedded server running on http://127.0.0.1:3450 (DataDir: C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus-desktop-test-1793081933249) 
+# [2026-10-27T06:18:53.458Z] [INFO] [Nexus]: Desktop ServerManager: Server on http://127.0.0.1:3450 stopped cleanly 
+# [2026-10-27T06:18:53.466Z] [INFO] [Nexus]: Desktop ServerManager: Embedded server running on http://127.0.0.1:3450 (DataDir: C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus-desktop-test-1793081933249) 
+# [2026-10-27T06:18:53.477Z] [INFO] [Nexus]: Desktop ServerManager: Server on http://127.0.0.1:3450 stopped cleanly 
+    # Subtest: supports repeated startup and clean shutdown cycles without socket or port leaks
+# [2026-10-27T06:18:53.488Z] [INFO] [Nexus]: Desktop ServerManager: Embedded server running on http://127.0.0.1:3500 (DataDir: C:\\Users\\BMS\\AppData\\Local\\Temp\\nexus-desktop-test-1793081933249) 
+    ok 5 - supports repeated startup and clean shutdown cycles without socket or port leaks
+      ---
+      duration_ms: 57.864
+      type: 'test'
+      ...
+# [2026-10-27T06:18:53.537Z] [INFO] [Nexus]: ProviderPreflightCache: Invalidated cache for provider 'gemini' 
+# [2026-10-27T06:18:53.546Z] [INFO] [Nexus]: Desktop ServerManager: Server on http://127.0.0.1:3500 stopped cleanly 
+    # Subtest: persists credentials and workspaces in user data directory and not install dir
+    ok 6 - persists credentials and workspaces in user data directory and not install dir
+      ---
+      duration_ms: 65.9365
+      type: 'test'
+      ...
+    1..6
+ok 1 - Desktop Process Lifecycle & Server Integration
+  ---
+  duration_ms: 293.5902
+  type: 'suite'
+  ...
+1..1
+# tests 6
+# suites 1
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1235.5593

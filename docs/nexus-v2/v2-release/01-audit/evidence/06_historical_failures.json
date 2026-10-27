@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "test": "invalid_key_validate",
+      "fakeKeyRes": {
+        "success": false,
+        "result": {
+          "provider": "gemini",
+          "isValid": false,
+          "code": "PROVIDER_REQUEST_FAILED",
+          "message": "Validation failed: API key not valid. Please pass a valid API key",
+          "testedAt": 1793082260185
+        },
+        "validation": {
+          "provider": "gemini",
+          "isValid": false,
+          "code": "PROVIDER_REQUEST_FAILED",
+          "message": "Validation failed: API key not valid. Please pass a valid API key",
+          "testedAt": 1793082260185
+        }
+      }
+    },
+    {
+      "test": "task_without_credentials",
+      "error": {
+        "name": "ProviderError",
+        "message": "Cannot execute task: No AI model provider is configured. Please configure an OpenAI or Google Gemini API key in Settings → Providers.",
+        "userReadableMessage": "AI Provider (router) error: Cannot execute task: No AI model provider is configured. Please configure an OpenAI or Google Gemini API key in Settings → Providers.",
+        "recoveryAction": "Check your provider configuration and API key status in Provider Setup.",
+        "code": "PROVIDER_NOT_CONFIGURED",
+        "statusCode": 400,
+        "isRetryable": false,
+        "correlationId": "req_1793082260595_p4ypv",
+        "timestamp": 1793082260596
+      }
+    },
+    {
+      "test": "task_cancel_call",
+      "cancelRes": {
+        "success": false,
+        "error": "Task not found"
+      }
+    }
+  ],
+  "serverOutput": "[2026-10-27T06:24:18.179Z] [INFO] [Nexus]: ModelRouter: registered provider 'openai' \n[2026-10-27T06:24:18.183Z] [INFO] [Nexus]: ModelRouter: registered provider 'gemini' \n[2026-10-27T06:24:18.196Z] [INFO] [Nexus]: NEXUS.AI Server listening on http://localhost:3999 \n[2026-10-27T06:24:20.597Z] [ERROR] [Nexus] [req_1793082260595_p4ypv]: Request Error [POST /api/tasks]: Cannot execute task: No AI model provider is configured. Please configure an OpenAI or Google Gemini API key in Settings → Providers. {\n  code: 'PROVIDER_NOT_CONFIGURED',\n  statusCode: 400,\n  recoveryAction: 'Check your provider configuration and API key status in Provider Setup.'\n}\n"
+}

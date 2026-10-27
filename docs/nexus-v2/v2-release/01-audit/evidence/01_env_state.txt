@@ -1,0 +1,25 @@
+=== ENVIRONMENT & REPOSITORY BASELINE ===
+
+Date: 2026-10-27T06:15:13.927Z
+
+Branch: v2-release-integration
+
+HEAD Commit: d749cbc580cd0bfdb9a086c611e9a65cffc86dff (d749cbc)
+
+Remotes:
+origin	https://mohanshankarbotcha@github.com/mohanshankarbotcha/nexux.git (fetch)
+origin	https://mohanshankarbotcha@github.com/mohanshankarbotcha/nexux.git (push)
+
+Tags:
+v1.0.0
+
+Working tree status:
+?? docs/design/
+
+Node version: v22.23.3
+
+npm version: 10.9.9
+
+OS: win32 x64 10.0.26200
+
+Windows Version: Microsoft Windows [Version 10.0.26200.9711]

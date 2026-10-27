@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&amp;family=Comfortaa:wght@400;500;700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;background-color:#111215;color:#e3e2e6;}body{overscroll-behavior:none;font-family:"Times New Roman",Times,serif;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-tertiary-container":"#a0fffe","surface-container-highest":"#343538","primary-fixed":"#d3e4ff","surface-dim":"#121316","outline-variant":"#23252b","secondary-fixed-dim":"#00dfbd","tertiary":"#00dddd","on-primary-fixed-variant":"#004881","on-tertiary-fixed-variant":"#004f4f","primary-fixed-dim":"#a2c9ff","error-container":"#93000a","on-secondary-fixed":"#00201a","surface-variant":"#1f2127","on-secondary-fixed-variant":"#005143","primary":"#a2c9ff","secondary":"#a5ffe7","on-secondary-container":"#006655","on-primary-fixed":"#001c38","on-surface":"#e3e2e6","inverse-on-surface":"#2f3034","surface-bright":"#38393c","on-tertiary-fixed":"#002020","on-error":"#690005","inverse-primary":"#0060a9","on-primary":"#00315c","tertiary-fixed-dim":"#00dddd","on-error-container":"#ffdad6","surface-container-low":"#16171c","on-tertiary":"#003737","inverse-surface":"#e3e2e6","on-secondary":"#00382d","secondary-container":"#00ecc7","background":"#111215","surface-container-lowest":"#0b0c0e","primary-container":"#106ebe","outline":"#8b919d","surface-tint":"#a2c9ff","on-background":"#e3e2e6","tertiary-container":"#007979","surface-container":"#1a1c22","surface":"#111215","error":"#ffb4ab","secondary-fixed":"#35fed8","tertiary-fixed":"#00fbfb","on-primary-container":"#e7efff","surface-container-high":"#22242c","on-surface-variant":"#c1c7d3"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"0.5rem","space-sm":"0.5rem","space-xl":"1.5rem","margin":"0.75rem","space-xs":"0.25rem","space-md":"0.75rem","space-lg":"1rem"},"fontFamily":{"label-md":["Comfortaa"],"label-sm":["Comfortaa"],"body-lg":["Courier Prime"],"headline-md":["\"Times New Roman\"","Times","serif"],"headline-lg":["\"Times New Roman\"","Times","serif"],"body-sm":["Courier Prime"],"headline-xl":["\"Times New Roman\"","Times","serif"],"code-block":["Courier Prime"],"body-md":["Courier Prime"],"serif":["\"Times New Roman\"","Times","serif"]},"fontSize":{"label-md":["0.75rem",{"lineHeight":"1rem","letterSpacing":"0.02em","fontWeight":"500"}],"label-sm":["0.6875rem",{"lineHeight":"0.875rem","letterSpacing":"0.04em","fontWeight":"500"}],"body-lg":["0.875rem",{"lineHeight":"1.375rem","letterSpacing":"-0.01em","fontWeight":"400"}],"headline-md":["1rem",{"lineHeight":"1.5rem","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-lg":["1.25rem",{"lineHeight":"1.75rem","letterSpacing":"-0.015em","fontWeight":"500"}],"body-sm":["0.75rem",{"lineHeight":"1.125rem","letterSpacing":"0em","fontWeight":"400"}],"headline-xl":["1.75rem",{"lineHeight":"2.25rem","letterSpacing":"-0.025em","fontWeight":"600"}],"code-block":["0.8125rem",{"lineHeight":"1.35rem","letterSpacing":"0em","fontWeight":"400"}],"body-md":["0.8125rem",{"lineHeight":"1.25rem","letterSpacing":"0em","fontWeight":"400"}]}}}}</script></head><body class="bg-background text-on-surface antialiased select-none"><header class="fixed top-0 left-0 right-0 h-12 bg-[#111215] border-b border-[#23252b] z-50 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><span class="font-headline-md text-headline-md tracking-tight font-serif text-on-surface text-[15px]">NEXUS.AI</span></div><div class="h-4 w-[1px] bg-outline-variant"></div><div class="flex items-center gap-space-xs font-code-block text-[11px] text-on-surface-variant"><span class="text-outline">nexus</span><span class="text-outline-variant">/</span><span class="text-on-surface">feat/agent-mesh</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm px-space-md py-1 rounded bg-[#16171c] border border-[#23252b] text-on-surface-variant text-[12px] cursor-pointer hover:border-outline/40 transition-colors"><span class="font-headline-md text-[12px]">Search files, symbols, commands...</span><div class="flex items-center gap-0.5 px-1 py-0.2 rounded bg-surface-container border border-outline-variant text-[10px] font-code-block text-outline"><span class="text-[9px]">⌘</span><span>K</span></div></div><div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#16171c] border border-[#23252b]"><span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span><span class="font-code-block text-[11px] text-secondary-fixed">Operational</span></div></div></header><aside class="fixed left-0 top-12 bottom-0 w-14 bg-[#111215] border-r border-[#23252b] z-40 flex flex-col justify-between items-center py-space-sm"><nav class="w-full flex flex-col items-center gap-space-xs" data-active-classes="bg-surface-container text-on-surface border-l-2 border-primary"><a class="w-10 h-10 rounded flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-headline-md text-[11px]" data-path="chat" href="#" title="Chat"><svg class="w-[18px] h-[18px] stroke-current stroke-[1.5] fill-none mb-0.5" viewbox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="leading-none">Chat</span></a><a class="w-10 h-10 rounded flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-headline-md text-[11px]" data-path="workspace" href="#" title="Workspace"><svg class="w-[18px] h-[18px] stroke-current stroke-[1.5] fill-none mb-0.5" viewbox="0 0 24 24"><polyline points="16 18 22 12 16 6" stroke-linecap="round" stroke-linejoin="round"></polyline><polyline points="8 6 2 12 8 18" stroke-linecap="round" stroke-linejoin="round"></polyline></svg><span class="leading-none">Code</span></a><a class="w-10 h-10 rounded flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-headline-md text-[11px]" data-path="usage" href="#" title="Telemetry"><svg class="w-[18px] h-[18px] stroke-current stroke-[1.5] fill-none mb-0.5" viewbox="0 0 24 24"><path d="M3 3v18h18" stroke-linecap="round" stroke-linejoin="round"></path><path d="m19 9-5 5-4-4-3 3" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="leading-none">Stats</span></a><a aria-current="page" class="w-10 h-10 rounded flex flex-col items-center justify-center transition-colors font-headline-md bg-surface-container text-on-surface border-l-2 border-primary" data-path="settings" href="#" title="Agents &amp; Settings"><svg class="w-[18px] h-[18px] stroke-current stroke-[1.5] fill-none mb-0.5" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span class="leading-none">Setup</span></a></nav><div class="w-full flex flex-col items-center gap-space-sm pt-space-xs border-t border-[#23252b]"><div class="w-7 h-7 rounded-full bg-[#1e2026] border border-[#23252b] flex items-center justify-center font-code-block text-[11px] text-on-surface" title="User Session">NX</div></div></aside><div class="pl-14 pt-12 min-h-screen bg-[#111215]"><main class="w-full"><div class="flex flex-col w-full">
+<div class="w-full max-w-7xl mx-auto px-space-lg py-space-xl flex flex-col gap-space-xl">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pb-space-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="font-body-sm text-body-sm text-outline tracking-wider uppercase">Runtime Orchestration</span>
+<span class="font-body-sm text-body-sm text-outline-variant">/</span>
+<span class="font-body-sm text-body-sm text-secondary-fixed">Topology v4.12</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface font-serif tracking-tight">Agent Mesh &amp; Gateway Topologies</h1>
+<p class="font-headline-md text-headline-md text-on-surface-variant font-serif max-w-2xl">
+          Configure autonomous agent heuristics, primary model delegation, and redundant upstream API failover channels.
+        </p>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg bg-surface-container-low shadow-sm">
+<div class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></div>
+<span class="font-code-block text-code-block text-on-surface">6/6 Agents Synced</span>
+<span class="font-code-block text-code-block text-outline ml-space-xs">p95 192ms</span>
+</div>
+<button class="px-space-md py-space-sm rounded bg-primary-container text-on-primary-container font-headline-md text-headline-md font-serif hover:bg-inverse-primary transition-colors shadow-sm cursor-pointer" id="header-save-btn">
+          Save Configuration
+        </button>
+</div>
+</div>
+<section class="flex flex-col gap-space-md">
+<div class="flex items-baseline justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-lg text-headline-lg text-on-surface font-serif">Autonomous Sub-Agents</span>
+<span class="font-code-block text-body-sm text-outline px-space-xs rounded bg-surface-container">06 NODES</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Model assignment cascades down to distributed workers</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
+<div class="agent-card rounded-lg bg-surface-container-low p-space-md flex flex-col justify-between shadow-sm transition-all hover:bg-surface-container" data-agent="coordinator">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<h3 class="font-headline-lg text-headline-md text-on-surface font-serif">Coordinator</h3>
+</div>
+<span class="font-body-sm text-body-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-secondary-fixed font-code-block">ACTIVE</span>
+</div>
+<p class="font-headline-md text-body-lg text-on-surface-variant font-serif">
+              Deconstructs user intent, synthesizes dependency trees, and routes execution tokens across downstream specialists.
+            </p>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline">Primary Model</span>
+<span class="font-code-block text-code-block text-primary">gemini-2.5-pro</span>
+</div>
+</div>
+<div class="pt-space-md flex flex-col gap-space-sm">
+<button class="expand-btn w-full py-space-xs px-space-sm rounded bg-surface-container text-left text-on-surface-variant font-headline-md text-body-md font-serif hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-between cursor-pointer">
+<span>Parameters &amp; Permissions</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200">expand_more</span>
+</button>
+<div class="expanded-panel hidden flex-col gap-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Temperature</span>
+<span class="font-code-block text-code-block text-on-surface">0.15</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1">
+<div class="bg-primary-container h-1 rounded-full w-[15%]"></div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline font-serif">Context Cache Strategy</span>
+<span class="font-code-block text-body-sm text-secondary-fixed">EPHEMERAL_TTL</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Workspace FS Access</span>
+<span class="font-code-block text-body-sm text-on-surface">READ_WRITE_ROOT</span>
+</div>
+</div>
+</div>
+</div>
+<div class="agent-card rounded-lg bg-surface-container-low p-space-md flex flex-col justify-between shadow-sm transition-all hover:bg-surface-container" data-agent="explorer">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<h3 class="font-headline-lg text-headline-md text-on-surface font-serif">Explorer</h3>
+</div>
+<span class="font-body-sm text-body-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-secondary-fixed font-code-block">ACTIVE</span>
+</div>
+<p class="font-headline-md text-body-lg text-on-surface-variant font-serif">
+              Scours codebase abstract syntax trees, indices references, and identifies cross-package imports and interfaces.
+            </p>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline">Primary Model</span>
+<span class="font-code-block text-code-block text-primary">gemini-2.5-pro</span>
+</div>
+</div>
+<div class="pt-space-md flex flex-col gap-space-sm">
+<button class="expand-btn w-full py-space-xs px-space-sm rounded bg-surface-container text-left text-on-surface-variant font-headline-md text-body-md font-serif hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-between cursor-pointer">
+<span>Parameters &amp; Permissions</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200">expand_more</span>
+</button>
+<div class="expanded-panel hidden flex-col gap-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Temperature</span>
+<span class="font-code-block text-code-block text-on-surface">0.00</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1">
+<div class="bg-primary-container h-1 rounded-full w-[2%]"></div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline font-serif">Context Cache Strategy</span>
+<span class="font-code-block text-body-sm text-secondary-fixed">LONG_HORIZON</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Workspace FS Access</span>
+<span class="font-code-block text-body-sm text-on-surface">READ_ONLY</span>
+</div>
+</div>
+</div>
+</div>
+<div class="agent-card rounded-lg bg-surface-container-low p-space-md flex flex-col justify-between shadow-sm transition-all hover:bg-surface-container" data-agent="planner">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<h3 class="font-headline-lg text-headline-md text-on-surface font-serif">Planner</h3>
+</div>
+<span class="font-body-sm text-body-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-secondary-fixed font-code-block">ACTIVE</span>
+</div>
+<p class="font-headline-md text-body-lg text-on-surface-variant font-serif">
+              Formulates step-by-step diff plans, test assertions, and atomic commits prior to any code generation attempt.
+            </p>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline">Primary Model</span>
+<span class="font-code-block text-code-block text-primary">gemini-2.5-pro</span>
+</div>
+</div>
+<div class="pt-space-md flex flex-col gap-space-sm">
+<button class="expand-btn w-full py-space-xs px-space-sm rounded bg-surface-container text-left text-on-surface-variant font-headline-md text-body-md font-serif hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-between cursor-pointer">
+<span>Parameters &amp; Permissions</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200">expand_more</span>
+</button>
+<div class="expanded-panel hidden flex-col gap-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Temperature</span>
+<span class="font-code-block text-code-block text-on-surface">0.20</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1">
+<div class="bg-primary-container h-1 rounded-full w-[20%]"></div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline font-serif">Context Cache Strategy</span>
+<span class="font-code-block text-body-sm text-secondary-fixed">EPHEMERAL_TTL</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Workspace FS Access</span>
+<span class="font-code-block text-body-sm text-on-surface">READ_ONLY</span>
+</div>
+</div>
+</div>
+</div>
+<div class="agent-card rounded-lg bg-surface-container-low p-space-md flex flex-col justify-between shadow-sm transition-all hover:bg-surface-container" data-agent="coder">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<h3 class="font-headline-lg text-headline-md text-on-surface font-serif">Coder</h3>
+</div>
+<span class="font-body-sm text-body-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-secondary-fixed font-code-block">ACTIVE</span>
+</div>
+<p class="font-headline-md text-body-lg text-on-surface-variant font-serif">
+              Executes surgical file modifications, generates unit suites, and adheres strictly to existing coding styles.
+            </p>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline">Primary Model</span>
+<span class="font-code-block text-code-block text-primary">gemini-2.5-pro</span>
+</div>
+</div>
+<div class="pt-space-md flex flex-col gap-space-sm">
+<button class="expand-btn w-full py-space-xs px-space-sm rounded bg-surface-container text-left text-on-surface-variant font-headline-md text-body-md font-serif hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-between cursor-pointer">
+<span>Parameters &amp; Permissions</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200">expand_more</span>
+</button>
+<div class="expanded-panel hidden flex-col gap-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Temperature</span>
+<span class="font-code-block text-code-block text-on-surface">0.10</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1">
+<div class="bg-primary-container h-1 rounded-full w-[10%]"></div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline font-serif">Context Cache Strategy</span>
+<span class="font-code-block text-body-sm text-secondary-fixed">PERSISTENT_BRANCH</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Workspace FS Access</span>
+<span class="font-code-block text-body-sm text-on-surface">READ_WRITE_SRC</span>
+</div>
+</div>
+</div>
+</div>
+<div class="agent-card rounded-lg bg-surface-container-low p-space-md flex flex-col justify-between shadow-sm transition-all hover:bg-surface-container" data-agent="debugger">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span>
+<h3 class="font-headline-lg text-headline-md text-on-surface font-serif">Debugger</h3>
+</div>
+<span class="font-body-sm text-body-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-secondary-fixed font-code-block">ACTIVE</span>
+</div>
+<p class="font-headline-md text-body-lg text-on-surface-variant font-serif">
+              Consumes terminal outputs, analyzes stack traces, reproduces runtime faults, and isolates regressions.
+            </p>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline">Primary Model</span>
+<span class="font-code-block text-code-block text-primary">gpt-4o</span>
+</div>
+</div>
+<div class="pt-space-md flex flex-col gap-space-sm">
+<button class="expand-btn w-full py-space-xs px-space-sm rounded bg-surface-container text-left text-on-surface-variant font-headline-md text-body-md font-serif hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-between cursor-pointer">
+<span>Parameters &amp; Permissions</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200">expand_more</span>
+</button>
+<div class="expanded-panel hidden flex-col gap-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Temperature</span>
+<span class="font-code-block text-code-block text-on-surface">0.05</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1">
+<div class="bg-primary-container h-1 rounded-full w-[5%]"></div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline font-serif">Context Cache Strategy</span>
+<span class="font-code-block text-body-sm text-secondary-fixed">EPHEMERAL_LOGS</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Terminal Runtime</span>
+<span class="font-code-block text-body-sm text-on-surface">ISOLATED_SANDBOX</span>
+</div>
+</div>
+</div>
+</div>
+<div class="agent-card rounded-lg bg-surface-container-low p-space-md flex flex-col justify-between shadow-sm transition-all hover:bg-surface-container" data-agent="reviewer">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<h3 class="font-headline-lg text-headline-md text-on-surface font-serif">Reviewer</h3>
+</div>
+<span class="font-body-sm text-body-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-outline font-code-block">STANDBY</span>
+</div>
+<p class="font-headline-md text-body-lg text-on-surface-variant font-serif">
+              Inspects candidate unified diffs for security vulnerabilities, style conformity, and unhandled edge scenarios.
+            </p>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline">Primary Model</span>
+<span class="font-code-block text-code-block text-primary">gemini-2.5-pro</span>
+</div>
+</div>
+<div class="pt-space-md flex flex-col gap-space-sm">
+<button class="expand-btn w-full py-space-xs px-space-sm rounded bg-surface-container text-left text-on-surface-variant font-headline-md text-body-md font-serif hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-between cursor-pointer">
+<span>Parameters &amp; Permissions</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200">expand_more</span>
+</button>
+<div class="expanded-panel hidden flex-col gap-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Temperature</span>
+<span class="font-code-block text-code-block text-on-surface">0.00</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1">
+<div class="bg-primary-container h-1 rounded-full w-[2%]"></div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-outline font-serif">Context Cache Strategy</span>
+<span class="font-code-block text-body-sm text-secondary-fixed">COMMIT_DIFF</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-outline font-serif">Workspace FS Access</span>
+<span class="font-code-block text-body-sm text-on-surface">STAGING_DIFF_ONLY</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-space-md">
+<div class="flex items-baseline justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-lg text-headline-lg text-on-surface font-serif">API Gateways &amp; Credentials</span>
+<span class="font-code-block text-body-sm text-outline px-space-xs rounded bg-surface-container">UPSTREAM PROVIDERS</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Encrypted in local session storage</span>
+</div>
+<div class="flex flex-col gap-space-md">
+<div class="rounded-lg bg-surface-container-low p-space-md flex flex-col gap-space-md shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-serif text-primary text-headline-md font-bold">
+                G
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-lg text-headline-md text-on-surface font-serif">Google Gemini Gateway</span>
+<span class="font-body-sm text-body-sm px-space-xs py-0.5 rounded bg-primary text-on-primary font-code-block">PRIMARY</span>
+</div>
+<span class="font-headline-md text-body-sm text-outline font-serif">Endpoint: generativelanguage.googleapis.com/v1beta</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+<span class="font-code-block text-body-sm text-secondary-fixed">180ms p95</span>
+</div>
+<button class="test-conn-btn px-space-sm py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-headline-md text-body-md font-serif transition-colors cursor-pointer" data-provider="gemini">
+                Test Connection
+              </button>
+</div>
+</div>
+<div class="flex flex-col md:flex-row items-center gap-space-sm pt-space-xs">
+<div class="w-full md:w-3/4 flex items-center justify-between px-space-md py-space-sm rounded bg-surface-container-lowest focus-within:bg-surface-container-high transition-colors">
+<span class="font-code-block text-code-block text-on-surface tracking-widest select-all">••••••••••••••••••••••••••••••••••••••••</span>
+<button class="reveal-btn text-outline hover:text-on-surface font-body-sm text-body-sm cursor-pointer ml-space-sm" title="Reveal Key">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+</button>
+</div>
+<button class="w-full md:w-1/4 py-space-sm rounded bg-surface-container text-on-surface font-headline-md text-body-md font-serif hover:bg-surface-container-high transition-colors cursor-pointer text-center">
+              Update Credential
+            </button>
+</div>
+<div class="flex flex-wrap items-center gap-space-xs pt-space-xs">
+<span class="font-headline-md text-body-sm text-outline font-serif mr-space-xs">Active Aliases:</span>
+<span class="font-code-block text-body-sm px-space-xs py-0.5 rounded bg-surface-container text-on-surface">gemini-2.5-pro</span>
+<span class="font-code-block text-body-sm px-space-xs py-0.5 rounded bg-surface-container text-on-surface">gemini-2.5-flash</span>
+<span class="font-code-block text-body-sm px-space-xs py-0.5 rounded bg-surface-container text-outline">gemini-1.5-pro-exp</span>
+</div>
+</div>
+<div class="rounded-lg bg-surface-container-low p-space-md flex flex-col gap-space-md shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-serif text-on-surface text-headline-md font-bold">
+                O
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-lg text-headline-md text-on-surface font-serif">OpenAI Gateway</span>
+<span class="font-body-sm text-body-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-outline font-code-block">SECONDARY</span>
+</div>
+<span class="font-headline-md text-body-sm text-outline font-serif">Endpoint: api.openai.com/v1</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+<span class="font-code-block text-body-sm text-secondary-fixed">240ms p95</span>
+</div>
+<button class="test-conn-btn px-space-sm py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-headline-md text-body-md font-serif transition-colors cursor-pointer" data-provider="openai">
+                Test Connection
+              </button>
+</div>
+</div>
+<div class="flex flex-col md:flex-row items-center gap-space-sm pt-space-xs">
+<div class="w-full md:w-3/4 flex items-center justify-between px-space-md py-space-sm rounded bg-surface-container-lowest focus-within:bg-surface-container-high transition-colors">
+<span class="font-code-block text-code-block text-on-surface tracking-widest select-all">••••••••••••••••••••••••••••••••••••••••</span>
+<button class="reveal-btn text-outline hover:text-on-surface font-body-sm text-body-sm cursor-pointer ml-space-sm" title="Reveal Key">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+</button>
+</div>
+<button class="w-full md:w-1/4 py-space-sm rounded bg-surface-container text-on-surface font-headline-md text-body-md font-serif hover:bg-surface-container-high transition-colors cursor-pointer text-center">
+              Update Credential
+            </button>
+</div>
+<div class="flex flex-wrap items-center gap-space-xs pt-space-xs">
+<span class="font-headline-md text-body-sm text-outline font-serif mr-space-xs">Active Aliases:</span>
+<span class="font-code-block text-body-sm px-space-xs py-0.5 rounded bg-surface-container text-on-surface">gpt-4o</span>
+<span class="font-code-block text-body-sm px-space-xs py-0.5 rounded bg-surface-container text-on-surface">gpt-4o-mini</span>
+<span class="font-code-block text-body-sm px-space-xs py-0.5 rounded bg-surface-container text-outline">o3-mini</span>
+</div>
+</div>
+</div>
+</section>
+<section class="rounded-lg bg-surface-container-low p-space-md flex flex-col gap-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-lg text-headline-md text-on-surface font-serif">Failover &amp; Circuit Safeguards</h2>
+<span class="font-body-sm text-body-sm text-outline">Autonomous Mesh Continuity</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md pt-space-xs">
+<div class="flex items-start justify-between p-space-md rounded bg-surface-container">
+<div class="flex flex-col gap-space-xs pr-space-md">
+<span class="font-headline-md text-headline-md text-on-surface font-serif">Automatic Failover to Secondary</span>
+<p class="font-headline-md text-body-sm text-on-surface-variant font-serif">
+              Promotes OpenAI gateway instantaneously upon detecting consecutive 5xx responses or upstream latency &gt; 800ms.
+            </p>
+</div>
+<button aria-checked="true" class="toggle-switch relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full bg-primary-container transition-colors duration-200 ease-in-out focus:outline-none" role="switch" type="button">
+<span class="translate-x-4 pointer-events-none inline-block h-4 w-4 transform rounded-full bg-on-primary-container shadow-sm transition duration-200 ease-in-out mt-0.5 ml-0.5"></span>
+</button>
+</div>
+<div class="flex items-start justify-between p-space-md rounded bg-surface-container">
+<div class="flex flex-col gap-space-xs pr-space-md">
+<span class="font-headline-md text-headline-md text-on-surface font-serif">Token Quota Safeguards</span>
+<p class="font-headline-md text-body-sm text-on-surface-variant font-serif">
+              Hard caps background sub-agent execution trees at 250,000 output tokens per single branch task to curb runaway loops.
+            </p>
+</div>
+<button aria-checked="true" class="toggle-switch relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full bg-primary-container transition-colors duration-200 ease-in-out focus:outline-none" role="switch" type="button">
+<span class="translate-x-4 pointer-events-none inline-block h-4 w-4 transform rounded-full bg-on-primary-container shadow-sm transition duration-200 ease-in-out mt-0.5 ml-0.5"></span>
+</button>
+</div>
+</div>
+</section>
+<div class="flex items-center justify-between pt-space-md pb-space-xl">
+<div class="flex items-center gap-space-xs">
+<span class="font-body-sm text-body-sm text-outline">Configuration hash:</span>
+<span class="font-code-block text-body-sm text-on-surface-variant">sha256:7f0c...9a41</span>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="px-space-md py-space-sm rounded text-outline hover:text-on-surface font-headline-md text-headline-md font-serif transition-colors cursor-pointer" id="discard-btn">
+          Revert Defaults
+        </button>
+<button class="px-space-lg py-space-sm rounded bg-primary-container text-on-primary-container font-headline-md text-headline-md font-serif hover:bg-inverse-primary transition-colors shadow-sm cursor-pointer" id="save-btn">
+          Save Changes
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  document.querySelectorAll('.expand-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = btn.nextElementSibling;
+      const icon = btn.querySelector('.material-symbols-outlined');
+      const isHidden = panel.classList.contains('hidden');
+      
+      if (isHidden) {
+        panel.classList.remove('hidden');
+        panel.classList.add('flex');
+        icon.style.transform = 'rotate(180deg)';
+      } else {
+        panel.classList.add('hidden');
+        panel.classList.remove('flex');
+        icon.style.transform = 'rotate(0deg)';
+      }
+    });
+  });
+
+  document.querySelectorAll('.toggle-switch').forEach(toggle => {
+    toggle.addEventListener('click', () => {
+      const isChecked = toggle.getAttribute('aria-checked') === 'true';
+      const knob = toggle.querySelector('span');
+      
+      if (isChecked) {
+        toggle.setAttribute('aria-checked', 'false');
+        toggle.classList.remove('bg-primary-container');
+        toggle.classList.add('bg-surface-container-highest');
+        knob.classList.remove('translate-x-4', 'bg-on-primary-container');
+        knob.classList.add('translate-x-0', 'bg-outline');
+      } else {
+        toggle.setAttribute('aria-checked', 'true');
+        toggle.classList.add('bg-primary-container');
+        toggle.classList.remove('bg-surface-container-highest');
+        knob.classList.add('translate-x-4', 'bg-on-primary-container');
+        knob.classList.remove('translate-x-0', 'bg-outline');
+      }
+    });
+  });
+
+  document.querySelectorAll('.test-conn-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const originalText = btn.textContent;
+      btn.textContent = 'Pinging...';
+      btn.classList.add('text-secondary-fixed');
+      setTimeout(() => {
+        btn.textContent = '200 OK (164ms)';
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.classList.remove('text-secondary-fixed');
+        }, 2000);
+      }, 600);
+    });
+  });
+
+  const notifySave = () => {
+    const saveBtn = document.getElementById('save-btn');
+    const headerBtn = document.getElementById('header-save-btn');
+    const origText = saveBtn.textContent;
+    saveBtn.textContent = 'Saved!';
+    headerBtn.textContent = 'Saved!';
+    setTimeout(() => {
+      saveBtn.textContent = origText;
+      headerBtn.textContent = 'Save Configuration';
+    }, 1500);
+  };
+
+  document.getElementById('save-btn')?.addEventListener('click', notifySave);
+  document.getElementById('header-save-btn')?.addEventListener('click', notifySave);
+</script></main></div></body></html>

@@ -1,0 +1,18 @@
+{
+  "corsConfig": "app.use(cors({ origin: '*' }));",
+  "listenCall": "const server = app.listen(port, () => {",
+  "authMiddlewarePresent": false,
+  "terminalWorkspacePathFallback": true,
+  "credentialStorageMethod": [
+    "this.credentialsFile = path.join(this.dataDir, 'credentials.json');",
+    "this.credentialsFile = path.join(this.dataDir, 'credentials.json');",
+    "this.credentialsFile = path.join(this.dataDir, 'credentials.json');",
+    "fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), {",
+    "const line = JSON.stringify(sanitized) + '\\n';"
+  ],
+  "electronSandbox": [
+    "contextIsolation: true,",
+    "nodeIntegration: false,",
+    "sandbox: false,"
+  ]
+}
