@@ -78,7 +78,7 @@ fs.mkdirSync(appDir, { recursive: true });
 const appPkgJson = {
   name: 'nexus-ai',
   productName: 'NEXUS.AI',
-  version: '1.0.0',
+  version: '2.0.0',
   description: 'NEXUS.AI — Autonomous AI Coding Assistant Platform',
   type: 'module',
   main: './dist/main.js',
@@ -89,8 +89,21 @@ const appPkgJson = {
 };
 fs.writeFileSync(path.join(appDir, 'package.json'), JSON.stringify(appPkgJson, null, 2), 'utf-8');
 
-// Copy desktop compiled dist
-fs.cpSync(desktopDist, path.join(appDir, 'dist'), { recursive: true });
+function copyDistClean(srcDist, targetDist) {
+  fs.cpSync(srcDist, targetDist, {
+    recursive: true,
+    filter: (src) => {
+      const base = path.basename(src);
+      if (base.includes('.test.') || base.endsWith('.test.js') || base.endsWith('.test.d.ts') || base.endsWith('.test.ts') || base.endsWith('.map')) {
+        return false;
+      }
+      return true;
+    },
+  });
+}
+
+// Copy desktop compiled dist (excluding tests and sourcemaps)
+copyDistClean(desktopDist, path.join(appDir, 'dist'));
 
 // Copy icon and assets
 const desktopAssets = path.join(rootDir, 'packages/desktop/assets');
@@ -99,8 +112,11 @@ if (fs.existsSync(desktopAssets)) {
   fs.cpSync(desktopAssets, path.join(targetAppDir, 'assets'), { recursive: true });
 }
 
-// Copy production client bundle
-fs.cpSync(clientDist, path.join(appDir, 'client-dist'), { recursive: true });
+// Copy production client bundle (excluding sourcemaps)
+fs.cpSync(clientDist, path.join(appDir, 'client-dist'), {
+  recursive: true,
+  filter: (src) => !src.endsWith('.map'),
+});
 
 // 6. Bundle Node.js Runtime Dependencies
 console.log('[4/8] Installing self-contained production runtime dependencies in app payload...');
@@ -113,19 +129,6 @@ cp.execSync('npm.cmd install --omit=dev --no-audit --no-fund --no-package-lock',
 console.log('[5/8] Linking internal workspace packages (@nexus/core, @nexus/server)...');
 const appNodeModules = path.join(appDir, 'node_modules/@nexus');
 fs.mkdirSync(appNodeModules, { recursive: true });
-
-function copyDistClean(srcDist, targetDist) {
-  fs.cpSync(srcDist, targetDist, {
-    recursive: true,
-    filter: (src) => {
-      const base = path.basename(src);
-      if (base.includes('.test.') || base.endsWith('.test.js') || base.endsWith('.test.d.ts') || base.endsWith('.test.ts')) {
-        return false;
-      }
-      return true;
-    },
-  });
-}
 
 // @nexus/core
 const appCoreDir = path.join(appNodeModules, 'core');
@@ -153,7 +156,7 @@ compileUninstaller(uninstallerExe);
 // Write App Info and Windows Installer Helper
 const appInfo = {
   name: 'NEXUS.AI',
-  version: '1.0.0',
+  version: '2.0.0',
   executable: 'NEXUS_AI.exe',
   platform: 'win32',
   arch: 'x64',
@@ -163,7 +166,7 @@ const appInfo = {
   security: {
     contextIsolation: true,
     nodeIntegration: false,
-    sandbox: false,
+    sandbox: true,
     dataDirectory: '%LOCALAPPDATA%\\NEXUS_AI_DATA',
   },
 };
@@ -203,13 +206,13 @@ try {
   console.warn('      Could not generate zip via tar, skipping archive creation.');
 }
 
-// 9. Compile Windows Setup Installer (NEXUS_AI_1.0.0_Setup.exe)
+// 9. Compile Windows Setup Installer (NEXUS_AI_2.0.0_Setup.exe)
 console.log('[8/8] Compiling Windows Setup Installer & Portable Executable...');
-const setupExe = path.join(releaseDir, 'NEXUS_AI_1.0.0_Setup.exe');
+const setupExe = path.join(releaseDir, 'NEXUS_AI_2.0.0_Setup.exe');
 compileSetupInstaller(zipFile, uninstallerExe, setupExe);
 
-// Also compile single-file portable runner NEXUS_AI_1.0.0_win_x64.exe
-const portableExe = path.join(releaseDir, 'NEXUS_AI_1.0.0_win_x64.exe');
+// Also compile single-file portable runner NEXUS_AI_2.0.0_win_x64.exe
+const portableExe = path.join(releaseDir, 'NEXUS_AI_2.0.0_win_x64.exe');
 compilePortableRunner(zipFile, portableExe);
 
 // 10. Generate SHA-256 Checksums
@@ -222,8 +225,8 @@ function sha256File(filePath) {
 }
 
 const checksumFiles = [
-  'NEXUS_AI_1.0.0_Setup.exe',
-  'NEXUS_AI_1.0.0_win_x64.exe',
+  'NEXUS_AI_2.0.0_Setup.exe',
+  'NEXUS_AI_2.0.0_win_x64.exe',
   'NEXUS_AI_Windows_x64.zip',
 ];
 

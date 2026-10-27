@@ -25,6 +25,6 @@
 | **DEF-13** | **High** | `04 UI` | Stitch mockups contain fictional sample data (NEX-4091, 84M tokens, 92.4% cache hit, p95 192ms) that must never ship. | `04_STITCH_V2_INTEGRATION.md` | `VERIFIED_FIXED` |
 | **DEF-14** | **Medium** | `04 UI` | Design typography conflict: owner requires Times New Roman, whereas Stitch `DESIGN.md` specifies Source Serif 4. | `04_STITCH_V2_INTEGRATION.md` | `VERIFIED_FIXED` |
 | **DEF-15** | **Medium** | `04 UI` | `packages/client/src/types/index.ts` missing `TaskStatus` values: `validating`, `awaiting_approval`, `timeout`. | `04_STITCH_V2_INTEGRATION.md` | `VERIFIED_FIXED` |
-| **DEF-16** | **High** | `06 release` | All `package.json` files and `/api/health` specify version `1.0.0` instead of V2 release versioning. | `06_DESKTOP_RELEASE_READINESS.md` | `OPEN` |
-| **DEF-17** | **Medium** | `06 release` | Data folder paths differ: `%APPDATA%\NEXUS_AI_DATA` in Desktop vs `%LOCALAPPDATA%\nexus_data` in Server default. | `06_DESKTOP_RELEASE_READINESS.md` | `OPEN` |
-| **DEF-18** | **High** | `06 release` | Windows executable and installer are currently unsigned, requiring SmartScreen user documentation. | `06_DESKTOP_RELEASE_READINESS.md` | `OPEN` |
+| **DEF-16** | **High** | `06 release` | All `package.json` files and `/api/health` specify version `1.0.0` instead of V2 release versioning. | `06_DESKTOP_RELEASE_READINESS.md` | `VERIFIED_FIXED` |
+| **DEF-17** | **Medium** | `06 release` | Data folder paths differ: `%APPDATA%\NEXUS_AI_DATA` in Desktop vs `%LOCALAPPDATA%\nexus_data` in Server default. | `06_DESKTOP_RELEASE_READINESS.md` | `VERIFIED_FIXED` |
+| **DEF-18** | **High** | `06 release` | Windows executable and installer are currently unsigned, requiring SmartScreen user documentation. | `06_DESKTOP_RELEASE_READINESS.md` | `VERIFIED_FIXED` |
