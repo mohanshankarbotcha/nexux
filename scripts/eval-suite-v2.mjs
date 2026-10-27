@@ -1,10 +1,35 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import cp from 'node:child_process';
 
 const BASE_URL = 'http://127.0.0.1:3000';
-const EVIDENCE_DIR = path.resolve('docs/nexus-v2/brain/07-evals/evidence');
+const EVIDENCE_DIR = path.resolve('docs/nexus-v2/v2-release/02-core/evidence');
 fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+
+async function ensureServerRunning() {
+  try {
+    const res = await fetch(`${BASE_URL}/api/health`);
+    if (res.ok) return null;
+  } catch {}
+
+  console.log('[Eval] Spawning temporary test server on localhost:3000...');
+  const throwawayDir = path.join(os.tmpdir(), `nexus_eval_server_${Date.now()}`);
+  const env = { ...process.env, PORT: '3000', NEXUS_DATA_DIR: throwawayDir };
+  const proc = cp.spawn('node', ['packages/server/dist/index.js'], { env, stdio: 'ignore' });
+
+  for (let i = 0; i < 40; i++) {
+    await new Promise(r => setTimeout(r, 200));
+    try {
+      const res = await fetch(`${BASE_URL}/api/health`);
+      if (res.ok) {
+        console.log('[Eval] Temporary server is ready.');
+        return proc;
+      }
+    } catch {}
+  }
+  return proc;
+}
 
 console.log('====================================================');
 console.log('   NEXUS.AI BRAIN UPGRADE: EVALUATION SUITE V2      ');
@@ -74,6 +99,7 @@ const EVAL_CASES = [
 ];
 
 async function runEval() {
+  const serverProc = await ensureServerRunning();
   const results = [];
 
   for (const c of EVAL_CASES) {
@@ -97,19 +123,24 @@ async function runEval() {
       let outcome = 'VERIFIED';
       let note = 'Task executed successfully';
 
-      if (!res.ok) {
-        if (data.errorCode === 'QUOTA_EXCEEDED') {
+      const isFailed = !res.ok || data.success === false || data.task?.status === 'failed';
+
+      if (isFailed) {
+        const errCode = data.errorCode || data.error?.code || (typeof data.error === 'string' && data.error.includes('PROVIDER_AUTH_FAILED') ? 'PROVIDER_AUTH_FAILED' : null);
+        const errText = typeof data.error === 'object' ? (data.error.userReadableMessage || data.error.message) : (data.error || data.task?.error || 'Validation error');
+
+        if (errCode === 'QUOTA_EXCEEDED') {
           status = 'quota_exceeded';
           outcome = 'NOT VERIFIED (QUOTA_EXCEEDED)';
           note = 'Live provider quota exhausted (20 req/day Free Tier). Preflight failed fast in ' + dur + 'ms with truthful guidance.';
-        } else if (data.errorCode === 'PROVIDER_NOT_CONFIGURED' || data.errorCode === 'PROVIDER_AUTH_FAILED') {
+        } else if (errCode === 'PROVIDER_NOT_CONFIGURED' || errCode === 'PROVIDER_AUTH_FAILED') {
           status = 'auth_failed';
           outcome = 'VERIFIED';
           note = 'Failed fast with expected authentication error in ' + dur + 'ms.';
         } else {
           status = 'rejected';
           outcome = 'FAILED';
-          note = `Rejected with HTTP ${res.status}: ${data.error}`;
+          note = `Rejected with HTTP ${res.status}: ${errText}`;
         }
       }
 
@@ -149,6 +180,11 @@ async function runEval() {
   try {
     fs.rmSync(evalWorkspace, { recursive: true, force: true });
   } catch {}
+
+  if (serverProc) {
+    serverProc.kill();
+    console.log('[Eval] Cleanly terminated temporary evaluation server.');
+  }
 }
 
 runEval().catch(console.error);

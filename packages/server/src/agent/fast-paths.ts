@@ -110,10 +110,11 @@ ${dynamicCapabilities}`;
       const isQuota = err.code === 'QUOTA_EXCEEDED' || err.statusCode === 429 || /quota|rate\s*limit|resource_exhausted/i.test(err.message || '');
 
       if (isQuota && (isGreeting || isCapabilityQuestion)) {
+        tokens = 0; // Deterministic local response
         if (isCapabilityQuestion) {
-          reply = `I am NEXUS.AI, your autonomous software engineering assistant.\n\n${dynamicCapabilities}\n\n*(Note: Your AI provider API key is currently experiencing a quota limit. You can still browse workspaces, inspect files, and execute terminal commands.)*`;
+          reply = `[SYSTEM NOTICE — OFFLINE FALLBACK: No model request executed due to provider quota limits (HTTP 429)]\n\nI am NEXUS.AI, your autonomous software engineering assistant.\n\n${dynamicCapabilities}\n\n*(Note: Your AI provider API key is currently experiencing a quota limit. You can still browse workspaces, inspect files, and execute terminal commands.)*`;
         } else {
-          reply = `Hello! I'm NEXUS.AI, your autonomous engineering assistant. I'm ready to help you build, refactor, and debug code.\n\n*(Note: Google Gemini has reached its Free Tier daily quota of 20 requests/day. You can enable billing at https://ai.google.dev or configure an alternative key in Settings → Providers.)*`;
+          reply = `[SYSTEM NOTICE — OFFLINE FALLBACK: No model request executed due to provider quota limits (HTTP 429)]\n\nHello! I'm NEXUS.AI, your autonomous engineering assistant. I'm ready to help you build, refactor, and debug code.\n\n*(Note: Google Gemini has reached its Free Tier daily quota of 20 requests/day. You can enable billing at https://ai.google.dev or configure an alternative key in Settings → Providers.)*`;
         }
       } else {
         throw err;

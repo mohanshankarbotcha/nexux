@@ -16,7 +16,7 @@ export interface ModelValidationResult {
 export class ProviderPreflightCache {
   private credentialCache = new Map<string, { result: ProviderValidationResult; timestamp: number }>();
   private modelCache = new Map<string, { result: ModelValidationResult; timestamp: number }>();
-  private readonly defaultTtlMs = 10 * 60 * 1000; // 10 minutes
+  private readonly defaultTtlMs = 15 * 60 * 1000; // 15 minutes
 
   /**
    * Validates provider credentials using in-memory cache when fresh.

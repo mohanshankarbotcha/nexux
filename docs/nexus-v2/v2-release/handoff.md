@@ -17,9 +17,9 @@
 | **DEF-05** | **High** | `03 security` | `credentials.json` stored in unencrypted plaintext on disk, contradicting UI claims of local encryption. | `03_SECURITY_HARDENING.md` | `OPEN` |
 | **DEF-06** | **Medium** | `03 security` | Electron BrowserWindow has `sandbox: false`. | `03_SECURITY_HARDENING.md` | `OPEN` |
 | **DEF-07** | **Low** | `03 security` | Tracked build artifact `packages/core/tsconfig.tsbuildinfo` committed to repository. | `03_SECURITY_HARDENING.md` | `OPEN` |
-| **DEF-08** | **High** | `02 core` | `scripts/eval-suite-v2.mjs` assumes localhost:3000 server is pre-running; fails with `fetch failed` if executed standalone. | `02_CORE_ENGINE_RELIABILITY.md` | `OPEN` |
-| **DEF-09** | **Medium** | `02 core` | In `packages/server/src/agent/fast-paths.ts`, S1 fallback returns canned greeting with quota note when remote model call hits 429 quota error. Must be labelled honestly as a system message. | `02_CORE_ENGINE_RELIABILITY.md` | `OPEN` |
-| **DEF-10** | **Medium** | `02 core` | `ProviderPreflightCache.defaultTtlMs` is 10 minutes (`10 * 60 * 1000`), whereas earlier reports claimed 15 minutes. | `02_CORE_ENGINE_RELIABILITY.md` | `OPEN` |
+| **DEF-08** | **High** | `02 core` | `scripts/eval-suite-v2.mjs` assumes localhost:3000 server is pre-running; fails with `fetch failed` if executed standalone. | `02_CORE_ENGINE_RELIABILITY.md` | `VERIFIED_FIXED` |
+| **DEF-09** | **Medium** | `02 core` | In `packages/server/src/agent/fast-paths.ts`, S1 fallback returns canned greeting with quota note when remote model call hits 429 quota error. Must be labelled honestly as a system message. | `02_CORE_ENGINE_RELIABILITY.md` | `VERIFIED_FIXED` |
+| **DEF-10** | **Medium** | `02 core` | `ProviderPreflightCache.defaultTtlMs` is 10 minutes (`10 * 60 * 1000`), whereas earlier reports claimed 15 minutes. | `02_CORE_ENGINE_RELIABILITY.md` | `VERIFIED_FIXED` |
 | **DEF-11** | **High** | `04 UI` | Client uses React 18.3.1 (report claimed React 19) and lacks Monaco Code Editor dependency. | `04_STITCH_V2_INTEGRATION.md` | `OPEN` |
 | **DEF-12** | **High** | `04 UI` | Stitch exports load fonts and icons from Google CDN; client must self-host fonts/icons to run offline and comply with CSP. | `04_STITCH_V2_INTEGRATION.md` | `OPEN` |
 | **DEF-13** | **High** | `04 UI` | Stitch mockups contain fictional sample data (NEX-4091, 84M tokens, 92.4% cache hit, p95 192ms) that must never ship. | `04_STITCH_V2_INTEGRATION.md` | `OPEN` |
