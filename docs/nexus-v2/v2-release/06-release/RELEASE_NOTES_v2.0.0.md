@@ -39,9 +39,9 @@ NEXUS.AI v2.0.0 is a major generational upgrade to the autonomous multi-agent de
 
 | Artifact | File Size | SHA-256 Checksum |
 |:---|:---:|:---|
-| `NEXUS_AI_2.0.0_Setup.exe` | 112.0 MB | `fd02d375748607388830a348489100baffd3dc50a88f3b21a6dbd4e2b97f7382` |
-| `NEXUS_AI_2.0.0_win_x64.exe` | 112.0 MB | `384c33ed4c43681f07b6c3da078e92b9c7bbc79bf7b45c8443695aadf9a45932` |
-| `NEXUS_AI_Windows_x64.zip` | 112.0 MB | `e899f18dd6662762ea10b06ac98cbf94a70c49046c4a33a780966d48381b8e9b` |
+| `NEXUS_AI_2.0.0_Setup.exe` | 112.0 MB | `816b75a4231020ae69f853225587f0be24c7bffea0b1927ca43596a5872095b5` |
+| `NEXUS_AI_2.0.0_win_x64.exe` | 112.0 MB | `12baebbc9e2c0e13038d4a4a95c3f9a7e7dfdfd0bd71795f7d5883f0d0236401` |
+| `NEXUS_AI_Windows_x64.zip` | 112.0 MB | `3e3fdd0b632243542a089a3481c24b7fadf01a752bc11bab8f6e8ca85ac8c8f7` |
 
 ---
 

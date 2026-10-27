@@ -24,19 +24,26 @@ export function createNexusApp() {
   const app = express();
 
   // Security Middleware (Prompt 03)
-  const ALLOWED_ORIGINS = new Set([
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-  ]);
+  const isLoopbackOrigin = (urlStr: string): boolean => {
+    try {
+      const parsed = new URL(urlStr);
+      const host = parsed.hostname.toLowerCase();
+      return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+    } catch {
+      return false;
+    }
+  };
+
+
+
+
 
   const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
       // Allow local tools, electron/mobile file/app protocols, and same-origin (no origin header)
       if (!origin) return callback(null, true);
       if (
-        ALLOWED_ORIGINS.has(origin) ||
+        isLoopbackOrigin(origin) ||
         origin.startsWith('app://') ||
         origin.startsWith('file://') ||
         origin.startsWith('vscode-webview://') ||
@@ -132,6 +139,10 @@ export function createNexusApp() {
     path.resolve(__dirname, '../../client-dist'),
     (process as any).resourcesPath ? path.resolve((process as any).resourcesPath, 'app/client-dist') : null,
     (process as any).resourcesPath ? path.resolve((process as any).resourcesPath, 'client-dist') : null,
+    path.resolve(__dirname, '../../../../client-dist'),
+    path.resolve(__dirname, '../../../../../client-dist'),
+    path.resolve(process.cwd(), 'resources/app/client-dist'),
+    path.resolve(process.cwd(), 'client-dist'),
   ].filter(Boolean) as string[];
 
   const targetDist = potentialDistPaths.find((p) => fs.existsSync(path.join(p, 'index.html'))) || null;

@@ -51,8 +51,24 @@ async function createMainWindow(serverUrl: string): Promise<BrowserWindow> {
     },
   });
 
+  const targetUrl = process.env.VITE_DEV_SERVER_URL || serverUrl;
+
+  win.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+    logger.error(`Desktop Renderer: Failed to load ${validatedURL} (Code: ${errorCode}, ${errorDescription})`);
+  });
+
+  win.webContents.on('console-message', (_event, level, message, line, sourceId) => {
+    if (level >= 2) {
+      logger.warn(`Desktop Renderer [line ${line} in ${sourceId}]: ${message}`);
+    }
+  });
+
+  win.webContents.on('render-process-gone', (_event, details) => {
+    logger.error('Desktop Renderer: Render process gone:', details);
+  });
+
   // Open external links in user's default browser
-    // Block unauthorized navigation (Prompt 03)
+  // Block unauthorized navigation (Prompt 03)
   win.webContents.on('will-navigate', (event, url) => {
     if (!url.startsWith(targetUrl) && !url.startsWith('http://127.0.0.1') && !url.startsWith('http://localhost')) {
       event.preventDefault();
@@ -75,7 +91,6 @@ async function createMainWindow(serverUrl: string): Promise<BrowserWindow> {
   });
 
   // Load backend or dev server
-  const targetUrl = process.env.VITE_DEV_SERVER_URL || serverUrl;
   logger.info(`Desktop Main: Loading UI from ${targetUrl}`);
   await win.loadURL(targetUrl);
 

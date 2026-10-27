@@ -78,7 +78,7 @@ namespace NexusAI.Installer
 
         private void InitializeComponents()
         {
-            this.Text = "NEXUS.AI v1.0.0 Setup";
+            this.Text = "NEXUS.AI v2.0.0 Setup";
             this.Size = new Size(540, 420);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -97,7 +97,7 @@ namespace NexusAI.Installer
 
             // Subtitle
             subtitleLabel = new Label();
-            subtitleLabel.Text = "Autonomous AI Coding Assistant Platform — Version 1.0.0";
+            subtitleLabel.Text = "Autonomous AI Coding Assistant Platform — Version 2.0.0";
             subtitleLabel.Font = new Font("Segoe UI", 10, FontStyle.Regular);
             subtitleLabel.ForeColor = Color.FromArgb(156, 163, 175);
             subtitleLabel.Location = new Point(32, 60);
@@ -454,7 +454,7 @@ namespace NexusAI.Installer
                         string iconPath = Path.Combine(appDir, "assets", "icon.ico");
 
                         key.SetValue("DisplayName", "NEXUS.AI");
-                        key.SetValue("DisplayVersion", "1.0.0");
+                        key.SetValue("DisplayVersion", "2.0.0");
                         key.SetValue("Publisher", "NEXUS.AI");
                         key.SetValue("InstallLocation", appDir);
                         key.SetValue("UninstallString", "\"" + uninstPath + "\"");

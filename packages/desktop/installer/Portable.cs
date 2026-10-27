@@ -14,7 +14,7 @@ namespace NexusAI.Portable
         {
             try
             {
-                string tempDir = Path.Combine(Path.GetTempPath(), "NEXUS_AI_PORTABLE_v100");
+                string tempDir = Path.Combine(Path.GetTempPath(), "NEXUS_AI_PORTABLE_v200");
                 string exePath = Path.Combine(tempDir, "NEXUS_AI.exe");
 
                 if (!File.Exists(exePath))
